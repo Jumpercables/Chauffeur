@@ -4,6 +4,9 @@ using System.Runtime.Serialization.Json;
 
 namespace Chauffeur.Jenkins.Client
 {
+    /// <summary>
+    /// A jenkins client that assumes the response will be in the JSON format.
+    /// </summary>
     public class JsonJenkinsClient : AuthenticatedJenkinsClient
     {
         #region Constructors

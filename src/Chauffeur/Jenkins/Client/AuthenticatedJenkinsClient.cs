@@ -5,8 +5,9 @@ using System.Text;
 namespace Chauffeur.Jenkins.Client
 {
     /// <summary>
+    ///     A jenkins client that allows for authentication to the server.
     /// </summary>
-    public class AuthenticatedJenkinsClient : JenkinsClient
+    public abstract class AuthenticatedJenkinsClient : JenkinsClient
     {
         #region Fields
 
@@ -22,7 +23,7 @@ namespace Chauffeur.Jenkins.Client
         /// </summary>
         /// <param name="userName">Name of the user.</param>
         /// <param name="apiToken">The API token.</param>
-        public AuthenticatedJenkinsClient(string userName, string apiToken)
+        protected AuthenticatedJenkinsClient(string userName, string apiToken)
         {
             _UserName = userName;
             _ApiToken = apiToken;
@@ -30,22 +31,7 @@ namespace Chauffeur.Jenkins.Client
 
         #endregion
 
-        #region Protected Properties
-
-        /// <summary>
-        ///     Gets the API suffix.
-        /// </summary>
-        /// <value>
-        ///     The API suffix.
-        /// </value>
-        protected override string ApiSuffix
-        {
-            get { return null; }
-        }
-
-        #endregion
-
-        #region Protected Methods
+        #region Public Methods
 
         /// <summary>
         ///     Creates the authenticated request object.
@@ -69,19 +55,6 @@ namespace Chauffeur.Jenkins.Client
             }
 
             return request;
-        }
-
-        /// <summary>
-        /// Gets the resource that has been converted to the proper format for the client.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="request">The request.</param>
-        /// <returns>
-        /// Returns <see cref="T" /> representing the format for the client.
-        /// </returns>
-        protected override T GetResource<T>(WebRequest request)
-        {
-            return default(T);
         }
 
         #endregion

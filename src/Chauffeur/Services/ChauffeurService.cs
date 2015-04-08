@@ -64,8 +64,11 @@ namespace Chauffeur.Services
             // Query for the job information from the server.
             Job job = this.GetJob(jobName);
 
-            // Download the artifacts only when the installed and last successful builds are different.
             string buildNumber = ConfigurationManager.AppSettings["jenkins.build"];
+            this.Log("Last successful build: {0}", job.LastSuccessfulBuild.Number);
+            this.Log("Last installed build: {0}", buildNumber);
+
+            // Download the artifacts only when the installed and last successful builds are different.           
             if (buildNumber == null || buildNumber.ToUpperInvariant() != job.LastSuccessfulBuild.Number.ToString(CultureInfo.CurrentCulture))
             {
                 // Download the build artifacts for the job.
@@ -134,13 +137,15 @@ namespace Chauffeur.Services
         ///     or
         ///     directory
         /// </exception>
-        private IEnumerable<string> DownloadArtifacts(Job job, string directory)
+        private List<string> DownloadArtifacts(Job job, string directory)
         {
             if (job == null)
                 throw new ArgumentNullException("job");
 
             if (directory == null)
                 throw new ArgumentNullException("directory");
+
+            this.Log("Downloading: {0}", directory);
 
             Uri baseUri;
             JenkinsClient client = this.GetClient(out baseUri);
@@ -179,6 +184,8 @@ namespace Chauffeur.Services
             if (jobName == null)
                 throw new ArgumentNullException("jobName");
 
+            this.Log("Job: {0}", jobName);
+
             Uri baseUri;
             JenkinsClient client = this.GetClient(out baseUri);
 
@@ -192,7 +199,7 @@ namespace Chauffeur.Services
         ///     Installs the build artifacts using the "msiexec.exe".
         /// </summary>
         /// <param name="artifacts">The artifacts.</param>
-        private void InstallMsiArtifacts(IEnumerable<string> artifacts)
+        private void InstallMsiArtifacts(List<string> artifacts)
         {
             Dictionary<string, string> parameters = new Dictionary<string, string>
             {
@@ -200,16 +207,31 @@ namespace Chauffeur.Services
                 {@"/i", ConfigurationManager.AppSettings["chauffeur.install"]}
             };
 
+            this.Log("Installation: {0}", artifacts.Count);
+
             foreach (var artifact in artifacts.Where(o => o.EndsWith(".msi", StringComparison.InvariantCultureIgnoreCase)))
             {
                 foreach (var s in parameters)
-                {
+                {                    
                     ProcessStartInfo startInfo = new ProcessStartInfo("cmd.exe", string.Format("/c start /MIN /wait msiexec.exe {0} {1} {2}", s.Key, artifact, s.Value));
                     startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+
+                    this.Log(string.Format("\t{0} {1}", startInfo.FileName, startInfo.Arguments));
+
                     using (Process process = Process.Start(startInfo))
                         if (process != null) process.WaitForExit();
                 }
             }
+        }
+
+        /// <summary>
+        ///     Logs the message in the specified format.
+        /// </summary>
+        /// <param name="format">The format.</param>
+        /// <param name="args">The arguments.</param>
+        private void Log(string format, params object[] args)
+        {
+            Trace.WriteLine(string.Format("{0} - {1}", DateTime.Now, string.Format(format, args)));
         }
 
         /// <summary>
@@ -218,6 +240,8 @@ namespace Chauffeur.Services
         /// <param name="build">The build.</param>
         private void SaveLastSuccessfulBuild(Build build)
         {
+            this.Log("Last installed build: {0}", build.Number);
+
             Assembly assembly = Assembly.GetExecutingAssembly();
             string location = Path.GetDirectoryName(assembly.Location);
             string configFile = Path.Combine(location, assembly.ManifestModule.Name + ".config");
@@ -225,7 +249,11 @@ namespace Chauffeur.Services
             fileMap.ExeConfigFilename = configFile;
 
             Configuration config = ConfigurationManager.OpenMappedExeConfiguration(fileMap, ConfigurationUserLevel.None);
-            config.AppSettings.Settings["jenkins.build"].Value = build.Number.ToString(CultureInfo.CurrentCulture);
+            if(config.AppSettings.Settings.AllKeys.Contains("jenkins.build"))
+                config.AppSettings.Settings["jenkins.build"].Value = build.Number.ToString(CultureInfo.CurrentCulture);
+            else
+                config.AppSettings.Settings.Add("jenkins.build", build.Number.ToString(CultureInfo.CurrentCulture));
+
             config.Save(ConfigurationSaveMode.Modified);
         }
 
@@ -236,6 +264,9 @@ namespace Chauffeur.Services
         /// <param name="e">The <see cref="ElapsedEventArgs" /> instance containing the event data.</param>
         private void Timer_OnElapsed(object sender, ElapsedEventArgs e)
         {
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            this.Log("============================== START ==============================");
+
             try
             {
                 _Timer.Stop();
@@ -252,6 +283,9 @@ namespace Chauffeur.Services
             finally
             {
                 _Timer.Start();
+
+                this.Log("Elapsed time was: {0}.{1}.{2}", stopwatch.Elapsed.Hours, stopwatch.Elapsed.Minutes, stopwatch.Elapsed.Seconds);
+                this.Log("============================== FINISHED ==============================");
             }
         }
 

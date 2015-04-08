@@ -43,7 +43,7 @@ namespace Chauffeur.Jenkins.Services
         /// or
         /// directory
         /// </exception>
-        public IEnumerable<string> DownloadArtifacts(Build build, string directory)
+        public List<string> DownloadArtifacts(Build build, string directory)
         {
             if(build == null)
                 throw new ArgumentNullException("build");
@@ -54,7 +54,7 @@ namespace Chauffeur.Jenkins.Services
             var tasks = build.Artifacts.Select(artifact => this.DownloadArtifactAsync(build, artifact, directory)).ToArray();
             Task.WaitAll(tasks);
 
-            return tasks.Select(o => o.Result);
+            return tasks.Select(o => o.Result).ToList();
         }
 
         #endregion
