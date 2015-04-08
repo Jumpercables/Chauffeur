@@ -78,10 +78,10 @@
     <Compile Include="Jenkins\Services\JenkinsService.cs" />
     <Compile Include="Jenkins\Services\ArtifactService.cs" />
     <Compile Include="Jenkins\Services\JobService.cs" />
-    <Compile Include="Services\ChauffeurService.cs">
+    <Compile Include="Windows\Services\ChauffeurService.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Services\ChauffeurService.Designer.cs">
+    <Compile Include="Windows\Services\ChauffeurService.Designer.cs">
       <DependentUpon>ChauffeurService.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />

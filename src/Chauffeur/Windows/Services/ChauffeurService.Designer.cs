@@ -1,4 +1,4 @@
-﻿namespace Chauffeur.Services
+﻿namespace Chauffeur.Windows.Services
 {
     partial class ChauffeurService
     {

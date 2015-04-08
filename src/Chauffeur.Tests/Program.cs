@@ -2,7 +2,7 @@
 using System.Configuration;
 using System.IO;
 
-using Chauffeur.Services;
+using Chauffeur.Windows.Services;
 
 namespace Chauffeur.Tests
 {

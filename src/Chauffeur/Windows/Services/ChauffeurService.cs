@@ -13,7 +13,7 @@ using Chauffeur.Jenkins.Client;
 using Chauffeur.Jenkins.Model;
 using Chauffeur.Jenkins.Services;
 
-namespace Chauffeur.Services
+namespace Chauffeur.Windows.Services
 {
     /// <summary>
     ///     A windows service used to monitor the builds and automatically install the last succsseful build.

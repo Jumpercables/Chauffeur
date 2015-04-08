@@ -1,27 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.ServiceProcess;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ServiceProcess;
 
-using Chauffeur.Services;
+using Chauffeur.Windows.Services;
 
 namespace Chauffeur
 {
-    static class Program
+    internal static class Program
     {
+        #region Private Methods
+
         /// <summary>
-        /// The main entry point for the application.
+        ///     The main entry point for the application.
         /// </summary>
-        static void Main()
+        private static void Main()
         {
             ServiceBase[] ServicesToRun;
-            ServicesToRun = new ServiceBase[] 
-            { 
-                new ChauffeurService() 
+            ServicesToRun = new ServiceBase[]
+            {
+                new ChauffeurService()
             };
             ServiceBase.Run(ServicesToRun);
         }
+
+        #endregion
     }
 }
