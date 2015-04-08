@@ -69,7 +69,6 @@
     <Compile Include="Jenkins\Client\IUrl.cs" />
     <Compile Include="Jenkins\Client\JenkinsClient.cs" />
     <Compile Include="Jenkins\Client\JsonJenkinsClient.cs" />
-    <Compile Include="Jenkins\Client\AuthenticatedJenkinsClient.cs" />
     <Compile Include="Jenkins\Model\Build.cs" />
     <Compile Include="Jenkins\Model\Job.cs" />
     <Compile Include="Jenkins\Model\Node.cs" />

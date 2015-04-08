@@ -1,0 +1,10 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/src/Chauffeur/bin/x86/Debug
+/src/Chauffeur/obj
+/src/Chauffeur.Tests/bin/x86/Debug
+/src/Chauffeur.Tests/obj
+*.suo
+/src/Chauffeur.Installer

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using System.Text;
 
 namespace Chauffeur.Jenkins.Client
 {
@@ -8,6 +9,28 @@ namespace Chauffeur.Jenkins.Client
     /// </summary>
     public abstract class JenkinsClient
     {
+        #region Fields
+
+        private readonly string _ApiToken;
+        private readonly string _UserName;
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="JenkinsClient" /> class.
+        /// </summary>
+        /// <param name="userName">Name of the user.</param>
+        /// <param name="apiToken">The API token.</param>
+        protected JenkinsClient(string userName, string apiToken)
+        {
+            _UserName = userName;
+            _ApiToken = apiToken;
+        }
+
+        #endregion
+
         #region Protected Properties
 
         /// <summary>
@@ -58,8 +81,27 @@ namespace Chauffeur.Jenkins.Client
         ///     Gets the request.
         /// </summary>
         /// <param name="absoluteUri">The absolute URI.</param>
-        /// <returns>Returns the <see cref="WebRequest" /> for the URI.</returns>
-        public abstract WebRequest GetRequest(Uri absoluteUri);
+        /// <returns>
+        ///     Returns the <see cref="WebRequest" /> for the URI.
+        /// </returns>
+        public virtual WebRequest GetRequest(Uri absoluteUri)
+        {
+            var request = WebRequest.Create(absoluteUri);
+            request.Method = "GET";
+            request.Timeout = 90000;
+
+            if (!string.IsNullOrEmpty(_UserName))
+            {
+                request.PreAuthenticate = true;
+
+                var authInfo = _UserName + ":" + _ApiToken;
+                authInfo = Convert.ToBase64String(Encoding.Default.GetBytes(authInfo));
+
+                request.Headers["Authorization"] = "Basic " + authInfo;
+            }
+
+            return request;
+        }
 
         /// <summary>
         ///     Retrieves a jenkins resource given it's URI and optional tree parameter.
@@ -70,9 +112,9 @@ namespace Chauffeur.Jenkins.Client
         /// </param>
         public T GetResource<T>(Uri resourceUri, string tree) where T : class, IUrl
         {
-            var absoluteUri = GetAbsoluteUri(resourceUri, tree);
-            var request = GetRequest(absoluteUri);
-            return GetResource<T>(request);
+            var absoluteUri = this.GetAbsoluteUri(resourceUri, tree);
+            var request = this.GetRequest(absoluteUri);
+            return this.GetResource<T>(request);
         }
 
         /// <summary>
@@ -84,9 +126,9 @@ namespace Chauffeur.Jenkins.Client
         /// </param>
         public T GetResource<T>(Uri resourceUri, int depth) where T : class, IUrl
         {
-            var absoluteUri = GetAbsoluteUri(resourceUri, depth);
-            var request = GetRequest(absoluteUri);
-            return GetResource<T>(request);
+            var absoluteUri = this.GetAbsoluteUri(resourceUri, depth);
+            var request = this.GetRequest(absoluteUri);
+            return this.GetResource<T>(request);
         }
 
         #endregion
