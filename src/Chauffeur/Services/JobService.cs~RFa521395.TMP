@@ -1,0 +1,305 @@
+﻿using System;
+using System.Collections.Concurrent;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+
+using Chauffeur.Jenkins.Client;
+using Chauffeur.Jenkins.Model;
+
+namespace Chauffeur.Services
+{
+    internal class JobService
+    {
+        #region Constants
+
+        /// <summary>
+        ///     The jobs tree parameter.
+        /// </summary>
+        private const string JOBS_PARAMETER = "jobs[name,displayName,url,lastBuild[url,number,building,result]]";       
+        
+        #endregion
+
+        #region Fields
+
+        private readonly Uri _BaseUri;
+        private readonly JenkinsClient _Client;
+        private readonly ConcurrentDictionary<Uri, Build> _LastSeenBuilds = new ConcurrentDictionary<Uri, Build>();
+
+        #endregion
+
+        #region Constructors
+
+        public JobService(Uri baseUri, JenkinsClient client)
+        {
+            if (baseUri == null)
+                throw new ArgumentNullException("baseUri");
+
+            if (client == null)
+                throw new ArgumentNullException("client");
+
+            _BaseUri = baseUri;
+            _Client = client;
+        }
+
+        #endregion
+
+        #region Events
+
+        public event EventHandler<BuildEventArgs> BuildAborted;
+        public event EventHandler<BuildEventArgs> BuildFailed;
+        public event EventHandler<BuildEventArgs> BuildFinished;
+        public event EventHandler<BuildEventArgs> BuildStarted;
+        public event EventHandler<BuildEventArgs> BuildSucceeded;
+        public event EventHandler<BuildEventArgs> BuildUnstable;
+        public event EventHandler<JobFoundEventArgs> FoundJob;
+        public event EventHandler<PollingErrorEventArgs> PollingError;
+
+        #endregion
+
+        #region Public Methods
+
+        public Job GetJob(string jobName)
+        {
+            var queryUri = new Uri(_BaseUri, @"\job\" + jobName);
+
+            try
+            {
+                var job = _Client.GetResource<Job>(queryUri, null);
+                return job;
+            }
+            catch (Exception ex)
+            {
+                this.OnPollingError(new PollingErrorEventArgs(ex));
+            }
+        }
+
+        public void Poll(int millisecondsTimeout = Timeout.Infinite)
+        {
+            var tasks = new Task[0];
+
+            try
+            {
+                var node = _Client.GetResource<Node>(_BaseUri, JOBS_PARAMETER);
+                tasks = node.Jobs.Select(QueryJobAsync).ToArray();
+            }
+            catch (Exception ex)
+            {
+                this.OnPollingError(new PollingErrorEventArgs(ex));
+            }
+
+            Task.WaitAll(tasks, millisecondsTimeout);
+        }
+
+        #endregion
+
+        #region Protected Methods
+
+        /// <summary>
+        ///     Raises the <see cref="E:BuildFinished" /> event.
+        /// </summary>
+        /// <param name="e">The <see cref="BuildEventArgs" /> instance containing the event data.</param>
+        protected void OnBuildFinished(BuildEventArgs e)
+        {
+            var eventHandler = this.BuildFinished;
+            if (eventHandler != null)
+                eventHandler(this, e);
+
+            switch (e.Build.Result.ToUpperInvariant())
+            {
+                case "SUCCESS":
+                    eventHandler = this.BuildSucceeded;
+                    break;
+                case "FAILURE":
+                    eventHandler = this.BuildFailed;
+                    break;
+                case "ABORTED":
+                    eventHandler = this.BuildAborted;
+                    break;
+                case "UNSTABLE":
+                    eventHandler = this.BuildUnstable;
+                    break;
+            }
+
+            if (eventHandler != null)
+                eventHandler(this, e);
+        }
+
+        /// <summary>
+        ///     Raises the <see cref="E:BuildStarted" /> event.
+        /// </summary>
+        /// <param name="e">The <see cref="BuildEventArgs" /> instance containing the event data.</param>
+        protected void OnBuildStarted(BuildEventArgs e)
+        {
+            var eventHandler = this.BuildStarted;
+            if (eventHandler != null)
+                eventHandler(this, e);
+        }
+
+        /// <summary>
+        ///     Raises the <see cref="E:FoundJob" /> event.
+        /// </summary>
+        /// <param name="e">The <see cref="JobFoundEventArgs" /> instance containing the event data.</param>
+        protected void OnFoundJob(JobFoundEventArgs e)
+        {
+            var eventHandler = this.FoundJob;
+            if (eventHandler != null)
+                eventHandler(this, e);
+        }
+
+        /// <summary>
+        ///     Raises the <see cref="E:PollingError" /> event.
+        /// </summary>
+        /// <param name="e">The <see cref="PollingErrorEventArgs" /> instance containing the event data.</param>
+        protected void OnPollingError(PollingErrorEventArgs e)
+        {
+            var eventHandler = this.PollingError;
+            if (eventHandler != null)
+                eventHandler(this, e);
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        /// <summary>
+        /// Gets the state of the job.
+        /// </summary>
+        /// <param name="job">The job.</param>
+        /// <param name="previousResult">The previous result.</param>
+        /// <returns></returns>
+        private Tuple<Job, Build> GetJobState(Job job, string previousResult)
+        {
+            job = _Client.Expand(job);
+           
+            var currentBuild = job.LastBuild == null
+                ? new Build {Building = false, Number = 0, Result = ""}
+                : _Client.Expand(job.LastBuild);
+            
+            currentBuild.Result = currentBuild.Result ?? previousResult;
+
+            _LastSeenBuilds[job.Url] = currentBuild;
+
+            return new Tuple<Job, Build>(job, currentBuild);
+        }
+
+        /// <summary>
+        ///     Queries for the job information from the server.
+        /// </summary>
+        /// <param name="job">The job information.</param>
+        private void QueryJob(Job job)
+        {
+            try
+            {
+                Build lastSeenBuild;
+                _LastSeenBuilds.TryGetValue(job.Url, out lastSeenBuild);
+
+                if (lastSeenBuild == null)
+                {
+                    var state = this.GetJobState(job, "");
+                    this.OnFoundJob(new JobFoundEventArgs(state.Item1));
+                    
+                    return;
+                }
+
+                if (lastSeenBuild.Number != job.LastBuild.Number)
+                {
+                    var state = this.GetJobState(job, lastSeenBuild.Result);
+                    this.OnBuildStarted(new BuildEventArgs(state.Item1, state.Item2));
+
+                    if (!state.Item1.LastBuild.Building)
+                    {
+                        var e = new BuildEventArgs(state.Item1, state.Item2, state.Item2.Result != lastSeenBuild.Result);
+                        this.OnBuildFinished(e);
+                    }
+
+                    return;
+                }
+
+                if (lastSeenBuild.Building != job.LastBuild.Building)
+                {
+                    var state = GetJobState(job, lastSeenBuild.Result);
+                    if (!state.Item1.LastBuild.Building)
+                    {
+                        var e = new BuildEventArgs(state.Item1, state.Item2, state.Item2.Result != lastSeenBuild.Result);
+                        this.OnBuildFinished(e);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                this.OnPollingError(new PollingErrorEventArgs(ex));
+            }
+        }
+
+        /// <summary>
+        /// Queries for the job asynchronous.
+        /// </summary>
+        /// <param name="jobInfo">The job information.</param>
+        /// <returns></returns>
+        private Task QueryJobAsync(Job jobInfo)
+        {
+            return Task.Factory.StartNew(() => QueryJob(jobInfo));
+        }
+
+        #endregion
+    }   
+
+    public class PollingErrorEventArgs : EventArgs
+    {
+        #region Constructors
+
+        public PollingErrorEventArgs(Exception exception)
+        {
+            this.Exception = exception;
+        }
+
+        #endregion
+
+        #region Public Properties
+
+        public Exception Exception { get; private set; }
+
+        #endregion
+    }
+
+    public class JobFoundEventArgs : EventArgs
+    {
+        #region Constructors
+
+        public JobFoundEventArgs(Job job)
+        {
+            this.Job = job;
+        }
+
+        #endregion
+
+        #region Public Properties
+
+        public Job Job { get; private set; }
+
+        #endregion
+    }
+
+    public class BuildEventArgs : EventArgs
+    {
+        #region Constructors
+
+        public BuildEventArgs(Job job, Build build, bool isFirstTime = false)
+        {
+            this.Build = build;
+            this.Job = job;
+            this.StatusChanged = isFirstTime;
+        }
+
+        #endregion
+
+        #region Public Properties
+
+        public Build Build { get; private set; }
+        public Job Job { get; private set; }
+        public bool StatusChanged { get; private set; }
+
+        #endregion
+    }
+}
