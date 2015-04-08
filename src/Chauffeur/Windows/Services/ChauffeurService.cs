@@ -245,6 +245,7 @@ namespace Chauffeur.Windows.Services
             Assembly assembly = Assembly.GetExecutingAssembly();
             string location = Path.GetDirectoryName(assembly.Location);
             string configFile = Path.Combine(location, assembly.ManifestModule.Name + ".config");
+           
             ExeConfigurationFileMap fileMap = new ExeConfigurationFileMap();
             fileMap.ExeConfigFilename = configFile;
 
@@ -265,7 +266,7 @@ namespace Chauffeur.Windows.Services
         private void Timer_OnElapsed(object sender, ElapsedEventArgs e)
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
-            this.Log("============================== START ==============================");
+            this.Log("============================== Started ==============================");
 
             try
             {
@@ -285,7 +286,7 @@ namespace Chauffeur.Windows.Services
                 _Timer.Start();
 
                 this.Log("Elapsed time was: {0}.{1}.{2}", stopwatch.Elapsed.Hours, stopwatch.Elapsed.Minutes, stopwatch.Elapsed.Seconds);
-                this.Log("============================== FINISHED ==============================");
+                this.Log("============================== Finished ==============================");
             }
         }
 
