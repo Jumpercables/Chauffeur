@@ -13,7 +13,7 @@ namespace Chauffeur.Tests
         private static void Main(string[] args)
         {
             string jobName = ConfigurationManager.AppSettings["jenkins.job"];
-            string artifactsDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Jenkins");  
+            string artifactsDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Jenkins");  
 
             ChauffeurService chauffeurService = new ChauffeurService();
             chauffeurService.InstallLastSuccessfulBuild(jobName, artifactsDirectory);

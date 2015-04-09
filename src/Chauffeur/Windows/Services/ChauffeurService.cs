@@ -100,16 +100,10 @@ namespace Chauffeur.Windows.Services
         /// </summary>
         /// <param name="args">Data passed by the start command.</param>
         protected override void OnStart(string[] args)
-        {            
-            double interval;
-            if (!double.TryParse(ConfigurationManager.AppSettings["chauffeur.interval"], out interval))
-                interval = 900000; // 15 minutes.
-
-            _Timer = new Timer(interval);
+        {                        
+            _Timer = new Timer(60000); // Wait 1 minute.
             _Timer.Elapsed += this.Timer_OnElapsed;
-            _Timer.Start();
-
-            this.Timer_OnElapsed(this, null);
+            _Timer.Start();            
         }
 
         /// <summary>
@@ -279,7 +273,7 @@ namespace Chauffeur.Windows.Services
                 _Timer.Stop();
 
                 string jobName = ConfigurationManager.AppSettings["jenkins.job"];
-                string artifactsDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Jenkins");              
+                string artifactsDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Jenkins");              
                 
                 this.InstallLastSuccessfulBuild(jobName, artifactsDirectory);
             }
@@ -289,6 +283,12 @@ namespace Chauffeur.Windows.Services
             }
             finally
             {
+                // Use the interval specified in the configuration file.
+                double interval;
+                if (!double.TryParse(ConfigurationManager.AppSettings["chauffeur.interval"], out interval))
+                    _Timer.Interval = 900000; // Otherwise, default to 15 minutes.
+
+                _Timer.Interval = interval;
                 _Timer.Start();
 
                 this.Log("Elapsed time was: {0}.{1}.{2}", stopwatch.Elapsed.Hours, stopwatch.Elapsed.Minutes, stopwatch.Elapsed.Seconds);

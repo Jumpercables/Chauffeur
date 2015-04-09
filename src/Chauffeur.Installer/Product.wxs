@@ -23,7 +23,7 @@
     <!-- Let's require Windows Installer 4.0 (included in Vista) -->
     <Package InstallerVersion="200"
              Compressed="yes"
-             InstallScope="perMachine"
+             InstallScope="perUser"
              Description="Jenkins Chauffeur Service for Automatic Installations of Builds."/>
 
     <!-- Set properties for add/remove programs -->
@@ -35,12 +35,13 @@
     <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
     <MediaTemplate />
 
-    <Feature Id="ProductFeature" Title="Window Service" Level="1">
+    <Feature Id="ProductFeature" Title="Jenkins Chauffeur Service" Level="1">
       <ComponentGroupRef Id="ProductComponents" />
     </Feature>
 
     <Property Id="ApplicationFolderName" Value="Jenkins" />
     <Property Id="WixAppFolder" Value="WixPerMachineFolder" />
+    
     <UIRef Id="WixUI_Advanced" />
   </Product>
 
