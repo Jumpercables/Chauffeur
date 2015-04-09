@@ -11,34 +11,41 @@ namespace Chauffeur.Jenkins.Model
         #region Public Properties
 
         /// <summary>
-        /// Gets or sets the description.
+        ///     Gets or sets the description.
         /// </summary>
         /// <value>
-        /// The description.
+        ///     The description.
         /// </value>
         [DataMember(Name = "description")]
         public string Description { get; set; }
+
         /// <summary>
-        /// Gets or sets the full name.
+        ///     Gets or sets the full name.
         /// </summary>
         /// <value>
-        /// The full name.
+        ///     The full name.
         /// </value>
         [DataMember(Name = "fullName")]
         public string FullName { get; set; }
+
         /// <summary>
-        /// Gets or sets the identifier.
+        ///     Gets or sets the identifier.
         /// </summary>
         /// <value>
-        /// The identifier.
+        ///     The identifier.
         /// </value>
         [DataMember(Name = "id")]
         public string Id { get; set; }
+
+        #endregion
+
+        #region IUrl Members
+
         /// <summary>
-        /// Gets or sets the URL.
+        ///     Gets or sets the URL.
         /// </summary>
         /// <value>
-        /// The URL.
+        ///     The URL.
         /// </value>
         [DataMember(Name = "url")]
         public Uri Url { get; set; }

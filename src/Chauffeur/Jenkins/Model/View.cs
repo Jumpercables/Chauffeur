@@ -12,34 +12,41 @@ namespace Chauffeur.Jenkins.Model
         #region Public Properties
 
         /// <summary>
-        /// Gets or sets the description.
+        ///     Gets or sets the description.
         /// </summary>
         /// <value>
-        /// The description.
+        ///     The description.
         /// </value>
         [DataMember(Name = "description")]
         public string Description { get; set; }
+
         /// <summary>
-        /// Gets or sets the jobs.
+        ///     Gets or sets the jobs.
         /// </summary>
         /// <value>
-        /// The jobs.
+        ///     The jobs.
         /// </value>
         [DataMember(Name = "jobs")]
         public IList<Job> Jobs { get; set; }
+
         /// <summary>
-        /// Gets or sets the name.
+        ///     Gets or sets the name.
         /// </summary>
         /// <value>
-        /// The name.
+        ///     The name.
         /// </value>
         [DataMember(Name = "name")]
         public string Name { get; set; }
+
+        #endregion
+
+        #region IUrl Members
+
         /// <summary>
-        /// Gets or sets the URL.
+        ///     Gets or sets the URL.
         /// </summary>
         /// <value>
-        /// The URL.
+        ///     The URL.
         /// </value>
         [DataMember(Name = "url")]
         public Uri Url { get; set; }
@@ -49,10 +56,10 @@ namespace Chauffeur.Jenkins.Model
         #region Public Methods
 
         /// <summary>
-        /// Returns a <see cref="System.String" /> that represents this instance.
+        ///     Returns a <see cref="System.String" /> that represents this instance.
         /// </summary>
         /// <returns>
-        /// A <see cref="System.String" /> that represents this instance.
+        ///     A <see cref="System.String" /> that represents this instance.
         /// </returns>
         public override string ToString()
         {

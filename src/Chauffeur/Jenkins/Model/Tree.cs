@@ -7,11 +7,14 @@ using Chauffeur.Jenkins.Client;
 namespace Chauffeur.Jenkins.Model
 {
     [DataContract]
-    public class Node : IUrl
+    public class Tree : IUrl
     {
         #region Constructors
 
-        public Node()
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Tree"/> class.
+        /// </summary>
+        public Tree()
         {
             this.Jobs = new List<Job>();
             this.Views = new List<View>();

@@ -6,7 +6,7 @@ using Chauffeur.Jenkins.Model;
 namespace Chauffeur.Jenkins.Services
 {
     /// <summary>
-    /// A service used to obtain the job information from jenkins.
+    ///     A service used to obtain the job information from jenkins.
     /// </summary>
     public class JobService : JenkinsService
     {
@@ -27,22 +27,22 @@ namespace Chauffeur.Jenkins.Services
         #region Public Methods
 
         /// <summary>
-        /// Gets the job from server with the specified name.
+        ///     Gets the job from server with the specified name.
         /// </summary>
         /// <param name="jobName">Name of the job.</param>
         /// <returns>
-        /// Returns a <see cref="Job" /> representing the job.
+        ///     Returns a <see cref="Job" /> representing the job.
         /// </returns>
         /// <exception cref="System.ArgumentNullException">jobName</exception>
         public Job GetJob(string jobName)
         {
-            if(jobName == null)
+            if (jobName == null)
                 throw new ArgumentNullException("jobName");
 
             var queryUri = new Uri(base.BaseUri, @"/job/" + jobName + "/");
             var job = base.Client.GetResource<Job>(queryUri, 1);
             return job;
-        }
+        }        
 
         #endregion
     }

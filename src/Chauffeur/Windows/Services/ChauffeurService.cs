@@ -40,7 +40,7 @@ namespace Chauffeur.Windows.Services
         #endregion
 
         #region Public Methods
-
+        
         /// <summary>
         ///     Installs the last successful build for the specified job.
         /// </summary>
@@ -266,7 +266,6 @@ namespace Chauffeur.Windows.Services
         private void Timer_OnElapsed(object sender, ElapsedEventArgs e)
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
-            this.Log("============================== Started ==============================");
 
             try
             {
@@ -291,8 +290,8 @@ namespace Chauffeur.Windows.Services
                 _Timer.Interval = interval;
                 _Timer.Start();
 
-                this.Log("Elapsed time was: {0}.{1}.{2}", stopwatch.Elapsed.Hours, stopwatch.Elapsed.Minutes, stopwatch.Elapsed.Seconds);
-                this.Log("============================== Finished ==============================");
+                this.Log("Interval: {0:N0} ms", _Timer.Interval);
+                this.Log("Elapsed Time: {0}.{1}.{2}", stopwatch.Elapsed.Hours, stopwatch.Elapsed.Minutes, stopwatch.Elapsed.Seconds);
             }
         }
 

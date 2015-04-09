@@ -71,7 +71,7 @@
     <Compile Include="Jenkins\Client\JsonJenkinsClient.cs" />
     <Compile Include="Jenkins\Model\Build.cs" />
     <Compile Include="Jenkins\Model\Job.cs" />
-    <Compile Include="Jenkins\Model\Node.cs" />
+    <Compile Include="Jenkins\Model\Tree.cs" />
     <Compile Include="Jenkins\Model\User.cs" />
     <Compile Include="Jenkins\Model\View.cs" />
     <Compile Include="Jenkins\Services\JenkinsService.cs" />

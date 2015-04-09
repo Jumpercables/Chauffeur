@@ -31,6 +31,21 @@ namespace Chauffeur.Jenkins.Client
 
         #endregion
 
+        #region Internal Properties
+
+        /// <summary>
+        ///     Gets the API token.
+        /// </summary>
+        /// <value>
+        ///     The API token.
+        /// </value>
+        internal string ApiToken
+        {
+            get { return _ApiToken; }
+        }
+
+        #endregion
+
         #region Protected Properties
 
         /// <summary>
@@ -130,7 +145,7 @@ namespace Chauffeur.Jenkins.Client
             var request = this.GetRequest(absoluteUri);
             return this.GetResource<T>(request);
         }
-
+        
         #endregion
 
         #region Protected Methods
