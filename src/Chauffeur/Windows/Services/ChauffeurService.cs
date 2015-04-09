@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.ServiceProcess;
+using System.Threading.Tasks;
 using System.Timers;
 
 using Chauffeur.Jenkins.Client;
@@ -99,14 +100,16 @@ namespace Chauffeur.Windows.Services
         /// </summary>
         /// <param name="args">Data passed by the start command.</param>
         protected override void OnStart(string[] args)
-        {
+        {            
             double interval;
             if (!double.TryParse(ConfigurationManager.AppSettings["chauffeur.interval"], out interval))
                 interval = 900000; // 15 minutes.
 
             _Timer = new Timer(interval);
-            _Timer.Elapsed += Timer_OnElapsed;
+            _Timer.Elapsed += this.Timer_OnElapsed;
             _Timer.Start();
+
+            this.Timer_OnElapsed(this, null);
         }
 
         /// <summary>
@@ -144,8 +147,11 @@ namespace Chauffeur.Windows.Services
 
             if (directory == null)
                 throw new ArgumentNullException("directory");
-
+           
             this.Log("Downloading: {0}", directory);
+            
+            if (!Directory.Exists(directory))
+                Directory.CreateDirectory(directory);
 
             Uri baseUri;
             JenkinsClient client = this.GetClient(out baseUri);
@@ -273,8 +279,8 @@ namespace Chauffeur.Windows.Services
                 _Timer.Stop();
 
                 string jobName = ConfigurationManager.AppSettings["jenkins.job"];
-                string artifactsDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Jenkins");
-
+                string artifactsDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Jenkins");              
+                
                 this.InstallLastSuccessfulBuild(jobName, artifactsDirectory);
             }
             catch (Exception ex)
