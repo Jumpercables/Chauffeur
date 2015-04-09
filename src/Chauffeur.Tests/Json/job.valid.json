@@ -1,0 +1,172 @@
+﻿{
+  "actions" : [
+    {
+      
+    },
+    {
+      
+    }
+  ],
+  "description" : "The Chauffeur .NET 4.5 Nightly build.",
+  "displayName" : "Chauffeur_4.5_Nightly",
+  "displayNameOrNull" : null,
+  "name" : "Chauffeur_4.5_Nightly",
+  "url" : "http://localhost:8080/view/job/Chauffeur_4.5_Nightly/",
+  "buildable" : true,
+  "builds" : [
+    {
+      "number" : 2211,
+      "url" : "http://localhost:8080/view/job/Chauffeur_4.5_Nightly/2211/"
+    },
+    {
+      "number" : 2210,
+      "url" : "http://localhost:8080/view/job/Chauffeur_4.5_Nightly/2210/"
+    },
+    {
+      "number" : 2209,
+      "url" : "http://localhost:8080/view/job/Chauffeur_4.5_Nightly/2209/"
+    },
+    {
+      "number" : 2208,
+      "url" : "http://localhost:8080/view/job/Chauffeur_4.5_Nightly/2208/"
+    },
+    {
+      "number" : 2207,
+      "url" : "http://localhost:8080/view/job/Chauffeur_4.5_Nightly/2207/"
+    },
+    {
+      "number" : 2206,
+      "url" : "http://localhost:8080/view/job/Chauffeur_4.5_Nightly/2206/"
+    },
+    {
+      "number" : 2205,
+      "url" : "http://localhost:8080/view/job/Chauffeur_4.5_Nightly/2205/"
+    },
+    {
+      "number" : 2204,
+      "url" : "http://localhost:8080/view/job/Chauffeur_4.5_Nightly/2204/"
+    },
+    {
+      "number" : 2203,
+      "url" : "http://localhost:8080/view/job/Chauffeur_4.5_Nightly/2203/"
+    },
+    {
+      "number" : 2202,
+      "url" : "http://localhost:8080/view/job/Chauffeur_4.5_Nightly/2202/"
+    },
+    {
+      "number" : 2201,
+      "url" : "http://localhost:8080/view/job/Chauffeur_4.5_Nightly/2201/"
+    },
+    {
+      "number" : 2200,
+      "url" : "http://localhost:8080/view/job/Chauffeur_4.5_Nightly/2200/"
+    },
+    {
+      "number" : 2199,
+      "url" : "http://localhost:8080/view/job/Chauffeur_4.5_Nightly/2199/"
+    },
+    {
+      "number" : 2198,
+      "url" : "http://localhost:8080/view/job/Chauffeur_4.5_Nightly/2198/"
+    },
+    {
+      "number" : 2197,
+      "url" : "http://localhost:8080/view/job/Chauffeur_4.5_Nightly/2197/"
+    },
+    {
+      "number" : 2196,
+      "url" : "http://localhost:8080/view/job/Chauffeur_4.5_Nightly/2196/"
+    },
+    {
+      "number" : 2195,
+      "url" : "http://localhost:8080/view/job/Chauffeur_4.5_Nightly/2195/"
+    },
+    {
+      "number" : 2194,
+      "url" : "http://localhost:8080/view/job/Chauffeur_4.5_Nightly/2194/"
+    },
+    {
+      "number" : 2193,
+      "url" : "http://localhost:8080/view/job/Chauffeur_4.5_Nightly/2193/"
+    },
+    {
+      "number" : 2192,
+      "url" : "http://localhost:8080/view/job/Chauffeur_4.5_Nightly/2192/"
+    },
+    {
+      "number" : 2191,
+      "url" : "http://localhost:8080/view/job/Chauffeur_4.5_Nightly/2191/"
+    },
+    {
+      "number" : 2190,
+      "url" : "http://localhost:8080/view/job/Chauffeur_4.5_Nightly/2190/"
+    },
+    {
+      "number" : 2189,
+      "url" : "http://localhost:8080/view/job/Chauffeur_4.5_Nightly/2189/"
+    },
+    {
+      "number" : 2188,
+      "url" : "http://localhost:8080/view/job/Chauffeur_4.5_Nightly/2188/"
+    },
+    {
+      "number" : 2187,
+      "url" : "http://localhost:8080/view/job/Chauffeur_4.5_Nightly/2187/"
+    }
+  ],
+  "color" : "blue",
+  "firstBuild" : {
+    "number" : 2187,
+    "url" : "http://localhost:8080/view/job/Chauffeur_4.5_Nightly/2187/"
+  },
+  "healthReport" : [
+    {
+      "description" : "Build stability: 2 out of the last 5 builds failed.",
+      "iconUrl" : "health-40to59.png",
+      "score" : 60
+    }
+  ],
+  "inQueue" : false,
+  "keepDependencies" : false,
+  "lastBuild" : {
+    "number" : 2211,
+    "url" : "http://localhost:8080/view/job/Chauffeur_4.5_Nightly/2211/"
+  },
+  "lastCompletedBuild" : {
+    "number" : 2211,
+    "url" : "http://localhost:8080/view/job/Chauffeur_4.5_Nightly/2211/"
+  },
+  "lastFailedBuild" : {
+    "number" : 2208,
+    "url" : "http://localhost:8080/view/job/Chauffeur_4.5_Nightly/2208/"
+  },
+  "lastStableBuild" : {
+    "number" : 2211,
+    "url" : "http://localhost:8080/view/job/Chauffeur_4.5_Nightly/2211/"
+  },
+  "lastSuccessfulBuild" : {
+    "number" : 2211,
+    "url" : "http://localhost:8080/view/job/Chauffeur_4.5_Nightly/2211/"
+  },
+  "lastUnstableBuild" : null,
+  "lastUnsuccessfulBuild" : {
+    "number" : 2208,
+    "url" : "http://localhost:8080/view/job/Chauffeur_4.5_Nightly/2208/"
+  },
+  "nextBuildNumber" : 2212,
+  "property" : [
+    
+  ],
+  "queueItem" : null,
+  "concurrentBuild" : false,
+  "downstreamProjects" : [
+    
+  ],
+  "scm" : {
+    
+  },
+  "upstreamProjects" : [
+    
+  ]
+}

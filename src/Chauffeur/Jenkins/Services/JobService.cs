@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 using Chauffeur.Jenkins.Client;
 using Chauffeur.Jenkins.Model;
@@ -42,7 +43,19 @@ namespace Chauffeur.Jenkins.Services
             var queryUri = new Uri(base.BaseUri, @"/job/" + jobName + "/");
             var job = base.Client.GetResource<Job>(queryUri, 1);
             return job;
-        }        
+        }
+
+        /// <summary>
+        ///     Gets all of the jobs that have been configured in jenkins.
+        /// </summary>
+        /// <returns>Returns a <see cref="IList{Job}" /> representing jobs configured.</returns>
+        public IList<Job> GetJobs()
+        {
+            var tree = base.Client.GetResource<Tree>(base.BaseUri, 1);
+            if (tree == null) return null;
+
+            return tree.Jobs;
+        }
 
         #endregion
     }

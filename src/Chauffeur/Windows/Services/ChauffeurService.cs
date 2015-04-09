@@ -7,7 +7,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.ServiceProcess;
-using System.Threading.Tasks;
 using System.Timers;
 
 using Chauffeur.Jenkins.Client;
@@ -40,7 +39,7 @@ namespace Chauffeur.Windows.Services
         #endregion
 
         #region Public Methods
-        
+
         /// <summary>
         ///     Installs the last successful build for the specified job.
         /// </summary>
@@ -79,7 +78,7 @@ namespace Chauffeur.Windows.Services
                 this.InstallMsiArtifacts(artifacts);
 
                 // Update the app.config file.
-                this.SaveLastSuccessfulBuild(job.LastSuccessfulBuild);
+                this.SaveLastInstalledBuild(job.LastSuccessfulBuild);
 
                 // A new build was installed.
                 return true;
@@ -100,10 +99,10 @@ namespace Chauffeur.Windows.Services
         /// </summary>
         /// <param name="args">Data passed by the start command.</param>
         protected override void OnStart(string[] args)
-        {                        
+        {
             _Timer = new Timer(60000); // Wait 1 minute.
             _Timer.Elapsed += this.Timer_OnElapsed;
-            _Timer.Start();            
+            _Timer.Start();
         }
 
         /// <summary>
@@ -141,9 +140,9 @@ namespace Chauffeur.Windows.Services
 
             if (directory == null)
                 throw new ArgumentNullException("directory");
-           
+
             this.Log("Downloading: {0}", directory);
-            
+
             if (!Directory.Exists(directory))
                 Directory.CreateDirectory(directory);
 
@@ -191,8 +190,22 @@ namespace Chauffeur.Windows.Services
 
             JobService jobService = new JobService(baseUri, client);
             Job job = jobService.GetJob(jobName);
-
             return job;
+        }
+
+        /// <summary>
+        ///     Gets the timer interval that has been configured.
+        /// </summary>
+        /// <returns>
+        ///     Returns a <see cref="double" /> representing the timer interval in miliseconds.
+        /// </returns>
+        private double GetTimerInterval()
+        {
+            double interval;
+            if (!double.TryParse(ConfigurationManager.AppSettings["interval"], out interval))
+                return 900000; // Otherwise, default to 15 minutes.
+
+            return interval;
         }
 
         /// <summary>
@@ -212,7 +225,7 @@ namespace Chauffeur.Windows.Services
             foreach (var artifact in artifacts.Where(o => o.EndsWith(".msi", StringComparison.InvariantCultureIgnoreCase)))
             {
                 foreach (var s in parameters)
-                {                    
+                {
                     ProcessStartInfo startInfo = new ProcessStartInfo("cmd.exe", string.Format("/c start /MIN /wait msiexec.exe {0} {1} {2}", s.Key, artifact, s.Value));
                     startInfo.WindowStyle = ProcessWindowStyle.Hidden;
 
@@ -235,22 +248,22 @@ namespace Chauffeur.Windows.Services
         }
 
         /// <summary>
-        ///     Saves the last successful build.
+        ///     Saves the last installed build.
         /// </summary>
         /// <param name="build">The build.</param>
-        private void SaveLastSuccessfulBuild(Build build)
+        private void SaveLastInstalledBuild(Build build)
         {
             this.Log("Last installed build: {0}", build.Number);
 
             Assembly assembly = Assembly.GetExecutingAssembly();
             string location = Path.GetDirectoryName(assembly.Location);
             string configFile = Path.Combine(location, assembly.ManifestModule.Name + ".config");
-           
+
             ExeConfigurationFileMap fileMap = new ExeConfigurationFileMap();
             fileMap.ExeConfigFilename = configFile;
 
             Configuration config = ConfigurationManager.OpenMappedExeConfiguration(fileMap, ConfigurationUserLevel.None);
-            if(config.AppSettings.Settings.AllKeys.Contains("build"))
+            if (config.AppSettings.Settings.AllKeys.Contains("build"))
                 config.AppSettings.Settings["build"].Value = build.Number.ToString(CultureInfo.CurrentCulture);
             else
                 config.AppSettings.Settings.Add("build", build.Number.ToString(CultureInfo.CurrentCulture));
@@ -272,8 +285,8 @@ namespace Chauffeur.Windows.Services
                 _Timer.Stop();
 
                 string jobName = ConfigurationManager.AppSettings["job"];
-                string artifactsDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Jenkins");              
-                
+                string artifactsDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Jenkins");
+
                 this.InstallLastSuccessfulBuild(jobName, artifactsDirectory);
             }
             catch (Exception ex)
@@ -283,11 +296,7 @@ namespace Chauffeur.Windows.Services
             finally
             {
                 // Use the interval specified in the configuration file.
-                double interval;
-                if (!double.TryParse(ConfigurationManager.AppSettings["interval"], out interval))
-                    _Timer.Interval = 900000; // Otherwise, default to 15 minutes.
-
-                _Timer.Interval = interval;
+                _Timer.Interval = this.GetTimerInterval();
                 _Timer.Start();
 
                 this.Log("Interval: {0:N0} ms", _Timer.Interval);

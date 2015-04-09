@@ -103,7 +103,6 @@ namespace Chauffeur.Jenkins.Client
         {
             var request = WebRequest.Create(absoluteUri);
             request.Method = "GET";
-            request.Timeout = 90000;
 
             if (!string.IsNullOrEmpty(_UserName))
             {
@@ -119,12 +118,15 @@ namespace Chauffeur.Jenkins.Client
         }
 
         /// <summary>
-        ///     Retrieves a jenkins resource given it's URI and optional tree parameter.
+        /// Retrieves a jenkins resource given it's URI and optional tree parameter.
         /// </summary>
+        /// <typeparam name="T"></typeparam>
         /// <param name="resourceUri">The absolute URI of that resource (not including the api suffix).</param>
-        /// <param name="tree">
-        ///     A tree parameter, which will filter what properties are selected. See the Jenkins API documentation for details.
-        /// </param>
+        /// <param name="tree">A tree parameter, which will filter what properties are selected. See the Jenkins API documentation
+        /// for details.</param>
+        /// <returns>
+        /// Returns a <see cref="T" /> representing the resource converted to the type.
+        /// </returns>
         public T GetResource<T>(Uri resourceUri, string tree) where T : class, IUrl
         {
             var absoluteUri = this.GetAbsoluteUri(resourceUri, tree);
@@ -135,17 +137,19 @@ namespace Chauffeur.Jenkins.Client
         /// <summary>
         ///     Retrieves a jenkins resource given it's URI and optional tree parameter.
         /// </summary>
+        /// <typeparam name="T"></typeparam>
         /// <param name="resourceUri">The absolute URI of that resource (not including the api suffix).</param>
-        /// <param name="depth">
-        ///     The number of levels to select.  See the Jenkins API documentation for details.
-        /// </param>
+        /// <param name="depth">The number of levels to select.  See the Jenkins API documentation for details.</param>
+        /// <returns>
+        ///     Returns a <see cref="T" /> representing the resource converted to the type.
+        /// </returns>
         public T GetResource<T>(Uri resourceUri, int depth) where T : class, IUrl
         {
             var absoluteUri = this.GetAbsoluteUri(resourceUri, depth);
             var request = this.GetRequest(absoluteUri);
             return this.GetResource<T>(request);
         }
-        
+
         #endregion
 
         #region Protected Methods
