@@ -65,7 +65,7 @@ namespace Chauffeur.Windows.Services
             // Query for the job information from the server.
             Job job = this.GetJob(jobName);
 
-            string buildNumber = ConfigurationManager.AppSettings["jenkins.build"];
+            string buildNumber = ConfigurationManager.AppSettings["build"];
             this.Log("Last successful build: {0}", job.LastSuccessfulBuild.Number);
             this.Log("Last installed build: {0}", buildNumber);
 
@@ -161,11 +161,11 @@ namespace Chauffeur.Windows.Services
         /// <returns>Returns the <see cref="JenkinsClient" /> representing the client object.</returns>
         private JenkinsClient GetClient(out Uri baseUri)
         {
-            string url = ConfigurationManager.AppSettings["jenkins.server"];
+            string url = ConfigurationManager.AppSettings["server"];
             baseUri = new Uri(url);
 
-            string user = ConfigurationManager.AppSettings["jenkins.user"];
-            string token = ConfigurationManager.AppSettings["jenkins.token"];
+            string user = ConfigurationManager.AppSettings["user"];
+            string token = ConfigurationManager.AppSettings["token"];
 
             JsonJenkinsClient client = new JsonJenkinsClient(user, token);
             return client;
@@ -203,8 +203,8 @@ namespace Chauffeur.Windows.Services
         {
             Dictionary<string, string> parameters = new Dictionary<string, string>
             {
-                {@"/x", ConfigurationManager.AppSettings["chauffeur.uninstall"]},
-                {@"/i", ConfigurationManager.AppSettings["chauffeur.install"]}
+                {@"/x", ConfigurationManager.AppSettings["uninstall"]},
+                {@"/i", ConfigurationManager.AppSettings["install"]}
             };
 
             this.Log("Installation: {0}", artifacts.Count);
@@ -250,10 +250,10 @@ namespace Chauffeur.Windows.Services
             fileMap.ExeConfigFilename = configFile;
 
             Configuration config = ConfigurationManager.OpenMappedExeConfiguration(fileMap, ConfigurationUserLevel.None);
-            if(config.AppSettings.Settings.AllKeys.Contains("jenkins.build"))
-                config.AppSettings.Settings["jenkins.build"].Value = build.Number.ToString(CultureInfo.CurrentCulture);
+            if(config.AppSettings.Settings.AllKeys.Contains("build"))
+                config.AppSettings.Settings["build"].Value = build.Number.ToString(CultureInfo.CurrentCulture);
             else
-                config.AppSettings.Settings.Add("jenkins.build", build.Number.ToString(CultureInfo.CurrentCulture));
+                config.AppSettings.Settings.Add("build", build.Number.ToString(CultureInfo.CurrentCulture));
 
             config.Save(ConfigurationSaveMode.Modified);
         }
@@ -271,7 +271,7 @@ namespace Chauffeur.Windows.Services
             {
                 _Timer.Stop();
 
-                string jobName = ConfigurationManager.AppSettings["jenkins.job"];
+                string jobName = ConfigurationManager.AppSettings["job"];
                 string artifactsDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Jenkins");              
                 
                 this.InstallLastSuccessfulBuild(jobName, artifactsDirectory);
@@ -284,7 +284,7 @@ namespace Chauffeur.Windows.Services
             {
                 // Use the interval specified in the configuration file.
                 double interval;
-                if (!double.TryParse(ConfigurationManager.AppSettings["chauffeur.interval"], out interval))
+                if (!double.TryParse(ConfigurationManager.AppSettings["interval"], out interval))
                     _Timer.Interval = 900000; // Otherwise, default to 15 minutes.
 
                 _Timer.Interval = interval;
