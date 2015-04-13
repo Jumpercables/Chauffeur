@@ -27,7 +27,7 @@
     <!-- Let's require Windows Installer 4.0 (included in Vista) -->
     <Package InstallerVersion="200"
              Compressed="yes"
-             InstallScope="perUser"
+             InstallScope="perMachine"
              Description="Jenkins Chauffeur Service for Automatic Installations of Builds."/>
 
     <!-- Set properties for add/remove programs -->
@@ -36,6 +36,7 @@
     <Property Id="ARPNOREPAIR" Value="yes" Secure="yes" />
     <Property Id="ARPNOMODIFY" Value="yes" Secure="yes" />
 
+    <Icon Id="Icon" SourceFile="jenkins.png"/>
     <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
     <MediaTemplate />
 
@@ -82,6 +83,8 @@
                         Name="ChauffeurService"
                         Wait="yes" />
         <File Id="Chauffeur.Jenkins.dll" Source="$(var.BuildArtifactDir)\Chauffeur.Jenkins.dll" />
+        <File Id="Chauffeur.Client.exe" Source="$(var.BuildArtifactDir)\Chauffeur.Client.exe" />
+        <File Id="Chauffeur.Client.exe.config" Source="$(var.BuildArtifactDir)\Chauffeur.Client.exe.config" />
       </Component>     
     </ComponentGroup>
   </Fragment>
