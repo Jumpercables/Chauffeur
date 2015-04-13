@@ -45,9 +45,21 @@ namespace Chauffeur.Jenkins.Services
         /// <summary>
         ///     Initializes a new instance of the <see cref="JobService" /> class.
         /// </summary>
+        public JobService()
+        {
+        }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="JobService" /> class.
+        /// </summary>
         /// <param name="baseUri">The base URI.</param>
         /// <param name="client">The client.</param>
-        public JobService(Uri baseUri, JenkinsClient client)
+        /// <exception cref="System.ArgumentNullException">
+        ///     baseUri
+        ///     or
+        ///     client
+        /// </exception>
+        internal JobService(Uri baseUri, JenkinsClient client)
             : base(baseUri, client)
         {
         }

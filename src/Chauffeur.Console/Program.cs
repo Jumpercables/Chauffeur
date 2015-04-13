@@ -1,8 +1,4 @@
-﻿using System;
-using System.Configuration;
-
-using Chauffeur.Jenkins.Client;
-using Chauffeur.Jenkins.Services;
+﻿using Chauffeur.Console.ServiceReference;
 
 namespace Chauffeur.Console
 {
@@ -12,19 +8,9 @@ namespace Chauffeur.Console
 
         private static void Main(string[] args)
         {
-            string url = ConfigurationManager.AppSettings["server"];
-            Uri baseUri = new Uri(url);
-
-            string user = ConfigurationManager.AppSettings["user"];
-            string token = ConfigurationManager.AppSettings["token"];
-
-            JsonJenkinsClient client = new JsonJenkinsClient(user, token);
-            ChauffeurService service = new ChauffeurService(baseUri, client);
-
+            ChauffeurServiceClient chauffeurServiceClient = new ChauffeurServiceClient();
             foreach (var jobName in args)
-            {
-                service.InstallLastSuccessfulBuild(jobName);
-            }
+                chauffeurServiceClient.InstallLastSuccessfulBuildAsync(jobName);
         }
 
         #endregion

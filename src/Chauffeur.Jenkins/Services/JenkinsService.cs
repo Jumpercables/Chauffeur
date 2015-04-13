@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using System.Diagnostics;
 
 using Chauffeur.Jenkins.Client;
@@ -11,6 +12,19 @@ namespace Chauffeur.Jenkins.Services
     public abstract class JenkinsService
     {
         #region Constructors
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="JenkinsService" /> class.
+        /// </summary>
+        protected JenkinsService()
+        {
+            string url = ConfigurationManager.AppSettings["server"];
+            this.BaseUri = new Uri(url);
+
+            string user = ConfigurationManager.AppSettings["user"];
+            string token = ConfigurationManager.AppSettings["token"];
+            this.Client = new JsonJenkinsClient(user, token);
+        }
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="JenkinsService" /> class.

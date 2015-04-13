@@ -14,7 +14,7 @@ namespace Chauffeur.WindowsService
             ServiceBase[] ServicesToRun;
             ServicesToRun = new ServiceBase[]
             {
-                new ChauffeurServiceHost(),
+                new ChauffeurWindowService(),
             };
             ServiceBase.Run(ServicesToRun);
         }

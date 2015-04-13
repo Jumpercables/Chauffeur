@@ -5,6 +5,24 @@ using System.Text;
 namespace Chauffeur.Jenkins.Client
 {
     /// <summary>
+    ///     The jenkins resposne object.
+    /// </summary>
+    public interface IUrl
+    {
+        #region Public Properties
+
+        /// <summary>
+        ///     Gets or sets the URL.
+        /// </summary>
+        /// <value>
+        ///     The URL.
+        /// </value>
+        Uri Url { get; set; }
+
+        #endregion
+    }
+
+    /// <summary>
     ///     An abstract client used to handle reading the Jenkins REST API.
     /// </summary>
     public abstract class JenkinsClient

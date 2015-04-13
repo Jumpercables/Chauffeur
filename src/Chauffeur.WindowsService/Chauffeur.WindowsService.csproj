@@ -55,6 +55,7 @@
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -64,11 +65,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ChauffeurServiceHost.cs">
+    <Compile Include="ChauffeurWindowService.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="ChauffeurServiceHost.Designer.cs">
-      <DependentUpon>ChauffeurServiceHost.cs</DependentUpon>
+    <Compile Include="ChauffeurWindowService.Designer.cs">
+      <DependentUpon>ChauffeurWindowService.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -80,7 +81,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Chauffeur.Jenkins\Chauffeur.Jenkins.csproj">
-      <Project>{dacfce5b-18f5-49d7-a451-665b69462d0e}</Project>
+      <Project>{880c9b0f-6005-4c1c-9f2f-5ff79ebfb54a}</Project>
       <Name>Chauffeur.Jenkins</Name>
     </ProjectReference>
   </ItemGroup>

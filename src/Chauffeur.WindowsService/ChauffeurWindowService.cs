@@ -19,21 +19,21 @@ namespace Chauffeur.WindowsService
     /// <summary>
     ///     A windows service used to monitor the builds and automatically install the last succsseful build.
     /// </summary>
-    public partial class ChauffeurServiceHost : ServiceBase
+    public partial class ChauffeurWindowService : ServiceBase
     {
         #region Fields
 
         private ServiceHost _ServiceHost;
-        private CancellationToken _CancellationToken;
+        private CancellationTokenSource _CancellationTokenSource;
 
         #endregion
 
         #region Constructors
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="ChauffeurServiceHost" /> class.
+        ///     Initializes a new instance of the <see cref="ChauffeurWindowService" /> class.
         /// </summary>
-        public ChauffeurServiceHost()
+        public ChauffeurWindowService()
         {
             InitializeComponent();
         }
@@ -50,13 +50,20 @@ namespace Chauffeur.WindowsService
         /// <param name="args">Data passed by the start command.</param>
         protected override void OnStart(string[] args)
         {
+            _CancellationTokenSource = new CancellationTokenSource();
+
             Task.Factory.StartNew(() =>
             {
-                _CancellationToken = new CancellationToken(false);
-                _CancellationToken.Register(() => _ServiceHost.Close());
-                
+                if (_ServiceHost != null)
+                {
+                    _ServiceHost.Close();
+                    _ServiceHost = null;
+                }
+                                                
                 _ServiceHost = new ServiceHost(typeof (ChauffeurService));
-            }, _CancellationToken);
+                _ServiceHost.Open();
+
+            }, _CancellationTokenSource.Token);
         }
 
         /// <summary>
@@ -65,8 +72,15 @@ namespace Chauffeur.WindowsService
         /// </summary>
         protected override void OnStop()
         {
-            _CancellationToken.ThrowIfCancellationRequested();
-            _ServiceHost.Close();
+            _CancellationTokenSource.Cancel();
+
+            if (_ServiceHost != null)
+            {
+                if(_ServiceHost.State != CommunicationState.Closed || _ServiceHost.State != CommunicationState.Closing)
+                    _ServiceHost.Close();
+
+                _ServiceHost = null;
+            }
         }
 
         #endregion

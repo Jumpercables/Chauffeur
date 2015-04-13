@@ -3,13 +3,14 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "Chauffeur.Installer", "Chauffeur.Installer\Chauffeur.Installer.wixproj", "{EF570F84-9B8F-4A81-8C8D-B4984ED9E4FA}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chauffeur.Console", "Chauffeur.Console\Chauffeur.Console.csproj", "{A77D53E7-3779-451C-B1CE-935CCBDE1F57}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chauffeur.WindowsService", "Chauffeur.WindowsService\Chauffeur.WindowsService.csproj", "{D834C147-447B-4D43-8F2C-24ABB2A8E388}"
+	ProjectSection(ProjectDependencies) = postProject
+		{880C9B0F-6005-4C1C-9F2F-5FF79EBFB54A} = {880C9B0F-6005-4C1C-9F2F-5FF79EBFB54A}
+	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chauffeur.Jenkins", "Chauffeur.Jenkins\Chauffeur.Jenkins.csproj", "{DACFCE5B-18F5-49D7-A451-665B69462D0E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chauffeur.Jenkins", "Chauffeur.Jenkins\Chauffeur.Jenkins.csproj", "{880C9B0F-6005-4C1C-9F2F-5FF79EBFB54A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,12 +20,6 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{EF570F84-9B8F-4A81-8C8D-B4984ED9E4FA}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{EF570F84-9B8F-4A81-8C8D-B4984ED9E4FA}.Debug|x86.ActiveCfg = Debug|x86
-		{EF570F84-9B8F-4A81-8C8D-B4984ED9E4FA}.Debug|x86.Build.0 = Debug|x86
-		{EF570F84-9B8F-4A81-8C8D-B4984ED9E4FA}.Release|Any CPU.ActiveCfg = Release|x86
-		{EF570F84-9B8F-4A81-8C8D-B4984ED9E4FA}.Release|x86.ActiveCfg = Release|x86
-		{EF570F84-9B8F-4A81-8C8D-B4984ED9E4FA}.Release|x86.Build.0 = Release|x86
 		{A77D53E7-3779-451C-B1CE-935CCBDE1F57}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A77D53E7-3779-451C-B1CE-935CCBDE1F57}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A77D53E7-3779-451C-B1CE-935CCBDE1F57}.Debug|x86.ActiveCfg = Debug|x86
@@ -39,13 +34,13 @@ Global
 		{D834C147-447B-4D43-8F2C-24ABB2A8E388}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D834C147-447B-4D43-8F2C-24ABB2A8E388}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D834C147-447B-4D43-8F2C-24ABB2A8E388}.Release|x86.ActiveCfg = Release|Any CPU
-		{DACFCE5B-18F5-49D7-A451-665B69462D0E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DACFCE5B-18F5-49D7-A451-665B69462D0E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DACFCE5B-18F5-49D7-A451-665B69462D0E}.Debug|x86.ActiveCfg = Debug|x86
-		{DACFCE5B-18F5-49D7-A451-665B69462D0E}.Debug|x86.Build.0 = Debug|x86
-		{DACFCE5B-18F5-49D7-A451-665B69462D0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DACFCE5B-18F5-49D7-A451-665B69462D0E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DACFCE5B-18F5-49D7-A451-665B69462D0E}.Release|x86.ActiveCfg = Release|Any CPU
+		{880C9B0F-6005-4C1C-9F2F-5FF79EBFB54A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{880C9B0F-6005-4C1C-9F2F-5FF79EBFB54A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{880C9B0F-6005-4C1C-9F2F-5FF79EBFB54A}.Debug|x86.ActiveCfg = Debug|x86
+		{880C9B0F-6005-4C1C-9F2F-5FF79EBFB54A}.Debug|x86.Build.0 = Debug|x86
+		{880C9B0F-6005-4C1C-9F2F-5FF79EBFB54A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{880C9B0F-6005-4C1C-9F2F-5FF79EBFB54A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{880C9B0F-6005-4C1C-9F2F-5FF79EBFB54A}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using System.ServiceModel;
 
-using Chauffeur.Jenkins.Client;
 using Chauffeur.Jenkins.Model;
 
 namespace Chauffeur.Jenkins.Services
@@ -29,39 +28,15 @@ namespace Chauffeur.Jenkins.Services
         [OperationContract]
         Build InstallLastSuccessfulBuild(string jobName);
 
-        /// <summary>
-        ///     Installs the last successful build for the specific job.
-        /// </summary>
-        /// <param name="jobName">Name of the job.</param>
-        /// <param name="artifactDirectory">The artifact directory.</param>
-        /// <returns>
-        ///     Returns a <see cref="Build" /> representing the build that was installed.
-        /// </returns>
-        [OperationContract]
-        Build InstallLastSuccessfulBuild(string jobName, string artifactDirectory);
-
         #endregion
     }
 
     /// <summary>
     ///     Provides a WCF service that will install builds on the host machines.
     /// </summary>
+    [ServiceBehavior(AddressFilterMode = AddressFilterMode.Any)]
     public class ChauffeurService : JenkinsService, IChauffeurService
     {
-        #region Constructors
-
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="ChauffeurService" /> class.
-        /// </summary>
-        /// <param name="baseUri">The base URI.</param>
-        /// <param name="client">The client.</param>
-        public ChauffeurService(Uri baseUri, JenkinsClient client)
-            : base(baseUri, client)
-        {
-        }
-
-        #endregion
-
         #region IChauffeurService Members
 
         /// <summary>
@@ -71,38 +46,11 @@ namespace Chauffeur.Jenkins.Services
         /// <returns>
         ///     Returns a <see cref="bool" /> representing <c>true</c> when a new build was installed; otherwise <c>false</c>.
         /// </returns>
+        /// <exception cref="System.ArgumentNullException">jobName</exception>
         public Build InstallLastSuccessfulBuild(string jobName)
-        {
-            string artifactsDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Jenkins");
-
-            return this.InstallLastSuccessfulBuild(jobName, artifactsDirectory);
-        }
-
-        /// <summary>
-        ///     Installs the last successful build for the specified job.
-        /// </summary>
-        /// <param name="jobName">Name of the job.</param>
-        /// <param name="artifactDirectory">The artifact directory.</param>
-        /// <returns>
-        ///     Returns a <see cref="bool" /> representing <c>true</c> when a new build was installed; otherwise <c>false</c>.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        ///     jobName
-        ///     or
-        ///     artifactDirectory
-        /// </exception>
-        /// <exception cref="System.ArgumentNullException">
-        ///     jobName
-        ///     or
-        ///     artifactDirectory
-        /// </exception>
-        public Build InstallLastSuccessfulBuild(string jobName, string artifactDirectory)
         {
             if (jobName == null)
                 throw new ArgumentNullException("jobName");
-
-            if (artifactDirectory == null)
-                throw new ArgumentNullException("artifactDirectory");
 
             // Query for the job information from the server.            
             JobService jobService = new JobService(base.BaseUri, base.Client);
@@ -112,10 +60,11 @@ namespace Chauffeur.Jenkins.Services
             this.Log("Last successful build: {0}", job.LastSuccessfulBuild.Number);
 
             // Download the build artifacts for the job.
-            var artifacts = this.DownloadArtifacts(job, artifactDirectory);
+            string artifactsDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Jenkins");
+            var artifacts = this.DownloadArtifacts(job, artifactsDirectory);
 
             // Install the MSI artifacts.
-            this.InstallMsiArtifacts(artifacts);
+            this.InstallMsiArtifacts(artifacts.Where(o => o.EndsWith(".msi", StringComparison.InvariantCultureIgnoreCase)).ToList());
 
             // Return the build installed.
             return job.LastSuccessfulBuild;
@@ -138,7 +87,7 @@ namespace Chauffeur.Jenkins.Services
         ///     or
         ///     directory
         /// </exception>
-        private List<string> DownloadArtifacts(Job job, string directory)
+        private IEnumerable<string> DownloadArtifacts(Job job, string directory)
         {
             if (job == null)
                 throw new ArgumentNullException("job");
@@ -167,7 +116,7 @@ namespace Chauffeur.Jenkins.Services
 
             this.Log("Installation: {0}", artifacts.Count);
 
-            foreach (var artifact in artifacts.Where(o => o.EndsWith(".msi", StringComparison.InvariantCultureIgnoreCase)))
+            foreach (var artifact in artifacts)
             {
                 foreach (var s in parameters)
                 {

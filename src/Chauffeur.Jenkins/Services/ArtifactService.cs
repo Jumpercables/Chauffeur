@@ -42,9 +42,21 @@ namespace Chauffeur.Jenkins.Services
         /// <summary>
         ///     Initializes a new instance of the <see cref="ArtifactService" /> class.
         /// </summary>
+        public ArtifactService()
+        {
+        }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="ArtifactService" /> class.
+        /// </summary>
         /// <param name="baseUri">The base URI.</param>
         /// <param name="client">The client.</param>
-        public ArtifactService(Uri baseUri, JenkinsClient client)
+        /// <exception cref="System.ArgumentNullException">
+        ///     baseUri
+        ///     or
+        ///     client
+        /// </exception>
+        internal ArtifactService(Uri baseUri, JenkinsClient client)
             : base(baseUri, client)
         {
         }
