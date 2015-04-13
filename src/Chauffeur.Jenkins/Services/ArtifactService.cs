@@ -35,7 +35,7 @@ namespace Chauffeur.Jenkins.Services
     /// <summary>
     ///     A service used to obtain the build artifacts from jenkins.
     /// </summary>
-    public class ArtifactService : JenkinsService
+    public class ArtifactService : JenkinsService, IArtifactService
     {
         #region Constructors
 
