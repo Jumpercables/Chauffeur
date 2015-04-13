@@ -74,6 +74,8 @@ namespace Chauffeur.Jenkins.Services
             if (directory == null)
                 throw new ArgumentNullException("directory");
 
+            this.Log("Downloading build {0} to '{1}'.", build.Number, directory);
+
             var tasks = build.Artifacts.Select(artifact => this.DownloadArtifactAsync(build, artifact, directory)).ToArray();
             Task.WaitAll(tasks);
 

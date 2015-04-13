@@ -69,6 +69,8 @@ namespace Chauffeur.Jenkins.Services
             if (jobName == null)
                 throw new ArgumentNullException("jobName");
 
+            this.Log("Job: {0}", jobName);
+
             var queryUri = new Uri(base.BaseUri, @"/job/" + jobName + "/");
             var job = base.Client.GetResource<Job>(queryUri, 1);
             return job;

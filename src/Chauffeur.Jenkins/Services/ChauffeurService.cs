@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.ServiceModel;
@@ -105,52 +104,21 @@ namespace Chauffeur.Jenkins.Services
             if (artifactDirectory == null)
                 throw new ArgumentNullException("artifactDirectory");
 
-            // Query for the job information from the server.
-            Job job = this.GetJob(jobName);
-
-            string buildNumber = ConfigurationManager.AppSettings["build"];
-            this.Log("Last successful build: {0}", job.LastSuccessfulBuild.Number);
-            this.Log("Last installed build: {0}", buildNumber);
-
-            // Download the artifacts only when the installed and last successful builds are different.           
-            if (buildNumber == null || buildNumber.ToUpperInvariant() != job.LastSuccessfulBuild.Number.ToString(CultureInfo.CurrentCulture))
-            {
-                // Download the build artifacts for the job.
-                var artifacts = this.DownloadArtifacts(job, artifactDirectory);
-
-                // Install the MSI artifacts.
-                this.InstallMsiArtifacts(artifacts);
-
-                // Return the build installed.
-                return job.LastSuccessfulBuild;
-            }
-
-            // Nothing changed.
-            return null;
-        }
-
-        #endregion
-
-        #region Public Methods
-
-        /// <summary>
-        ///     Gets the job from the jenkins server.
-        /// </summary>
-        /// <param name="jobName">Name of the job.</param>
-        /// <returns>
-        ///     Returns a <see cref="Job" /> representing the job.
-        /// </returns>
-        /// <exception cref="System.ArgumentNullException">jobName</exception>
-        public Job GetJob(string jobName)
-        {
-            if (jobName == null)
-                throw new ArgumentNullException("jobName");
-
-            this.Log("Job: {0}", jobName);
-
+            // Query for the job information from the server.            
             JobService jobService = new JobService(base.BaseUri, base.Client);
             Job job = jobService.GetJob(jobName);
-            return job;
+
+            // Assume the build installed is different.
+            this.Log("Last successful build: {0}", job.LastSuccessfulBuild.Number);
+
+            // Download the build artifacts for the job.
+            var artifacts = this.DownloadArtifacts(job, artifactDirectory);
+
+            // Install the MSI artifacts.
+            this.InstallMsiArtifacts(artifacts);
+
+            // Return the build installed.
+            return job.LastSuccessfulBuild;
         }
 
         #endregion
@@ -177,8 +145,6 @@ namespace Chauffeur.Jenkins.Services
 
             if (directory == null)
                 throw new ArgumentNullException("directory");
-
-            this.Log("Downloading: {0}", directory);
 
             if (!Directory.Exists(directory))
                 Directory.CreateDirectory(directory);

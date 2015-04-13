@@ -4,14 +4,13 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{7966A9BD-3BCD-47B8-A244-9C3F892F0604}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <ProjectGuid>{A77D53E7-3779-451C-B1CE-935CCBDE1F57}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Chauffeur</RootNamespace>
-    <AssemblyName>Chauffeur</AssemblyName>
+    <RootNamespace>Chauffeur.Console</RootNamespace>
+    <AssemblyName>Chauffeur.Console</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <WcfConfigValidationEnabled>True</WcfConfigValidationEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -56,35 +55,25 @@
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.ServiceModel" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
-    <Reference Include="System.ServiceProcess" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Jenkins\Client\IUrl.cs" />
-    <Compile Include="Jenkins\Client\JenkinsClient.cs" />
-    <Compile Include="Jenkins\Client\JsonJenkinsClient.cs" />
-    <Compile Include="Jenkins\Model\Build.cs" />
-    <Compile Include="Jenkins\Model\Job.cs" />
-    <Compile Include="Jenkins\Model\Tree.cs" />
-    <Compile Include="Jenkins\Model\User.cs" />
-    <Compile Include="Jenkins\Model\View.cs" />
-    <Compile Include="Jenkins\Services\JenkinsService.cs" />
-    <Compile Include="Jenkins\Services\ArtifactService.cs" />
-    <Compile Include="Jenkins\Services\JobService.cs" />
-    <Compile Include="Jenkins\Services\ChauffeurService.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\Chauffeur.Jenkins\Chauffeur.Jenkins.csproj">
+      <Project>{dacfce5b-18f5-49d7-a451-665b69462d0e}</Project>
+      <Name>Chauffeur.Jenkins</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
