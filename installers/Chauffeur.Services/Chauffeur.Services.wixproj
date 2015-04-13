@@ -41,6 +41,32 @@
   <ItemGroup>
     <Content Include="jenkins.png" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Chauffeur.Client\Chauffeur.Client.csproj">
+      <Name>Chauffeur.Client</Name>
+      <Project>{a77d53e7-3779-451c-b1ce-935ccbde1f57}</Project>
+      <Private>True</Private>
+      <DoNotHarvest>True</DoNotHarvest>
+      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
+      <RefTargetDir>INSTALLFOLDER</RefTargetDir>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\Chauffeur.Jenkins\Chauffeur.Jenkins.csproj">
+      <Name>Chauffeur.Jenkins</Name>
+      <Project>{880c9b0f-6005-4c1c-9f2f-5ff79ebfb54a}</Project>
+      <Private>True</Private>
+      <DoNotHarvest>True</DoNotHarvest>
+      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
+      <RefTargetDir>INSTALLFOLDER</RefTargetDir>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\Chauffeur.WindowsService\Chauffeur.WindowsService.csproj">
+      <Name>Chauffeur.WindowsService</Name>
+      <Project>{d834c147-447b-4d43-8f2c-24abb2a8e388}</Project>
+      <Private>True</Private>
+      <DoNotHarvest>True</DoNotHarvest>
+      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
+      <RefTargetDir>INSTALLFOLDER</RefTargetDir>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(WixTargetsPath)" />
   <!--
 	To modify your build process, add your task inside one of the targets below and uncomment it.
