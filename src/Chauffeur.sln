@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chauffeur.Console", "Chauffeur.Console\Chauffeur.Console.csproj", "{A77D53E7-3779-451C-B1CE-935CCBDE1F57}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chauffeur.Client", "Chauffeur.Client\Chauffeur.Client.csproj", "{A77D53E7-3779-451C-B1CE-935CCBDE1F57}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chauffeur.WindowsService", "Chauffeur.WindowsService\Chauffeur.WindowsService.csproj", "{D834C147-447B-4D43-8F2C-24ABB2A8E388}"
 	ProjectSection(ProjectDependencies) = postProject

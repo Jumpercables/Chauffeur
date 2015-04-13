@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Runtime.Serialization;
 
 using Chauffeur.Jenkins.Client;
@@ -147,7 +148,7 @@ namespace Chauffeur.Jenkins.Model
         /// </returns>
         public override string ToString()
         {
-            return this.FullDisplayName ?? this.Number.ToString();
+            return this.FullDisplayName ?? this.Number.ToString(CultureInfo.InvariantCulture);
         }
 
         #endregion

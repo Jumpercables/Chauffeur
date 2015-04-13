@@ -1,6 +1,8 @@
-﻿using Chauffeur.Console.ServiceReference;
+﻿using System;
 
-namespace Chauffeur.Console
+using Chauffeur.Client.ServiceReference;
+
+namespace Chauffeur.Client
 {
     internal class Program
     {
@@ -10,7 +12,10 @@ namespace Chauffeur.Console
         {
             ChauffeurServiceClient chauffeurServiceClient = new ChauffeurServiceClient();
             foreach (var jobName in args)
-                chauffeurServiceClient.InstallLastSuccessfulBuildAsync(jobName);
+            {
+                var build = chauffeurServiceClient.InstallLastSuccessfulBuildAsync(jobName);
+                Console.WriteLine("Build: {0}", build);
+            }
         }
 
         #endregion
