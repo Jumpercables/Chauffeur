@@ -1,3 +1,5 @@
+[![Build status](https://ci.appveyor.com/api/projects/status/c46okqadhrke0at7?svg=true)](https://ci.appveyor.com/project/Jumpercables/chauffeur)
+
 # Chauffeur #
 An extension to the Jenkins CI that allows for automatically updating test machines with the latest build.
 
