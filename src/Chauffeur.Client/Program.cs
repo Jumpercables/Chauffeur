@@ -10,11 +10,21 @@ namespace Chauffeur.Client
 
         private static void Main(string[] args)
         {
-            ChauffeurServiceClient chauffeurServiceClient = new ChauffeurServiceClient();
-            foreach (var jobName in args)
+            try
             {
-                var build = chauffeurServiceClient.InstallLastSuccessfulBuildAsync(jobName);
-                Console.WriteLine("Build: {0}", build);
+                if (args.Length != 2)
+                {
+                    Console.WriteLine("Invalid arguments: <endPointConfigurationName> <jobName>");    
+                    return;
+                }
+
+                ChauffeurServiceClient chauffeurServiceClient = new ChauffeurServiceClient(args[0]);
+                var build = chauffeurServiceClient.InstallLastSuccessfulBuild(args[1]);
+                Console.WriteLine("Last successful build installed: {0}", build.number);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
             }
         }
 
