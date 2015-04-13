@@ -1,4 +1,4 @@
-[![Build status](https://ci.appveyor.com/api/projects/status/c46okqadhrke0at7?svg=true)](https://ci.appveyor.com/project/Jumpercables/chauffeur)
+[![Build status](https://ci.appveyor.com/api/projects/status/c46okqadhrke0at7/branch/master?svg=true)](https://ci.appveyor.com/project/Jumpercables/chauffeur/branch/master)
 
 # Chauffeur #
 An extension to the Jenkins CI that allows for automatically updating test machines with the latest build.
