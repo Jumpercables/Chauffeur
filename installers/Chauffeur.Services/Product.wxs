@@ -36,7 +36,9 @@
     <Property Id="ARPNOREPAIR" Value="yes" Secure="yes" />
     <Property Id="ARPNOMODIFY" Value="yes" Secure="yes" />
 
-    <Icon Id="Icon" SourceFile="jenkins.png"/>
+    <Icon Id="icon.ico" SourceFile="jenkins.png"/>
+    <Property Id="ARPPRODUCTICON" Value="icon.ico" />
+    
     <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
     <MediaTemplate />
 
