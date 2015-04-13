@@ -19,6 +19,13 @@ namespace Chauffeur.Jenkins.Services
         #region Public Methods
 
         /// <summary>
+        ///     Installs the build on the machine that hosts the service.
+        /// </summary>
+        /// <param name="build">The build.</param>
+        [OperationContract]
+        void InstallBuild(Build build);
+
+        /// <summary>
         ///     Installs the last successful build for the specific job.
         /// </summary>
         /// <param name="jobName">Name of the job.</param>
@@ -56,18 +63,32 @@ namespace Chauffeur.Jenkins.Services
             JobService jobService = new JobService(base.BaseUri, base.Client);
             Job job = jobService.GetJob(jobName);
 
-            // Assume the build installed is different.
+            // The caller should know the build installed or use the JobService to confirm a new build is needed.
             this.Log("Last successful build: {0}", job.LastSuccessfulBuild.Number);
 
-            // Download the build artifacts for the job.
-            string artifactsDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Jenkins");
-            var artifacts = this.DownloadArtifacts(job, artifactsDirectory);
-
-            // Install the MSI artifacts.
-            this.InstallMsiArtifacts(artifacts.Where(o => o.EndsWith(".msi", StringComparison.InvariantCultureIgnoreCase)).ToList());
+            // Install the last successful build.
+            this.InstallBuild(job.LastSuccessfulBuild);
 
             // Return the build installed.
             return job.LastSuccessfulBuild;
+        }
+
+        /// <summary>
+        ///     Installs the build on the machine that hosts the service.
+        /// </summary>
+        /// <param name="build">The build.</param>
+        /// <exception cref="System.ArgumentNullException">build</exception>
+        public void InstallBuild(Build build)
+        {
+            if (build == null)
+                throw new ArgumentNullException("build");
+
+            // Download the build artifacts for the job.
+            string directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Jenkins");
+            var artifacts = this.DownloadArtifacts(build, directory);
+
+            // Install only the MSI packages.
+            this.InstallPackages(artifacts.Where(o => o.EndsWith(".msi", StringComparison.InvariantCultureIgnoreCase)).ToList());
         }
 
         #endregion
@@ -75,9 +96,9 @@ namespace Chauffeur.Jenkins.Services
         #region Private Methods
 
         /// <summary>
-        ///     Downloads the artifacts to the specified directory.
+        ///     Downloads the build artifacts to the specified directory.
         /// </summary>
-        /// <param name="job">The job.</param>
+        /// <param name="build">The build.</param>
         /// <param name="directory">The directory.</param>
         /// <returns>
         ///     Returns a <see cref="IEnumerable{String}" /> representing the paths to the artifacts that have been downloaded.
@@ -87,10 +108,10 @@ namespace Chauffeur.Jenkins.Services
         ///     or
         ///     directory
         /// </exception>
-        private IEnumerable<string> DownloadArtifacts(Job job, string directory)
+        private IEnumerable<string> DownloadArtifacts(Build build, string directory)
         {
-            if (job == null)
-                throw new ArgumentNullException("job");
+            if (build == null)
+                throw new ArgumentNullException("build");
 
             if (directory == null)
                 throw new ArgumentNullException("directory");
@@ -99,14 +120,14 @@ namespace Chauffeur.Jenkins.Services
                 Directory.CreateDirectory(directory);
 
             ArtifactService artifactService = new ArtifactService(base.BaseUri, base.Client);
-            return artifactService.DownloadArtifacts(job.LastSuccessfulBuild, directory);
+            return artifactService.DownloadArtifacts(build, directory);
         }
 
         /// <summary>
-        ///     Installs the build artifacts using the "msiexec.exe".
+        ///     Installs the build MSI packages using the "msiexec.exe" utility on the windows machine.
         /// </summary>
-        /// <param name="artifacts">The artifacts.</param>
-        private void InstallMsiArtifacts(List<string> artifacts)
+        /// <param name="packages">The packages.</param>
+        private void InstallPackages(List<string> packages)
         {
             Dictionary<string, string> parameters = new Dictionary<string, string>
             {
@@ -114,13 +135,13 @@ namespace Chauffeur.Jenkins.Services
                 {@"/i", ConfigurationManager.AppSettings["install"]}
             };
 
-            this.Log("Installation: {0}", artifacts.Count);
+            this.Log("Installing {0} package(s).", packages.Count);
 
-            foreach (var artifact in artifacts)
+            foreach (var pkg in packages)
             {
                 foreach (var s in parameters)
                 {
-                    ProcessStartInfo startInfo = new ProcessStartInfo("cmd.exe", string.Format("/c start /MIN /wait msiexec.exe {0} {1} {2}", s.Key, artifact, s.Value));
+                    ProcessStartInfo startInfo = new ProcessStartInfo("cmd.exe", string.Format("/c start /MIN /wait msiexec.exe {0} {1} {2}", s.Key, pkg, s.Value));
                     startInfo.WindowStyle = ProcessWindowStyle.Hidden;
 
                     this.Log(string.Format("\t{0} {1}", startInfo.FileName, startInfo.Arguments));
