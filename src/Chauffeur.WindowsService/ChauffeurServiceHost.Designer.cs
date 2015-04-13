@@ -1,6 +1,6 @@
-﻿namespace Chauffeur.Windows.Services
+﻿namespace Chauffeur.WindowsService
 {
-    partial class ChauffeurService
+    partial class ChauffeurServiceHost
     {
         /// <summary> 
         /// Required designer variable.

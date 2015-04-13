@@ -1,8 +1,6 @@
 ﻿using System.ServiceProcess;
 
-using Chauffeur.Windows.Services;
-
-namespace Chauffeur
+namespace Chauffeur.WindowsService
 {
     internal static class Program
     {
@@ -16,7 +14,7 @@ namespace Chauffeur
             ServiceBase[] ServicesToRun;
             ServicesToRun = new ServiceBase[]
             {
-                new ChauffeurService()
+                new ChauffeurServiceHost(),
             };
             ServiceBase.Run(ServicesToRun);
         }

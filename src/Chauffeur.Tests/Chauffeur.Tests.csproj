@@ -80,12 +80,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Chauffeur\Chauffeur.csproj">
-      <Project>{7966a9bd-3bcd-47b8-a244-9c3f892f0604}</Project>
-      <Name>Chauffeur</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Json\job.valid.json" />
     <EmbeddedResource Include="Json\tree.valid.json" />
     <None Include="packages.config" />

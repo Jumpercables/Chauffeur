@@ -6,48 +6,79 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.ServiceProcess;
-using System.Timers;
+using System.ServiceModel;
 
 using Chauffeur.Jenkins.Client;
 using Chauffeur.Jenkins.Model;
-using Chauffeur.Jenkins.Services;
 
-namespace Chauffeur.Windows.Services
+namespace Chauffeur.Jenkins.Services
 {
     /// <summary>
-    ///     A windows service used to monitor the builds and automatically install the last succsseful build.
+    ///     Provides a WCF service for chauffering the builds onto remote machines.
     /// </summary>
-    public partial class ChauffeurService : ServiceBase
+    [ServiceContract]
+    public interface IChauffeurService
     {
-        #region Fields
-
-        private Timer _Timer;
-
-        #endregion
-
-        #region Constructors
+        #region Public Methods
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="ChauffeurService" /> class.
+        ///     Installs the last successful build for the specific job.
         /// </summary>
-        public ChauffeurService()
-        {
-            InitializeComponent();
-        }
+        /// <param name="jobName">Name of the job.</param>
+        /// <returns>
+        ///     Returns a <see cref="bool" /> representing <c>true</c> when a new build was installed; otherwise <c>false</c>.
+        /// </returns>
+        [OperationContract]
+        bool InstallLastSuccessfulBuild(string jobName);
+
+        /// <summary>
+        ///     Installs the last successful build for the specific job.
+        /// </summary>
+        /// <param name="jobName">Name of the job.</param>
+        /// <param name="artifactDirectory">The artifact directory.</param>
+        /// <returns>
+        ///     Returns a <see cref="bool" /> representing <c>true</c> when a new build was installed; otherwise <c>false</c>.
+        /// </returns>
+        [OperationContract]
+        bool InstallLastSuccessfulBuild(string jobName, string artifactDirectory);
 
         #endregion
+    }
 
-        #region Public Methods
+    /// <summary>
+    ///     Provides a WCF service that will install builds on the host machines.
+    /// </summary>
+    public class ChauffeurService : IChauffeurService
+    {
+        #region IChauffeurService Members
+
+        /// <summary>
+        ///     Installs the last successful build for the specific job.
+        /// </summary>
+        /// <param name="jobName">Name of the job.</param>
+        /// <returns>
+        ///     Returns a <see cref="bool" /> representing <c>true</c> when a new build was installed; otherwise <c>false</c>.
+        /// </returns>
+        public bool InstallLastSuccessfulBuild(string jobName)
+        {
+            string artifactsDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Jenkins");
+
+            return this.InstallLastSuccessfulBuild(jobName, artifactsDirectory);
+        }
 
         /// <summary>
         ///     Installs the last successful build for the specified job.
         /// </summary>
         /// <param name="jobName">Name of the job.</param>
-        /// <param name="artifactDirectory">The directory for the artifacts.</param>
+        /// <param name="artifactDirectory">The artifact directory.</param>
         /// <returns>
         ///     Returns a <see cref="bool" /> representing <c>true</c> when a new build was installed; otherwise <c>false</c>.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///     jobName
+        ///     or
+        ///     artifactDirectory
+        /// </exception>
         /// <exception cref="System.ArgumentNullException">
         ///     jobName
         ///     or
@@ -90,30 +121,29 @@ namespace Chauffeur.Windows.Services
 
         #endregion
 
-        #region Protected Methods
+        #region Public Methods
 
         /// <summary>
-        ///     When implemented in a derived class, executes when a Start command is sent to the service by the Service Control
-        ///     Manager (SCM) or when the operating system starts (for a service that starts automatically). Specifies actions to
-        ///     take when the service starts.
+        ///     Gets the job from the jenkins server.
         /// </summary>
-        /// <param name="args">Data passed by the start command.</param>
-        protected override void OnStart(string[] args)
+        /// <param name="jobName">Name of the job.</param>
+        /// <returns>
+        ///     Returns a <see cref="Job" /> representing the job.
+        /// </returns>
+        /// <exception cref="System.ArgumentNullException">jobName</exception>
+        public Job GetJob(string jobName)
         {
-            _Timer = new Timer(60000); // Wait 1 minute.
-            _Timer.Elapsed += this.Timer_OnElapsed;
-            _Timer.Start();
-        }
+            if (jobName == null)
+                throw new ArgumentNullException("jobName");
 
-        /// <summary>
-        ///     When implemented in a derived class, executes when a Stop command is sent to the service by the Service Control
-        ///     Manager (SCM). Specifies actions to take when a service stops running.
-        /// </summary>
-        protected override void OnStop()
-        {
-            _Timer.Stop();
-            _Timer.Dispose();
-            _Timer = null;
+            this.Log("Job: {0}", jobName);
+
+            Uri baseUri;
+            JenkinsClient client = this.GetClient(out baseUri);
+
+            JobService jobService = new JobService(baseUri, client);
+            Job job = jobService.GetJob(jobName);
+            return job;
         }
 
         #endregion
@@ -170,43 +200,6 @@ namespace Chauffeur.Windows.Services
             return client;
         }
 
-        /// <summary>
-        ///     Gets the job from the jenkins server.
-        /// </summary>
-        /// <param name="jobName">Name of the job.</param>
-        /// <returns>
-        ///     Returns a <see cref="Job" /> representing the job.
-        /// </returns>
-        /// <exception cref="System.ArgumentNullException">jobName</exception>
-        private Job GetJob(string jobName)
-        {
-            if (jobName == null)
-                throw new ArgumentNullException("jobName");
-
-            this.Log("Job: {0}", jobName);
-
-            Uri baseUri;
-            JenkinsClient client = this.GetClient(out baseUri);
-
-            JobService jobService = new JobService(baseUri, client);
-            Job job = jobService.GetJob(jobName);
-            return job;
-        }
-
-        /// <summary>
-        ///     Gets the timer interval that has been configured.
-        /// </summary>
-        /// <returns>
-        ///     Returns a <see cref="double" /> representing the timer interval in miliseconds.
-        /// </returns>
-        private double GetTimerInterval()
-        {
-            double interval;
-            if (!double.TryParse(ConfigurationManager.AppSettings["interval"], out interval))
-                return 900000; // Otherwise, default to 15 minutes.
-
-            return interval;
-        }
 
         /// <summary>
         ///     Installs the build artifacts using the "msiexec.exe".
@@ -247,6 +240,7 @@ namespace Chauffeur.Windows.Services
             Trace.WriteLine(string.Format("{0} - {1}", DateTime.Now, string.Format(format, args)));
         }
 
+
         /// <summary>
         ///     Saves the last installed build.
         /// </summary>
@@ -257,8 +251,9 @@ namespace Chauffeur.Windows.Services
 
             Assembly assembly = Assembly.GetExecutingAssembly();
             string location = Path.GetDirectoryName(assembly.Location);
-            string configFile = Path.Combine(location, assembly.ManifestModule.Name + ".config");
+            if (location == null) return;
 
+            string configFile = Path.Combine(location, assembly.ManifestModule.Name + ".config");
             ExeConfigurationFileMap fileMap = new ExeConfigurationFileMap();
             fileMap.ExeConfigFilename = configFile;
 
@@ -269,39 +264,6 @@ namespace Chauffeur.Windows.Services
                 config.AppSettings.Settings.Add("build", build.Number.ToString(CultureInfo.CurrentCulture));
 
             config.Save(ConfigurationSaveMode.Modified);
-        }
-
-        /// <summary>
-        ///     Handles the OnElapsed event of the Timer control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="ElapsedEventArgs" /> instance containing the event data.</param>
-        private void Timer_OnElapsed(object sender, ElapsedEventArgs e)
-        {
-            Stopwatch stopwatch = Stopwatch.StartNew();
-
-            try
-            {
-                _Timer.Stop();
-
-                string jobName = ConfigurationManager.AppSettings["job"];
-                string artifactsDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Jenkins");
-
-                this.InstallLastSuccessfulBuild(jobName, artifactsDirectory);
-            }
-            catch (Exception ex)
-            {
-                Trace.WriteLine(ex);
-            }
-            finally
-            {
-                // Use the interval specified in the configuration file.
-                _Timer.Interval = this.GetTimerInterval();
-                _Timer.Start();
-
-                this.Log("Interval: {0:N0} ms", _Timer.Interval);
-                this.Log("Elapsed Time: {0}.{1}.{2}", stopwatch.Elapsed.Hours, stopwatch.Elapsed.Minutes, stopwatch.Elapsed.Seconds);
-            }
         }
 
         #endregion

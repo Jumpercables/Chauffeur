@@ -77,12 +77,7 @@
     <Compile Include="Jenkins\Services\JenkinsService.cs" />
     <Compile Include="Jenkins\Services\ArtifactService.cs" />
     <Compile Include="Jenkins\Services\JobService.cs" />
-    <Compile Include="Windows\Services\ChauffeurService.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Windows\Services\ChauffeurService.Designer.cs">
-      <DependentUpon>ChauffeurService.cs</DependentUpon>
-    </Compile>
+    <Compile Include="Jenkins\Services\ChauffeurService.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
