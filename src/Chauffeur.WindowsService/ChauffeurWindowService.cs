@@ -1,18 +1,8 @@
-﻿using System;
-using System.Configuration;
-using System.Diagnostics;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Reflection;
+﻿using Chauffeur.Jenkins.Services;
 using System.ServiceModel;
 using System.ServiceProcess;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Timers;
-
-using Chauffeur.Jenkins.Model;
-using Chauffeur.Jenkins.Services;
 
 namespace Chauffeur.WindowsService
 {
@@ -24,7 +14,6 @@ namespace Chauffeur.WindowsService
         #region Fields
 
         private ServiceHost _ServiceHost;
-        private CancellationTokenSource _CancellationTokenSource;
 
         #endregion
 
@@ -50,20 +39,18 @@ namespace Chauffeur.WindowsService
         /// <param name="args">Data passed by the start command.</param>
         protected override void OnStart(string[] args)
         {
-            _CancellationTokenSource = new CancellationTokenSource();
-
-            Task.Factory.StartNew(() =>
+            if (_ServiceHost != null)
             {
-                if (_ServiceHost != null)
-                {
-                    _ServiceHost.Close();
-                    _ServiceHost = null;
-                }
-                                                
-                _ServiceHost = new ServiceHost(typeof (ChauffeurService));
-                _ServiceHost.Open();
+                _ServiceHost.Close();
+            }
 
-            }, _CancellationTokenSource.Token);
+            // Create a ServiceHost for the ChauffeurService type and 
+            // provide the base address.
+            _ServiceHost = new ServiceHost(typeof(ChauffeurService));
+
+            // Open the ServiceHostBase to create listeners and start 
+            // listening for messages.
+            _ServiceHost.Open();
         }
 
         /// <summary>
@@ -72,13 +59,9 @@ namespace Chauffeur.WindowsService
         /// </summary>
         protected override void OnStop()
         {
-            _CancellationTokenSource.Cancel();
-
             if (_ServiceHost != null)
             {
-                if(_ServiceHost.State != CommunicationState.Closed || _ServiceHost.State != CommunicationState.Closing)
-                    _ServiceHost.Close();
-
+                _ServiceHost.Close();
                 _ServiceHost = null;
             }
         }
