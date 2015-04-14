@@ -126,6 +126,8 @@ namespace Chauffeur.Jenkins.Services
                 throw new ArgumentNullException("directory");
 
             string fileName = Path.Combine(directory, artifact.FileName);
+            if (File.Exists(fileName)) return fileName;
+
             Uri absoluteUri = new Uri(build.Url, @"artifact/" + artifact.RelativePath);
             var request = base.Client.GetRequest(absoluteUri);
 
