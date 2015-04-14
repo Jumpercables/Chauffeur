@@ -81,11 +81,21 @@
     <None Include="Service References\ServiceReference\Chauffeur.Jenkins.Model.xsd">
       <SubType>Designer</SubType>
     </None>
+    <None Include="Service References\ServiceReference\Chauffeur.Jenkins.Model2.xsd">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Service References\ServiceReference\service.wsdl" />
     <None Include="Service References\ServiceReference\service.xsd">
       <SubType>Designer</SubType>
     </None>
     <None Include="Service References\ServiceReference\service1.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\ServiceReference\service2.wsdl" />
+    <None Include="Service References\ServiceReference\service3.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\ServiceReference\service4.xsd">
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>

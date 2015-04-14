@@ -639,6 +639,12 @@ namespace Chauffeur.Client.ServiceReference {
     [System.ServiceModel.ServiceContractAttribute(ConfigurationName="ServiceReference.IChauffeurService")]
     public interface IChauffeurService {
         
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IChauffeurService/InstallBuild", ReplyAction="http://tempuri.org/IChauffeurService/InstallBuildResponse")]
+        void InstallBuild(Chauffeur.Client.ServiceReference.Build build);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IChauffeurService/InstallBuild", ReplyAction="http://tempuri.org/IChauffeurService/InstallBuildResponse")]
+        System.Threading.Tasks.Task InstallBuildAsync(Chauffeur.Client.ServiceReference.Build build);
+        
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IChauffeurService/InstallLastSuccessfulBuild", ReplyAction="http://tempuri.org/IChauffeurService/InstallLastSuccessfulBuildResponse")]
         Chauffeur.Client.ServiceReference.Build InstallLastSuccessfulBuild(string jobName);
         
@@ -671,6 +677,14 @@ namespace Chauffeur.Client.ServiceReference {
         
         public ChauffeurServiceClient(System.ServiceModel.Channels.Binding binding, System.ServiceModel.EndpointAddress remoteAddress) : 
                 base(binding, remoteAddress) {
+        }
+        
+        public void InstallBuild(Chauffeur.Client.ServiceReference.Build build) {
+            base.Channel.InstallBuild(build);
+        }
+        
+        public System.Threading.Tasks.Task InstallBuildAsync(Chauffeur.Client.ServiceReference.Build build) {
+            return base.Channel.InstallBuildAsync(build);
         }
         
         public Chauffeur.Client.ServiceReference.Build InstallLastSuccessfulBuild(string jobName) {

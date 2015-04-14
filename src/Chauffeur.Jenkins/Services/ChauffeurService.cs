@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.ServiceModel;
+using System.Threading.Tasks;
 
 using Chauffeur.Jenkins.Model;
 
@@ -19,21 +21,24 @@ namespace Chauffeur.Jenkins.Services
         #region Public Methods
 
         /// <summary>
-        ///     Installs the build on the machine that hosts the service.
+        ///     Installs the build asynchronous on the machine that host the service.
         /// </summary>
         /// <param name="build">The build.</param>
-        [OperationContract]
-        void InstallBuild(Build build);
+        /// <returns>
+        ///     Returns a <see cref="Task" /> for the asynchrous task.
+        /// </returns>
+        [OperationContract(Name = "InstallBuild")]
+        Task InstallBuildAsync(Build build);
 
         /// <summary>
-        ///     Installs the last successful build for the specific job.
+        ///     Installs the last successful build asynchronous on the machine that host the service.
         /// </summary>
         /// <param name="jobName">Name of the job.</param>
         /// <returns>
-        ///     Returns a <see cref="Build" /> representing the build was installed.
+        ///     Returns the <see cref="Build" /> that was installed on the machine.
         /// </returns>
-        [OperationContract]
-        Build InstallLastSuccessfulBuild(string jobName);
+        [OperationContract(Name = "InstallLastSuccessfulBuild")]
+        Task<Build> InstallLastSuccessfulBuildAsync(string jobName);
 
         #endregion
     }
@@ -47,48 +52,31 @@ namespace Chauffeur.Jenkins.Services
         #region IChauffeurService Members
 
         /// <summary>
-        ///     Installs the last successful build for the specific job.
+        ///     Installs the last successful build asynchronous on the machine that host the service.
         /// </summary>
         /// <param name="jobName">Name of the job.</param>
         /// <returns>
-        ///     Returns a <see cref="bool" /> representing <c>true</c> when a new build was installed; otherwise <c>false</c>.
+        ///     Returns the <see cref="Build" /> that was installed on the machine.
         /// </returns>
-        /// <exception cref="System.ArgumentNullException">jobName</exception>
-        public Build InstallLastSuccessfulBuild(string jobName)
+        public async Task<Build> InstallLastSuccessfulBuildAsync(string jobName)
         {
-            if (jobName == null)
-                throw new ArgumentNullException("jobName");
+            this.Log("[InstallLastSuccessfulBuild]: {0}", jobName);
 
-            // Query for the job information from the server.            
-            JobService jobService = new JobService(base.BaseUri, base.Client);
-            Job job = jobService.GetJob(jobName);
-
-            // The caller should know the build installed or use the JobService to confirm a new build is needed.
-            this.Log("Last successful build: {0}", job.LastSuccessfulBuild.Number);
-
-            // Install the last successful build.
-            this.InstallBuild(job.LastSuccessfulBuild);
-
-            // Return the build installed.
-            return job.LastSuccessfulBuild;
+            return await Task.Factory.StartNew(() => this.InstallLastSuccessfulBuild(jobName));
         }
 
         /// <summary>
-        ///     Installs the build on the machine that hosts the service.
+        ///     Installs the build asynchronous on the machine that host the service.
         /// </summary>
         /// <param name="build">The build.</param>
-        /// <exception cref="System.ArgumentNullException">build</exception>
-        public void InstallBuild(Build build)
+        /// <returns>
+        ///     Returns a <see cref="Task" /> for the asynchrous task.
+        /// </returns>
+        public async Task InstallBuildAsync(Build build)
         {
-            if (build == null)
-                throw new ArgumentNullException("build");
-
-            // Download the build artifacts for the job.
-            string directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Jenkins");
-            var artifacts = this.DownloadArtifacts(build, directory);
-
-            // Install only the MSI packages.
-            this.InstallPackages(artifacts.Where(o => o.EndsWith(".msi", StringComparison.InvariantCultureIgnoreCase)).ToList());
+            this.Log("[InstallBuild]: {0}", build.Number);
+            
+            await Task.Factory.StartNew(() => this.InstallBuild(build));
         }
 
         #endregion
@@ -124,6 +112,54 @@ namespace Chauffeur.Jenkins.Services
         }
 
         /// <summary>
+        ///     Installs the build on the machine that hosts the service.
+        /// </summary>
+        /// <param name="build">The build.</param>
+        /// <exception cref="System.ArgumentNullException">build</exception>
+        private void InstallBuild(Build build)
+        {
+            if (build == null)
+                throw new ArgumentNullException("build");
+
+            // Download the build artifacts for the job.
+            string directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Jenkins");
+            var artifacts = this.DownloadArtifacts(build, directory);
+
+            // Install only the MSI packages.
+            this.InstallPackages(artifacts.Where(o => o.EndsWith(".msi", StringComparison.InvariantCultureIgnoreCase)).ToList());
+
+            // The install completes successfully, set the environment variable.
+            Environment.SetEnvironmentVariable("JENKINS_BUILD_INSTALLED", build.Number.ToString(CultureInfo.InvariantCulture));
+        }
+
+        /// <summary>
+        ///     Installs the last successful build for the specific job.
+        /// </summary>
+        /// <param name="jobName">Name of the job.</param>
+        /// <returns>
+        ///     Returns the <see cref="Build" /> that was installed on the machine.
+        /// </returns>
+        /// <exception cref="System.ArgumentNullException">jobName</exception>
+        private Build InstallLastSuccessfulBuild(string jobName)
+        {
+            if (jobName == null)
+                throw new ArgumentNullException("jobName");            
+
+            // Query for the job information from the server.            
+            JobService jobService = new JobService(base.BaseUri, base.Client);
+            Job job = jobService.GetJob(jobName);
+
+            // The caller should know the build installed or use the JobService to confirm a new build is needed.
+            this.Log("Last successful build: {0}", job.LastSuccessfulBuild.Number);
+
+            // Install the last successful build but move to the next method and don't wait for completion.
+            Task.Run(() => this.InstallBuild(job.LastSuccessfulBuild));
+
+            // Return the build installed.
+            return job.LastSuccessfulBuild;
+        }
+
+        /// <summary>
         ///     Installs the build MSI packages using the "msiexec.exe" utility on the windows machine.
         /// </summary>
         /// <param name="packages">The packages.</param>
@@ -141,7 +177,7 @@ namespace Chauffeur.Jenkins.Services
             {
                 foreach (var s in parameters)
                 {
-                    ProcessStartInfo startInfo = new ProcessStartInfo("cmd.exe", string.Format("/c start /MIN /wait msiexec.exe {0} {1} {2}", s.Key, pkg, s.Value));
+                    ProcessStartInfo startInfo = new ProcessStartInfo("cmd.exe", string.Format("/c start /MIN /wait msiexec.exe {0} \"{1}\" {2}", s.Key, pkg, s.Value));
                     startInfo.WindowStyle = ProcessWindowStyle.Hidden;
 
                     this.Log(string.Format("\t{0} {1}", startInfo.FileName, startInfo.Arguments));

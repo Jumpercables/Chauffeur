@@ -126,8 +126,6 @@ namespace Chauffeur.Jenkins.Services
                 throw new ArgumentNullException("directory");
 
             string fileName = Path.Combine(directory, artifact.FileName);
-            if (File.Exists(fileName)) return fileName;
-
             Uri absoluteUri = new Uri(build.Url, @"artifact/" + artifact.RelativePath);
             var request = base.Client.GetRequest(absoluteUri);
 
@@ -173,7 +171,7 @@ namespace Chauffeur.Jenkins.Services
         /// <returns>Returns a <see cref="string" /> representing the full path to the local artifact.</returns>
         private Task<string> DownloadArtifactAsync(Build build, Artifact artifact, string directory)
         {
-            return Task.Factory.StartNew(() => this.DownloadArtifact(build, artifact, directory));
+            return Task.Run(() => this.DownloadArtifact(build, artifact, directory));
         }
 
         #endregion
