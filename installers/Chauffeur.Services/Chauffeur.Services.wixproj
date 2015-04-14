@@ -39,7 +39,7 @@
     </WixExtension>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="jenkins.png" />
+    <Content Include="jenkins.ico" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Chauffeur.Client\Chauffeur.Client.csproj">

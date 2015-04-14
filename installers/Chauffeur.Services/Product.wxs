@@ -36,7 +36,7 @@
     <Property Id="ARPNOREPAIR" Value="yes" Secure="yes" />
     <Property Id="ARPNOMODIFY" Value="yes" Secure="yes" />
 
-    <Icon Id="icon.ico" SourceFile="jenkins.png"/>
+    <Icon Id="icon.ico" SourceFile="jenkins.ico"/>
     <Property Id="ARPPRODUCTICON" Value="icon.ico" />
     
     <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
@@ -57,6 +57,7 @@
       <Directory Id="ProgramFilesFolder">
         <Directory Id="APPLICATIONFOLDER" Name="Jenkins">
           <Directory Id="APPLICATIONBINFOLDER" Name="Bin"/>
+          
         </Directory>
       </Directory>
     </Directory>
@@ -87,6 +88,7 @@
         <File Id="Chauffeur.Jenkins.dll" Source="$(var.BuildArtifactDir)\Chauffeur.Jenkins.dll" />
         <File Id="Chauffeur.Client.exe" Source="$(var.BuildArtifactDir)\Chauffeur.Client.exe" />
         <File Id="Chauffeur.Client.exe.config" Source="$(var.BuildArtifactDir)\Chauffeur.Client.exe.config" />
+        <RemoveFile Id="DeleteComponents" Name="*.*" On="uninstall" />
       </Component>     
     </ComponentGroup>
   </Fragment>
