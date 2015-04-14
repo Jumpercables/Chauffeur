@@ -88,7 +88,7 @@
         <File Id="Chauffeur.Jenkins.dll" Source="$(var.BuildArtifactDir)\Chauffeur.Jenkins.dll" />
         <File Id="Chauffeur.Client.exe" Source="$(var.BuildArtifactDir)\Chauffeur.Client.exe" />
         <File Id="Chauffeur.Client.exe.config" Source="$(var.BuildArtifactDir)\Chauffeur.Client.exe.config" />
-        <RemoveFile Id="DeleteComponents" Name="*.*" On="uninstall" />
+        <RemoveFile Id="DeleteFilesWindowsService" Name="*.*" On="uninstall" />
       </Component>     
     </ComponentGroup>
   </Fragment>

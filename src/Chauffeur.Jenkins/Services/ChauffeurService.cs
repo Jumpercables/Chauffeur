@@ -60,8 +60,6 @@ namespace Chauffeur.Jenkins.Services
         /// </returns>
         public async Task<Build> InstallLastSuccessfulBuildAsync(string jobName)
         {
-            this.Log("[InstallLastSuccessfulBuild]: {0}", jobName);
-
             return await Task.Factory.StartNew(() => this.InstallLastSuccessfulBuild(jobName));
         }
 
@@ -74,8 +72,6 @@ namespace Chauffeur.Jenkins.Services
         /// </returns>
         public async Task InstallBuildAsync(Build build)
         {
-            this.Log("[InstallBuild]: {0}", build.Number);
-            
             await Task.Factory.StartNew(() => this.InstallBuild(build));
         }
 

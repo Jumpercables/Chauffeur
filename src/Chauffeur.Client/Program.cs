@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.ServiceModel;
 using System.Threading.Tasks;
@@ -32,10 +33,17 @@ namespace Chauffeur.Client
 
             try
             {
+                List<string> machineNames = new List<string>();
+
                 for (int i = 1; i < args.GetLength(0); i++)
                 {
-                    var build = Task.Run(() => InstallLastSuccessfulBuildAsync(args[0], args[i]));
-                    Console.WriteLine("{0} - Last successful build requested to be installed: {1}", args[i], build.Result.number);                    
+                    if (!machineNames.Contains(args[i]))
+                    {
+                        var build = Task.Run(() => InstallLastSuccessfulBuildAsync(args[0], args[i]));
+                        Console.WriteLine("{0} - Last successful build requested to be installed: {1}", args[i], build.Result.number);
+                    }
+
+                    machineNames.Add(args[i]);
                 }
 
                 return 0;
