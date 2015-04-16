@@ -63,10 +63,14 @@ namespace Chauffeur.Jenkins.Services
 
             // Download the build artifacts for the job.
             string directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Jenkins");
-            var artifacts = this.DownloadArtifacts(build, directory);
+            if (!Directory.Exists(directory))
+                Directory.CreateDirectory(directory);
 
-            // Install only the MSI packages.
-            this.InstallPackages(artifacts.Where(o => o.EndsWith(".msi", StringComparison.InvariantCultureIgnoreCase)).ToList());
+            var jenkinsService = new ArtifactService(base.BaseUri, base.Client);
+            var artifacts = jenkinsService.DownloadArtifacts(build, directory);
+
+            // Install the MSI packages on a thread to prevent blocking.
+            this.InstallPackagesAsync(artifacts.Where(o => o.EndsWith(".msi", StringComparison.InvariantCultureIgnoreCase)).ToList());            
 
             // The install completes successfully, set the environment variable.
             Environment.SetEnvironmentVariable("JENKINS_BUILD_INSTALLED", build.Number.ToString(CultureInfo.InvariantCulture));
@@ -86,14 +90,14 @@ namespace Chauffeur.Jenkins.Services
                 throw new FaultException("The job name was not provided.");
 
             // Query for the job information from the server.            
-            JobService jobService = new JobService(base.BaseUri, base.Client);
-            Job job = jobService.GetJob(jobName);
+            var jenkinsService = new JobService(base.BaseUri, base.Client);
+            Job job = jenkinsService.GetJob(jobName);
 
             // The caller should know the build installed or use the JobService to confirm a new build is needed.
             this.Log("Last successful build: {0}", job.LastSuccessfulBuild.Number);
 
             // Install the last successful build but move to the next method and don't wait for completion.
-            Task.Run(() => this.InstallBuild(job.LastSuccessfulBuild));
+            this.InstallBuild(job.LastSuccessfulBuild);
 
             // Return the build installed.
             return job.LastSuccessfulBuild;
@@ -102,34 +106,6 @@ namespace Chauffeur.Jenkins.Services
         #endregion
 
         #region Private Methods
-
-        /// <summary>
-        ///     Downloads the build artifacts to the specified directory.
-        /// </summary>
-        /// <param name="build">The build.</param>
-        /// <param name="directory">The directory.</param>
-        /// <returns>
-        ///     Returns a <see cref="IEnumerable{String}" /> representing the paths to the artifacts that have been downloaded.
-        /// </returns>
-        /// <exception cref="System.ArgumentNullException">
-        ///     job
-        ///     or
-        ///     directory
-        /// </exception>
-        private IEnumerable<string> DownloadArtifacts(Build build, string directory)
-        {
-            if (build == null)
-                throw new ArgumentNullException("build");
-
-            if (directory == null)
-                throw new ArgumentNullException("directory");
-
-            if (!Directory.Exists(directory))
-                Directory.CreateDirectory(directory);
-
-            ArtifactService artifactService = new ArtifactService(base.BaseUri, base.Client);
-            return artifactService.DownloadArtifacts(build, directory);
-        }
 
         /// <summary>
         ///     Installs the build MSI packages using the "msiexec.exe" utility on the windows machine.
@@ -158,6 +134,15 @@ namespace Chauffeur.Jenkins.Services
                         if (process != null) process.WaitForExit();
                 }
             }
+        }
+
+        /// <summary>
+        ///     Installs the packages asynchronous.
+        /// </summary>
+        /// <param name="packages">The packages.</param>
+        private void InstallPackagesAsync(List<string> packages)
+        {
+            Task.Run(() => this.InstallPackages(packages));
         }
 
         #endregion
