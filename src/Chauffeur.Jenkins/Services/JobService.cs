@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.ServiceModel;
 
 using Chauffeur.Jenkins.Client;
 using Chauffeur.Jenkins.Model;
 
 namespace Chauffeur.Jenkins.Services
-{
+{    
     /// <summary>
     ///     Provides a WFC service contract for obtaining job information from Jenkins.
     /// </summary>
@@ -36,7 +37,7 @@ namespace Chauffeur.Jenkins.Services
     }
 
     /// <summary>
-    ///     Provides a WCF Service used to obtain the job information from jenkins.
+    /// Provides a WCF Service used to obtain the job information from jenkins.
     /// </summary>
     public class JobService : JenkinsService, IJobService
     {
@@ -69,23 +70,34 @@ namespace Chauffeur.Jenkins.Services
         #region IJobService Members
 
         /// <summary>
-        ///     Gets the job from server with the specified name.
+        /// Gets the job from server with the specified name.
         /// </summary>
         /// <param name="jobName">Name of the job.</param>
         /// <returns>
-        ///     Returns a <see cref="Job" /> representing the job.
+        /// Returns a <see cref="Job" /> representing the job.
         /// </returns>
-        /// <exception cref="System.ArgumentNullException">jobName</exception>
+        /// <exception cref="System.ServiceModel.FaultException">
+        /// The job name was not provided.
+        /// or
+        /// The job could not be found.
+        /// </exception>
         public Job GetJob(string jobName)
         {
             if (jobName == null)
-                throw new ArgumentNullException("jobName");
+                throw new FaultException("The job name was not provided.");
 
             this.Log("Job: {0}", jobName);
 
-            var queryUri = new Uri(base.BaseUri, @"/job/" + jobName + "/");
-            var job = base.Client.GetResource<Job>(queryUri, 1);
-            return job;
+            try
+            {
+                var queryUri = new Uri(base.BaseUri, @"/job/" + jobName + "/");
+                var job = base.Client.GetResource<Job>(queryUri, 1);
+                return job;
+            }
+            catch (WebException)
+            {
+                throw new FaultException("The job could not be found.");
+            }
         }
 
         /// <summary>

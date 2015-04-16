@@ -33,7 +33,7 @@ namespace Chauffeur.Jenkins.Services
     }
 
     /// <summary>
-    ///     A service used to obtain the build artifacts from jenkins.
+    /// A service used to obtain the build artifacts from jenkins.
     /// </summary>
     public class ArtifactService : JenkinsService, IArtifactService
     {
@@ -66,25 +66,28 @@ namespace Chauffeur.Jenkins.Services
         #region Public Methods
 
         /// <summary>
-        ///     Downloads all of the artifacts from the build into the specified directory.
+        /// Downloads all of the artifacts from the build into the specified directory.
         /// </summary>
         /// <param name="build">The build.</param>
         /// <param name="directory">The directory.</param>
         /// <returns>
-        ///     Returns a <see cref="IEnumerable{String}" /> that representing the paths to the local artifacts.
+        /// Returns a <see cref="IEnumerable{String}" /> that representing the paths to the local artifacts.
         /// </returns>
-        /// <exception cref="System.ArgumentNullException">
-        ///     build
-        ///     or
-        ///     directory
+        /// <exception cref="System.ServiceModel.FaultException">
+        /// The build was not provided.
+        /// or
+        /// The directory was not provided.
         /// </exception>
+        /// <exception cref="System.ArgumentNullException">build
+        /// or
+        /// directory</exception>
         public List<string> DownloadArtifacts(Build build, string directory)
         {
             if (build == null)
-                throw new ArgumentNullException("build");
+                throw new FaultException("The build was not provided.");
 
             if (directory == null)
-                throw new ArgumentNullException("directory");
+                throw new FaultException("The directory was not provided.");
 
             this.Log("Downloading build {0} to '{1}'.", build.Number, directory);
 
@@ -99,31 +102,31 @@ namespace Chauffeur.Jenkins.Services
         #region Private Methods
 
         /// <summary>
-        ///     Downloads the artifact into the directory.
+        /// Downloads the artifact into the directory.
         /// </summary>
         /// <param name="build">The build.</param>
         /// <param name="artifact">The artifact.</param>
         /// <param name="directory">The directory.</param>
         /// <returns>
-        ///     Returns a <see cref="string" /> representing the full path to the local artifact.
+        /// Returns a <see cref="string" /> representing the full path to the local artifact.
         /// </returns>
-        /// <exception cref="System.ArgumentNullException">
-        ///     build
-        ///     or
-        ///     artifact
-        ///     or
-        ///     directory
+        /// <exception cref="System.ServiceModel.FaultException">
+        /// The build was not provided.
+        /// or
+        /// The artifact was not provided.
+        /// or
+        /// The directory was not provided.
         /// </exception>
         private string DownloadArtifact(Build build, Artifact artifact, string directory)
         {
             if (build == null)
-                throw new ArgumentNullException("build");
+                throw new FaultException("The build was not provided.");
 
-            if (artifact == null)
-                throw new ArgumentNullException("artifact");
+            if(artifact == null)
+                throw new FaultException("The artifact was not provided.");
 
             if (directory == null)
-                throw new ArgumentNullException("directory");
+                throw new FaultException("The directory was not provided.");
 
             string fileName = Path.Combine(directory, artifact.FileName);
             Uri absoluteUri = new Uri(build.Url, @"artifact/" + artifact.RelativePath);

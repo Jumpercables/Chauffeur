@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq.Expressions;
 using System.ServiceModel;
 using System.Threading.Tasks;
 
@@ -12,14 +13,21 @@ namespace Chauffeur.Client
     {
         #region Private Methods
 
-        private static async Task<Build> InstallLastSuccessfulBuildAsync(string jobName, string machineName)
+        private static async Task InstallLastSuccessfulBuildAsync(string jobName, string machineName)
         {
             var remoteAddress = new EndpointAddress(string.Format("http://{0}:8080/Chauffeur.Jenkins.Services/ChauffeurService/", machineName));
             using (ChauffeurServiceClient client = new ChauffeurServiceClient("BasicHttpBinding_IChauffeurService", remoteAddress))
             {
-                var build = await client.InstallLastSuccessfulBuildAsync(jobName);
-
-                return build;
+                try
+                {
+                    var build = await client.InstallLastSuccessfulBuildAsync(jobName);
+                    Console.WriteLine("{0} - Last successful build requested to be installed: {1}", machineName, build.number);
+                }
+                catch (FaultException ex)
+                {                    
+                    Console.WriteLine(ex.Message);
+                    client.Abort();
+                }   
             }
         }
        
@@ -34,17 +42,21 @@ namespace Chauffeur.Client
             try
             {
                 List<string> machineNames = new List<string>();
+                var tasks = new List<Task>();
 
                 for (int i = 1; i < args.GetLength(0); i++)
                 {
                     if (!machineNames.Contains(args[i]))
                     {
-                        var build = Task.Run(() => InstallLastSuccessfulBuildAsync(args[0], args[i]));
-                        Console.WriteLine("{0} - Last successful build requested to be installed: {1}", args[i], build.Result.number);
+                        var machineName = args[i];
+                        var task = Task.Run(() => InstallLastSuccessfulBuildAsync(args[0], machineName));
+                        tasks.Add(task);
                     }
 
                     machineNames.Add(args[i]);
                 }
+
+                Task.WaitAll(tasks.ToArray());
 
                 return 0;
             }

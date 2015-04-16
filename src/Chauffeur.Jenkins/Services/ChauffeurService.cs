@@ -55,11 +55,11 @@ namespace Chauffeur.Jenkins.Services
         ///     Installs the build on the machine that hosts the service.
         /// </summary>
         /// <param name="build">The build.</param>
-        /// <exception cref="System.ArgumentNullException">build</exception>
+        /// <exception cref="System.ServiceModel.FaultException">The build was not provided.</exception>
         public void InstallBuild(Build build)
         {
             if (build == null)
-                throw new ArgumentNullException("build");
+                throw new FaultException("The build was not provided.");
 
             // Download the build artifacts for the job.
             string directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Jenkins");
@@ -79,11 +79,11 @@ namespace Chauffeur.Jenkins.Services
         /// <returns>
         ///     Returns the <see cref="Build" /> that was installed on the machine.
         /// </returns>
-        /// <exception cref="System.ArgumentNullException">jobName</exception>
+        /// <exception cref="System.ServiceModel.FaultException">The job name was not provided.</exception>
         public Build InstallLastSuccessfulBuild(string jobName)
         {
             if (string.IsNullOrEmpty(jobName))
-                throw new ArgumentNullException("jobName");
+                throw new FaultException("The job name was not provided.");
 
             // Query for the job information from the server.            
             JobService jobService = new JobService(base.BaseUri, base.Client);
