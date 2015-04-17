@@ -8,7 +8,7 @@ A windows service (that hosts a WCF Service) that allows communication between t
 install the last successful build on the machine.
 
 ## Jenkins Chauffeur Client ##
-A console application that notifies the Jenkins Chauffeur Service that a successful build has completed and should be installed.
+A console application that notifies the Jenkins Chauffeur Service that a successful build has completed and should be installed, which needs to be configured as a post-build event in Jenkins.
 
 ### Requirements ###
 - 4.5 .NET Framework
