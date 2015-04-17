@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.ServiceModel;
 using System.Threading.Tasks;
 
@@ -77,10 +78,7 @@ namespace Chauffeur.Jenkins.Services
         /// The build was not provided.
         /// or
         /// The directory was not provided.
-        /// </exception>
-        /// <exception cref="System.ArgumentNullException">build
-        /// or
-        /// directory</exception>
+        /// </exception>       
         public List<string> DownloadArtifacts(Build build, string directory)
         {
             if (build == null)
@@ -89,7 +87,10 @@ namespace Chauffeur.Jenkins.Services
             if (directory == null)
                 throw new FaultException("The directory was not provided.");
 
-            this.Log("Downloading build {0} to '{1}'.", build.Number, directory);
+            this.Log("Downloading artifacts for build '{0}' to the '{1}' directory.", build.Number, directory);
+
+            if (!Directory.Exists(directory))
+                Directory.CreateDirectory(directory);
 
             var tasks = build.Artifacts.Select(artifact => this.DownloadArtifactAsync(build, artifact, directory)).ToArray();
             Task.WaitAll(tasks);
@@ -129,13 +130,21 @@ namespace Chauffeur.Jenkins.Services
                 throw new FaultException("The directory was not provided.");
 
             string fileName = Path.Combine(directory, artifact.FileName);
-            Uri absoluteUri = new Uri(build.Url, @"artifact/" + artifact.RelativePath);
-            var request = base.Client.GetRequest(absoluteUri);
+            WebRequest request;
+
+            try
+            {
+                
+                Uri absoluteUri = new Uri(build.Url, @"artifact/" + artifact.RelativePath);
+                request = base.Client.GetRequest(absoluteUri);
+            }
+            catch (WebException)
+            {
+                throw new FaultException("The artifact was not found.");
+            }
 
             using (var response = request.GetResponse())
             {
-                // Once the WebResponse object has been retrieved,
-                // get the stream object associated with the response's data
                 using (var stream = response.GetResponseStream())
                 {
                     if (stream != null)
@@ -143,12 +152,10 @@ namespace Chauffeur.Jenkins.Services
                         // Create the local file
                         using (var localStream = File.Create(fileName))
                         {
-                            // Allocate a 1k buffer
+                            // Allocate the buffer
                             byte[] buffer = new byte[1024];
                             int bytes;
 
-                            // Simple do/while loop to read from stream until
-                            // no bytes are returned
                             do
                             {
                                 // Read data (up to 1k) from the stream

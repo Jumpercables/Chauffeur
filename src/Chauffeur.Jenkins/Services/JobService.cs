@@ -83,7 +83,7 @@ namespace Chauffeur.Jenkins.Services
         /// </exception>
         public Job GetJob(string jobName)
         {
-            if (jobName == null)
+            if (string.IsNullOrEmpty(jobName))
                 throw new FaultException("The job name was not provided.");
 
             this.Log("Job: {0}", jobName);
