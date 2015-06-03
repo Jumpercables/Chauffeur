@@ -84,12 +84,15 @@
     <Compile Include="Model\View.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\ArtifactService.cs" />
+    <Compile Include="Services\BuildService.cs" />
     <Compile Include="Services\ChauffeurService.cs" />
     <Compile Include="Services\JenkinsService.cs" />
     <Compile Include="Services\JobService.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Chauffeur.ps1" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

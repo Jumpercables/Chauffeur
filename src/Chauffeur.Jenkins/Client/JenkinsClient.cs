@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace Chauffeur.Jenkins.Client
@@ -108,6 +109,31 @@ namespace Chauffeur.Jenkins.Client
         public T Expand<T>(T resource, int depth) where T : class, IUrl
         {
             return resource == null ? null : this.GetResource<T>(resource.Url, depth);
+        }
+
+        /// <summary>
+        /// Posts the request to the specified absolute URI.
+        /// </summary>
+        /// <param name="absoluteUri">The absolute URI.</param>
+        /// <returns>
+        /// Returns a <see cref="WebRequest" /> representing the reponse.
+        /// </returns>
+        public virtual WebRequest Post(Uri absoluteUri)
+        {
+            var request = WebRequest.Create(absoluteUri);
+            request.Method = "POST";
+
+            if (!string.IsNullOrEmpty(_UserName))
+            {
+                request.PreAuthenticate = true;
+
+                var authInfo = _UserName + ":" + _ApiToken;
+                authInfo = Convert.ToBase64String(Encoding.Default.GetBytes(authInfo));
+
+                request.Headers["Authorization"] = "Basic " + authInfo;
+            }
+
+            return request;
         }
 
         /// <summary>
