@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Linq.Expressions;
 using System.ServiceModel;
 using System.Threading.Tasks;
 
@@ -13,7 +11,7 @@ namespace Chauffeur.Client
     {
         #region Private Methods
 
-        private static async Task InstallLastSuccessfulBuildAsync(string jobName, string machineName)
+        private async Task InstallLastSuccessfulBuildAsync(string jobName, string machineName)
         {
             var remoteAddress = new EndpointAddress(string.Format("http://{0}:8080/Chauffeur.Jenkins.Services/ChauffeurService/", machineName));
             using (ChauffeurServiceClient client = new ChauffeurServiceClient("BasicHttpBinding_IChauffeurService", remoteAddress))
@@ -24,48 +22,53 @@ namespace Chauffeur.Client
                     Console.WriteLine("{0} - Last successful build requested to be installed: {1}", machineName, build.number);
                 }
                 catch (FaultException ex)
-                {                    
+                {
                     Console.WriteLine(ex.Message);
                     client.Abort();
-                }   
+                }
             }
         }
-       
-        private static int Main(string[] args)
-        {
-            if (args.Length < 2)
-            {
-                Console.WriteLine("Invalid arguments: <jobName> <machineName>");
-                return 1;
-            }
 
+        private static void Main(string[] args)
+        {
             try
             {
-                List<string> machineNames = new List<string>();
-                var tasks = new List<Task>();
-
-                for (int i = 1; i < args.GetLength(0); i++)
+                if (args.Length < 2)
                 {
-                    if (!machineNames.Contains(args[i]))
-                    {
-                        var machineName = args[i];
-                        var task = Task.Run(() => InstallLastSuccessfulBuildAsync(args[0], machineName));
-                        tasks.Add(task);
-                    }
-
-                    machineNames.Add(args[i]);
+                    Console.WriteLine("Invalid arguments: <jobName> <machineName>");
                 }
 
-                Task.WaitAll(tasks.ToArray());
-
-                return 0;
+                var tasks = new Program().Run(args);
+                Task.WaitAll(tasks);
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                Console.WriteLine("ERROR: {0}", ex);
             }
 
-            return 2;
+            Console.WriteLine("Press any key to continue...");
+            Console.ReadKey();
+        }
+
+
+        private Task[] Run(string[] args)
+        {
+            List<string> machineNames = new List<string>();
+            var tasks = new List<Task>();
+
+            for (int i = 1; i < args.GetLength(0); i++)
+            {
+                if (!machineNames.Contains(args[i]))
+                {
+                    var machineName = args[i];
+                    var task = Task.Run(() => InstallLastSuccessfulBuildAsync(args[0], machineName));
+                    tasks.Add(task);
+                }
+
+                machineNames.Add(args[i]);
+            }
+
+            return tasks.ToArray();
         }
 
         #endregion

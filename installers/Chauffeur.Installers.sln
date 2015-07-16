@@ -6,6 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "Chauffeur.Services", "Chauffeur.Services\Chauffeur.Services.wixproj", "{EF570F84-9B8F-4A81-8C8D-B4984ED9E4FA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chauffeur.Client", "..\src\Chauffeur.Client\Chauffeur.Client.csproj", "{A77D53E7-3779-451C-B1CE-935CCBDE1F57}"
+	ProjectSection(ProjectDependencies) = postProject
+		{880C9B0F-6005-4C1C-9F2F-5FF79EBFB54A} = {880C9B0F-6005-4C1C-9F2F-5FF79EBFB54A}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chauffeur.WindowsService", "..\src\Chauffeur.WindowsService\Chauffeur.WindowsService.csproj", "{D834C147-447B-4D43-8F2C-24ABB2A8E388}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -19,7 +22,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\README.md = ..\README.md
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Chauffeur", "Chauffeur", "{1FFB017D-A01D-4F1B-89B9-093C7565CE70}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{1FFB017D-A01D-4F1B-89B9-093C7565CE70}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

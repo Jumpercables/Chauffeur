@@ -6,7 +6,7 @@
     <ProductVersion>3.9</ProductVersion>
     <ProjectGuid>ef570f84-9b8f-4a81-8c8d-b4984ed9e4fa</ProjectGuid>
     <SchemaVersion>2.0</SchemaVersion>
-    <OutputName>Chauffeur Jenkins Service v1.0.0</OutputName>
+    <OutputName>Jenkins Chauffeur Service</OutputName>
     <OutputType>Package</OutputType>
     <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' AND '$(MSBuildExtensionsPath32)' != '' ">$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
     <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' ">$(MSBuildExtensionsPath)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
@@ -15,11 +15,12 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <OutputPath>bin\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
-    <DefineConstants>Debug;ProductVersion=1.0.0</DefineConstants>
+    <DefineConstants>Debug;</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <OutputPath>bin\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+    <DefineConstants>ProductVersion=1.0.0</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Product.wxs" />

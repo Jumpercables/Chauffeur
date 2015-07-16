@@ -74,6 +74,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="Chauffeur.ps1" />
     <None Include="Properties\DataSources\Chauffeur.Jenkins.Model.Build.datasource" />
     <None Include="Service References\ServiceReference\Chauffeur.Client.ServiceReference.Build.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>

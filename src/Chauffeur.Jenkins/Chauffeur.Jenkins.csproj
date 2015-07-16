@@ -71,6 +71,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
@@ -88,12 +89,12 @@
     <Compile Include="Services\ChauffeurService.cs" />
     <Compile Include="Services\JenkinsService.cs" />
     <Compile Include="Services\JobService.cs" />
+    <Compile Include="Services\NotificationService.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Chauffeur.ps1" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

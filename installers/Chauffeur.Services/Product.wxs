@@ -10,16 +10,19 @@
       Defines & Variables
    -->
   <?ifndef $(var.BuildArtifactDir)?>
-  <?define BuildArtifactDir = "..\..\src\bin\Debug"?>
+  <?define BuildArtifactDir = "..\..\src\bin\Debug"?>  
   <?endif?>
-
+  <?ifndef $(var.Version)?>
+  <?define Version = "1.0.0.0"?>
+  <?endif?>
   <!--
       ====================================================================================
       Package start
    -->
   <Product Id="7BD9DB27-0ABD-40D3-BB56-C466EAE6E0A8" 
            Name="Jenkins Chauffeur Service" 
-           Language="1033" Version="1.0.0.0" 
+           Language="1033" 
+           Version="$(var.Version)" 
            Manufacturer="Metis LLC" 
            UpgradeCode="bc63b526-be6d-411e-9bd7-ba707c91bbd3">
 
@@ -32,7 +35,7 @@
 
     <!-- Set properties for add/remove programs -->
     <Property Id="PRODUCTNAME" Value="Chauffeur"/>
-    <Property Id="PRODUCTVERSION" Value="$(var.ProductVersion)"/>
+    <Property Id="PRODUCTVERSION" Value="$(var.Version)"/>
     <Property Id="ARPNOREPAIR" Value="yes" Secure="yes" />
     <Property Id="ARPNOMODIFY" Value="yes" Secure="yes" />
 
@@ -40,7 +43,7 @@
     <Property Id="ARPPRODUCTICON" Value="icon.ico" />
     
     <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
-    <MediaTemplate />
+    <MediaTemplate EmbedCab="yes" />
 
     <Feature Id="ProductFeature" Title="Jenkins Chauffeur Service" Level="1">
       <ComponentGroupRef Id="ProductComponents" />
