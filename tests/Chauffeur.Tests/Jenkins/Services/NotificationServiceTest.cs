@@ -16,8 +16,7 @@ namespace Chauffeur.Tests.Jenkins.Services
         public void NotificationService_SendAsync()
         {
             NotificationService service = new NotificationService();
-            var task = service.SendAsync(new Build());
-            Task.WaitAll(task);
+            bool result = service.Send(new Build() { Number = 123 });
         }
 
         #endregion

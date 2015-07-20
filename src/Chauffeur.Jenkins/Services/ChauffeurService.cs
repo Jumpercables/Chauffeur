@@ -165,9 +165,9 @@ namespace Chauffeur.Jenkins.Services
                 if (t.IsCompleted)
                 {
                     NotificationService service = new NotificationService();
-                    var e = service.SendAsync(build);
-                    if (e != null) this.Log("Build notification completed.");
+                    if (service.Send(build)) this.Log("Build notification completed.");
                 }
+
             }, cancellationToken.Token);
         }
 
