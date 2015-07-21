@@ -11,10 +11,18 @@ namespace Chauffeur.Client
     {
         #region Private Methods
 
+        /// <summary>
+        ///     Installs the last successful build asynchronous.
+        /// </summary>
+        /// <param name="jobName">Name of the job.</param>
+        /// <param name="machineName">Name of the machine.</param>
+        /// <returns></returns>
         private async Task InstallLastSuccessfulBuildAsync(string jobName, string machineName)
         {
+            var basicHttpBinding = new BasicHttpBinding(BasicHttpSecurityMode.None);
             var remoteAddress = new EndpointAddress(string.Format("http://{0}:8080/Chauffeur.Jenkins.Services/ChauffeurService/", machineName));
-            using (ChauffeurServiceClient client = new ChauffeurServiceClient("BasicHttpBinding_IChauffeurService", remoteAddress))
+
+            using (ChauffeurServiceClient client = new ChauffeurServiceClient(basicHttpBinding, remoteAddress))
             {
                 try
                 {
@@ -45,12 +53,14 @@ namespace Chauffeur.Client
             {
                 Console.WriteLine("ERROR: {0}", ex);
             }
-
-            Console.WriteLine("Press any key to continue...");
-            Console.ReadKey();
         }
 
 
+        /// <summary>
+        ///     Runs the specified arguments.
+        /// </summary>
+        /// <param name="args">The arguments.</param>
+        /// <returns></returns>
         private Task[] Run(string[] args)
         {
             List<string> machineNames = new List<string>();
@@ -61,7 +71,7 @@ namespace Chauffeur.Client
                 if (!machineNames.Contains(args[i]))
                 {
                     var machineName = args[i];
-                    var task = Task.Run(() => InstallLastSuccessfulBuildAsync(args[0], machineName));
+                    var task = Task.Run(() => this.InstallLastSuccessfulBuildAsync(args[0], machineName));
                     tasks.Add(task);
                 }
 

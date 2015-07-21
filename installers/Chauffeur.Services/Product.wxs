@@ -52,15 +52,16 @@
     <Property Id="ApplicationFolderName" Value="Jenkins" />
     <Property Id="WixAppFolder" Value="WixPerMachineFolder" />
     
-    <UIRef Id="WixUI_Advanced" />
+    <UIRef Id="WixUI_Advanced"/>
   </Product>
 
   <Fragment>
     <Directory Id="TARGETDIR" Name="SourceDir">
       <Directory Id="ProgramFilesFolder">
         <Directory Id="APPLICATIONFOLDER" Name="Jenkins">
-          <Directory Id="APPLICATIONBINFOLDER" Name="Bin"/>
-          
+          <Directory Id="CHAUFFEURFOLDER" Name="Chauffeur">
+            <Directory Id="APPLICATIONBINFOLDER" Name="Bin"/>
+          </Directory>
         </Directory>
       </Directory>
     </Directory>
@@ -88,9 +89,7 @@
                         Remove="uninstall"
                         Name="ChauffeurService"
                         Wait="yes" />
-        <File Id="Chauffeur.Jenkins.dll" Source="$(var.BuildArtifactDir)\Chauffeur.Jenkins.dll" />
-        <File Id="Chauffeur.Client.exe" Source="$(var.BuildArtifactDir)\Chauffeur.Client.exe" />
-        <File Id="Chauffeur.Client.exe.config" Source="$(var.BuildArtifactDir)\Chauffeur.Client.exe.config" />
+        <File Id="Chauffeur.Jenkins.dll" Source="$(var.BuildArtifactDir)\Chauffeur.Jenkins.dll" />     
         <RemoveFile Id="DeleteFilesWindowsService" Name="*.*" On="uninstall" />
       </Component>     
     </ComponentGroup>
