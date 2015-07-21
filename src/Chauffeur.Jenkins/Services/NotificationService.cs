@@ -32,14 +32,7 @@ namespace Chauffeur.Jenkins.Services
     ///     Provides a WFC contract that will send out a notification for the build.
     /// </summary>
     public class NotificationService : INotificationService
-    {
-        #region Constants
-
-        private const string BUILD_PROPERTY = "{BUILD}";
-        private const string ENVIRONMENT_PROPERTY = "{ENVIRONMENT}";
-
-        #endregion
-
+    {        
         #region INotificationService Members
 
         /// <summary>
@@ -73,6 +66,7 @@ namespace Chauffeur.Jenkins.Services
                 message.From = new MailAddress(from);
                 message.Subject = this.ApplyTemplates(build, ConfigurationManager.AppSettings["email.subject"]);;                
                 message.Body = this.ApplyTemplates(build, ConfigurationManager.AppSettings["email.body"]);;
+                message.IsBodyHtml = "true".Equals(ConfigurationManager.AppSettings["email.html"], StringComparison.OrdinalIgnoreCase);
 
                 using (SmtpClient client = new SmtpClient(host))
                     client.Send(message);

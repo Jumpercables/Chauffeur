@@ -8,15 +8,17 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Chauffeur.Tests.Jenkins.Services
 {
     [TestClass]
-    public class NotificationServiceTest
+    public class NotificationServiceTest : JenkinsServiceTest
     {
         #region Public Methods
 
         [TestMethod]
-        public void NotificationService_SendAsync()
+        public void NotificationService_Send()
         {
+            var build = this.GetResource<Build>("build.valid.json");
+            
             NotificationService service = new NotificationService();
-            bool result = service.Send(new Build() { Number = 123 });
+            bool result = service.Send(build);
         }
 
         #endregion

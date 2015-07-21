@@ -18,11 +18,11 @@ namespace Chauffeur.Jenkins.Services
         /// </summary>
         protected JenkinsService()
         {
-            string url = ConfigurationManager.AppSettings["server"];
+            string url = ConfigurationManager.AppSettings["jenkins.server"];
             this.BaseUri = new Uri(url);
 
-            string user = ConfigurationManager.AppSettings["user"];
-            string token = ConfigurationManager.AppSettings["token"];
+            string user = ConfigurationManager.AppSettings["jenkins.user"];
+            string token = ConfigurationManager.AppSettings["jenkins.token"];
             this.Client = new JsonJenkinsClient(user, token);
         }
 

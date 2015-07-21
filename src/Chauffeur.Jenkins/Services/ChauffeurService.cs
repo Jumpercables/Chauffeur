@@ -5,9 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.ServiceModel;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
 
 using Chauffeur.Jenkins.Model;
 
@@ -37,7 +35,7 @@ namespace Chauffeur.Jenkins.Services
         ///     Returns the <see cref="Build" /> that was installed on the machine.
         /// </returns>
         [OperationContract]
-        Build InstallLastSuccessfulBuild(string jobName);      
+        Build InstallLastSuccessfulBuild(string jobName);
 
         #endregion
     }
@@ -65,7 +63,7 @@ namespace Chauffeur.Jenkins.Services
             var artifacts = jenkinsService.DownloadArtifacts(build, directory);
 
             // Install the MSI packages on a thread to prevent blocking.
-            this.InstallPackagesAsync(build, artifacts.Where(o => o.EndsWith(".msi", StringComparison.InvariantCultureIgnoreCase)).ToList());
+            this.InstallPackagesAsync(build, artifacts.Where(o => o.EndsWith(".msi", StringComparison.InvariantCultureIgnoreCase)).ToList());           
         }
 
         /// <summary>
@@ -80,16 +78,16 @@ namespace Chauffeur.Jenkins.Services
         {
             // Query for the job information from the server.            
             var jenkinsService = new JobService(base.BaseUri, base.Client);
-            Job job = jenkinsService.GetJob(jobName);
+            var build = jenkinsService.GetLastSuccessfulBuild(jobName);
 
-            this.Log("Last successful build: {0}", job.LastSuccessfulBuild.Number);
+            this.Log("Last successful build: {0}", build.Number);
 
             // Install the last successful build but move to the next method and don't wait for completion. 
             var directory = this.GetArtifactsPath();
-            this.InstallBuild(job.LastSuccessfulBuild, directory);
+            this.InstallBuild(build, directory);
 
             // Return the build installed.
-            return job.LastSuccessfulBuild;
+            return build;
         }
 
         #endregion
@@ -114,11 +112,33 @@ namespace Chauffeur.Jenkins.Services
         }
 
         /// <summary>
-        ///     Installs the build MSI packages using the "msiexec.exe" utility on the windows machine.
+        ///     Installs the package asynchronous.
         /// </summary>
+        /// <param name="package">The package.</param>
+        /// <param name="parameters">The parameters.</param>
+        /// <returns>
+        ///     Returns the <see cref="Task" /> representing the operation.
+        /// </returns>
+        private Task InstallPackageAsync(string package, KeyValuePair<string, string> parameters)
+        {
+            return Task.Run(() =>
+            {
+                ProcessStartInfo startInfo = new ProcessStartInfo("cmd.exe", string.Format("/c start /MIN /wait msiexec.exe {0} \"{1}\" {2}", parameters.Key, package, parameters.Value));
+                startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+
+                this.Log(string.Format("\t{0} {1}", startInfo.FileName, startInfo.Arguments));
+
+                using (Process process = Process.Start(startInfo))
+                    if (process != null) process.WaitForExit();
+            });
+        }
+
+        /// <summary>
+        /// Installs the build MSI packages using the "msiexec.exe" utility on the windows machine.
+        /// </summary>
+        /// <param name="build">The build.</param>
         /// <param name="packages">The packages.</param>
-        /// <param name="cancellationTokenSource">The cancellation token source.</param>
-        private void InstallPackages(List<string> packages, CancellationTokenSource cancellationTokenSource)
+        private async void InstallPackagesAsync(Build build, List<string> packages)
         {
             Dictionary<string, string> parameters = new Dictionary<string, string>
             {
@@ -128,47 +148,16 @@ namespace Chauffeur.Jenkins.Services
 
             this.Log("Installing {0} package(s).", packages.Count);
 
-            try
+            foreach (var pkg in packages)
             {
-                foreach (var pkg in packages)
+                foreach (var p in parameters)
                 {
-                    foreach (var s in parameters)
-                    {
-                        ProcessStartInfo startInfo = new ProcessStartInfo("cmd.exe", string.Format("/c start /MIN /wait msiexec.exe {0} \"{1}\" {2}", s.Key, pkg, s.Value));
-                        startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-
-                        this.Log(string.Format("\t{0} {1}", startInfo.FileName, startInfo.Arguments));
-
-                        using (Process process = Process.Start(startInfo))
-                            if (process != null) process.WaitForExit();
-                    }
+                    await this.InstallPackageAsync(pkg, p);
                 }
             }
-            catch (Exception)
-            {
-                cancellationTokenSource.Cancel();
-            }
-        }
 
-        /// <summary>
-        ///     Installs the packages asynchronous and once installed it will send an e-mail notification to the recipents
-        ///     configured in the application configuration file.
-        /// </summary>
-        /// <param name="build">The build.</param>
-        /// <param name="packages">The packages.</param>
-        private void InstallPackagesAsync(Build build, List<string> packages)
-        {
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
-            Task task = Task.Run(() => this.InstallPackages(packages, cancellationToken), cancellationToken.Token);
-            task.ContinueWith(t =>
-            {
-                if (t.IsCompleted)
-                {
-                    NotificationService service = new NotificationService();
-                    if (service.Send(build)) this.Log("Build notification completed.");
-                }
-
-            }, cancellationToken.Token);
+            NotificationService service = new NotificationService();
+            if (service.Send(build)) this.Log("Build notification completed.");
         }
 
         #endregion

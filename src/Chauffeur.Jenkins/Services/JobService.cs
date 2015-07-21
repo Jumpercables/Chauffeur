@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.ServiceModel;
 
@@ -8,7 +7,7 @@ using Chauffeur.Jenkins.Client;
 using Chauffeur.Jenkins.Model;
 
 namespace Chauffeur.Jenkins.Services
-{    
+{
     /// <summary>
     ///     Provides a WFC service contract for obtaining job information from Jenkins.
     /// </summary>
@@ -34,11 +33,19 @@ namespace Chauffeur.Jenkins.Services
         [OperationContract]
         IList<Job> GetJobs();
 
+        /// <summary>
+        ///     Gets the last successful build for the job.
+        /// </summary>
+        /// <param name="jobName">Name of the job.</param>
+        /// <returns>Returns a <see cref="Build" /> representing the last successful build for the job.</returns>
+        [OperationContract]
+        Build GetLastSuccessfulBuild(string jobName);
+
         #endregion
     }
 
     /// <summary>
-    /// Provides a WCF Service used to obtain the job information from jenkins.
+    ///     Provides a WCF Service used to obtain the job information from jenkins.
     /// </summary>
     public class JobService : JenkinsService, IJobService
     {
@@ -71,16 +78,16 @@ namespace Chauffeur.Jenkins.Services
         #region IJobService Members
 
         /// <summary>
-        /// Gets the job from server with the specified name.
+        ///     Gets the job from server with the specified name.
         /// </summary>
         /// <param name="jobName">Name of the job.</param>
         /// <returns>
-        /// Returns a <see cref="Job" /> representing the job.
+        ///     Returns a <see cref="Job" /> representing the job.
         /// </returns>
         /// <exception cref="System.ServiceModel.FaultException">
-        /// The job name was not provided.
-        /// or
-        /// The job could not be found.
+        ///     The job name was not provided.
+        ///     or
+        ///     The job could not be found.
         /// </exception>
         public Job GetJob(string jobName)
         {
@@ -91,9 +98,38 @@ namespace Chauffeur.Jenkins.Services
 
             try
             {
-                var queryUri = new Uri(base.BaseUri, @"/job/" + jobName + "/");
+                var queryUri = this.CreateUri(jobName);
                 var job = base.Client.GetResource<Job>(queryUri, 1);
                 return job;
+            }
+            catch (WebException)
+            {
+                throw new FaultException("The job could not be found.");
+            }
+        }
+
+        /// <summary>
+        ///     Gets the last successful build.
+        /// </summary>
+        /// <param name="jobName">Name of the job.</param>
+        /// <returns></returns>
+        /// <exception cref="System.ServiceModel.FaultException">
+        ///     The job name was not provided.
+        ///     or
+        ///     The job could not be found.
+        /// </exception>
+        public Build GetLastSuccessfulBuild(string jobName)
+        {
+            if (string.IsNullOrEmpty(jobName))
+                throw new FaultException("The job name was not provided.");
+
+            this.Log("Job: {0}", jobName);
+
+            try
+            {
+                var queryUri = this.CreateUri(jobName, "lastSuccessfulBuild");
+                var build = base.Client.GetResource<Build>(queryUri, 1);
+                return build;
             }
             catch (WebException)
             {
@@ -111,6 +147,24 @@ namespace Chauffeur.Jenkins.Services
             if (tree == null) return null;
 
             return tree.Jobs;
+        }
+
+        #endregion
+
+        #region Protected Methods
+
+        /// <summary>
+        ///     Creates the URI for the specific job.
+        /// </summary>
+        /// <param name="jobName">Name of the job.</param>
+        /// <param name="queryString">The query string.</param>
+        /// <returns>
+        ///     Returns a <see cref="Uri" /> representing the query string for the job.
+        /// </returns>
+        protected Uri CreateUri(string jobName, params string[] queryString)
+        {
+            var queryUri = new Uri(base.BaseUri, @"/job/" + jobName + "/" + string.Join("/", queryString) + "/");
+            return queryUri;
         }
 
         #endregion
