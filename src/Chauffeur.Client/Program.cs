@@ -26,7 +26,7 @@ namespace Chauffeur.Client
             {
                 try
                 {
-                    var build = await client.InstallLastSuccessfulBuildAsync(jobName);
+                    var build = await client.InstallBuildAsync(jobName);
                     Console.WriteLine("{0} - Last successful build requested to be installed: {1}", machineName, build.number);
                 }
                 catch (FaultException ex)

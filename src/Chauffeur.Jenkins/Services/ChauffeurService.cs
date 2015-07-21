@@ -54,7 +54,7 @@ namespace Chauffeur.Jenkins.Services
         {
             // Query for the job information from the server.            
             var service = new JobService(base.BaseUri, base.Client);
-            var build = service.GetLastSuccessfulBuild(jobName);
+            var build = service.GetBuild(jobName);
 
             // Download the packages.
             var packages = await this.DownloadPackages(build);

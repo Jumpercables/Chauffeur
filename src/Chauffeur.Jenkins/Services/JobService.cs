@@ -40,7 +40,7 @@ namespace Chauffeur.Jenkins.Services
         /// <param name="jobName">Name of the job.</param>
         /// <returns>Returns a <see cref="Build" /> representing the last successful build for the job.</returns>
         [OperationContract]
-        Build GetLastSuccessfulBuild(string jobName);
+        Build GetBuild(string jobName);
 
         #endregion
     }
@@ -119,7 +119,7 @@ namespace Chauffeur.Jenkins.Services
         ///     or
         ///     The job could not be found.
         /// </exception>
-        public Build GetLastSuccessfulBuild(string jobName)
+        public Build GetBuild(string jobName)
         {
             if (string.IsNullOrEmpty(jobName))
                 throw new WebFaultException<ErrorData>(new ErrorData("The job name was not provided.", "The jobName argument cannot be null."), HttpStatusCode.NotFound);

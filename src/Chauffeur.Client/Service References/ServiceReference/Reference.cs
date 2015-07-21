@@ -640,16 +640,10 @@ namespace Chauffeur.Client.ServiceReference {
     public interface IChauffeurService {
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IChauffeurService/InstallBuild", ReplyAction="http://tempuri.org/IChauffeurService/InstallBuildResponse")]
-        void InstallBuild(Chauffeur.Client.ServiceReference.Build build, string directory);
+        Chauffeur.Client.ServiceReference.Build InstallBuild(string jobName);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IChauffeurService/InstallBuild", ReplyAction="http://tempuri.org/IChauffeurService/InstallBuildResponse")]
-        System.Threading.Tasks.Task InstallBuildAsync(Chauffeur.Client.ServiceReference.Build build, string directory);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IChauffeurService/InstallLastSuccessfulBuild", ReplyAction="http://tempuri.org/IChauffeurService/InstallLastSuccessfulBuildResponse")]
-        Chauffeur.Client.ServiceReference.Build InstallLastSuccessfulBuild(string jobName);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IChauffeurService/InstallLastSuccessfulBuild", ReplyAction="http://tempuri.org/IChauffeurService/InstallLastSuccessfulBuildResponse")]
-        System.Threading.Tasks.Task<Chauffeur.Client.ServiceReference.Build> InstallLastSuccessfulBuildAsync(string jobName);
+        System.Threading.Tasks.Task<Chauffeur.Client.ServiceReference.Build> InstallBuildAsync(string jobName);
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
@@ -679,20 +673,12 @@ namespace Chauffeur.Client.ServiceReference {
                 base(binding, remoteAddress) {
         }
         
-        public void InstallBuild(Chauffeur.Client.ServiceReference.Build build, string directory) {
-            base.Channel.InstallBuild(build, directory);
+        public Chauffeur.Client.ServiceReference.Build InstallBuild(string jobName) {
+            return base.Channel.InstallBuild(jobName);
         }
         
-        public System.Threading.Tasks.Task InstallBuildAsync(Chauffeur.Client.ServiceReference.Build build, string directory) {
-            return base.Channel.InstallBuildAsync(build, directory);
-        }
-        
-        public Chauffeur.Client.ServiceReference.Build InstallLastSuccessfulBuild(string jobName) {
-            return base.Channel.InstallLastSuccessfulBuild(jobName);
-        }
-        
-        public System.Threading.Tasks.Task<Chauffeur.Client.ServiceReference.Build> InstallLastSuccessfulBuildAsync(string jobName) {
-            return base.Channel.InstallLastSuccessfulBuildAsync(jobName);
+        public System.Threading.Tasks.Task<Chauffeur.Client.ServiceReference.Build> InstallBuildAsync(string jobName) {
+            return base.Channel.InstallBuildAsync(jobName);
         }
     }
 }
