@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Configuration;
 using System.Diagnostics;
+using System.Runtime.Serialization;
 
 using Chauffeur.Jenkins.Client;
 
@@ -83,5 +84,41 @@ namespace Chauffeur.Jenkins.Services
         }
 
         #endregion
+    }
+
+    /// <summary>
+    /// A light weight structure used for the details in the WebFaultException.
+    /// </summary>
+    [DataContract]
+    public class ErrorData
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ErrorData"/> class.
+        /// </summary>
+        /// <param name="reason">The reason.</param>
+        /// <param name="detailedInformation">The detailed information.</param>
+        public ErrorData(string reason, string detailedInformation)
+        {
+            this.Reason = reason;
+            this.DetailedInformation = detailedInformation;
+        }
+
+        /// <summary>
+        /// Gets the reason.
+        /// </summary>
+        /// <value>
+        /// The reason.
+        /// </value>
+        [DataMember]
+        public string Reason { get; private set; }
+
+        /// <summary>
+        /// Gets the detailed information.
+        /// </summary>
+        /// <value>
+        /// The detailed information.
+        /// </value>
+        [DataMember]
+        public string DetailedInformation { get; private set; }
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net;
 using System.ServiceModel;
+using System.ServiceModel.Web;
 
 using Chauffeur.Jenkins.Client;
 using Chauffeur.Jenkins.Model;
@@ -92,7 +93,7 @@ namespace Chauffeur.Jenkins.Services
         public Job GetJob(string jobName)
         {
             if (string.IsNullOrEmpty(jobName))
-                throw new FaultException("The job name was not provided.");
+                throw new WebFaultException<ErrorData>(new ErrorData("The job name was not provided.", "The jobName argument cannot be null."), HttpStatusCode.NotFound);
 
             this.Log("Job: {0}", jobName);
 
@@ -104,7 +105,7 @@ namespace Chauffeur.Jenkins.Services
             }
             catch (WebException)
             {
-                throw new FaultException("The job could not be found.");
+                throw new WebFaultException<ErrorData>(new ErrorData("The job was not found.", "A job with the specified name does not exist."), HttpStatusCode.NotFound);
             }
         }
 
@@ -121,7 +122,7 @@ namespace Chauffeur.Jenkins.Services
         public Build GetLastSuccessfulBuild(string jobName)
         {
             if (string.IsNullOrEmpty(jobName))
-                throw new FaultException("The job name was not provided.");
+                throw new WebFaultException<ErrorData>(new ErrorData("The job name was not provided.", "The jobName argument cannot be null."), HttpStatusCode.NotFound);
 
             this.Log("Job: {0}", jobName);
 
@@ -129,11 +130,14 @@ namespace Chauffeur.Jenkins.Services
             {
                 var queryUri = this.CreateUri(jobName, "lastSuccessfulBuild");
                 var build = base.Client.GetResource<Build>(queryUri, 1);
+
+                this.Log("Last successful build: {0}", build.Number);
+
                 return build;
             }
             catch (WebException)
             {
-                throw new FaultException("The job could not be found.");
+                throw new WebFaultException<ErrorData>(new ErrorData("The job was not found.", "A job with the specified name does not exist."), HttpStatusCode.NotFound);
             }
         }
 

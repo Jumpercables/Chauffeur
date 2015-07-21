@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.ServiceModel;
+using System.ServiceModel.Web;
 using System.Threading.Tasks;
 
 using Chauffeur.Jenkins.Model;
@@ -20,22 +21,15 @@ namespace Chauffeur.Jenkins.Services
         #region Public Methods
 
         /// <summary>
-        ///     Installs the build asynchronous on the machine that host the service.
-        /// </summary>
-        /// <param name="build">The build.</param>
-        /// <param name="directory">The directory.</param>
-        [OperationContract]
-        void InstallBuild(Build build, string directory);
-
-        /// <summary>
-        ///     Installs the last successful build asynchronous on the machine that host the service.
+        ///     Download and installs the last successful build on the machine that host the service.
         /// </summary>
         /// <param name="jobName">Name of the job.</param>
         /// <returns>
         ///     Returns the <see cref="Build" /> that was installed on the machine.
         /// </returns>
         [OperationContract]
-        Build InstallLastSuccessfulBuild(string jobName);
+        [WebGet(UriTemplate = "Install/{jobName}", ResponseFormat = WebMessageFormat.Json)]
+        Task<Build> InstallBuildAsync(string jobName);
 
         #endregion
     }
@@ -43,28 +37,10 @@ namespace Chauffeur.Jenkins.Services
     /// <summary>
     ///     Provides a WCF service that will install builds on the host machines.
     /// </summary>
+    [ServiceBehavior(AddressFilterMode = AddressFilterMode.Any)]
     public class ChauffeurService : JenkinsService, IChauffeurService
     {
         #region IChauffeurService Members
-
-        /// <summary>
-        ///     Installs the build on the machine that hosts the service.
-        /// </summary>
-        /// <param name="build">The build.</param>
-        /// <param name="directory">The directory.</param>
-        /// <exception cref="System.ServiceModel.FaultException">The build was not provided.</exception>
-        public void InstallBuild(Build build, string directory)
-        {
-            if (build == null)
-                throw new FaultException("The build was not provided.");
-
-            // Download the build artifacts for the job.
-            var jenkinsService = new ArtifactService(base.BaseUri, base.Client);
-            var artifacts = jenkinsService.DownloadArtifacts(build, directory);
-
-            // Install the MSI packages on a thread to prevent blocking.
-            this.InstallPackagesAsync(build, artifacts.Where(o => o.EndsWith(".msi", StringComparison.InvariantCultureIgnoreCase)).ToList());           
-        }
 
         /// <summary>
         ///     Installs the last successful build for the specific job.
@@ -74,17 +50,17 @@ namespace Chauffeur.Jenkins.Services
         ///     Returns the <see cref="Build" /> that was installed on the machine.
         /// </returns>
         /// <exception cref="System.ServiceModel.FaultException">The job name was not provided.</exception>
-        public Build InstallLastSuccessfulBuild(string jobName)
+        public async Task<Build> InstallBuildAsync(string jobName)
         {
             // Query for the job information from the server.            
-            var jenkinsService = new JobService(base.BaseUri, base.Client);
-            var build = jenkinsService.GetLastSuccessfulBuild(jobName);
+            var service = new JobService(base.BaseUri, base.Client);
+            var build = service.GetLastSuccessfulBuild(jobName);
 
-            this.Log("Last successful build: {0}", build.Number);
+            // Download the packages.
+            var packages = await this.DownloadPackages(build);
 
-            // Install the last successful build but move to the next method and don't wait for completion. 
-            var directory = this.GetArtifactsPath();
-            this.InstallBuild(build, directory);
+            // Install the packages once the download completes.
+            this.InstallPackages(build, packages);
 
             // Return the build installed.
             return build;
@@ -93,6 +69,22 @@ namespace Chauffeur.Jenkins.Services
         #endregion
 
         #region Private Methods
+
+        /// <summary>
+        ///     Downloads the packages of the build.
+        /// </summary>
+        /// <param name="build">The build.</param>
+        private async Task<string[]> DownloadPackages(Build build)
+        {
+            // Install the last successful build but move to the next method and don't wait for completion. 
+            var directory = this.GetArtifactsPath();
+
+            // Download the build artifacts for the job.
+            var service = new ArtifactService(base.BaseUri, base.Client);
+            var packages = await service.DownloadArtifactsAsync(build, directory);
+
+            return packages;
+        }
 
         /// <summary>
         ///     Gets the artifacts.
@@ -112,7 +104,7 @@ namespace Chauffeur.Jenkins.Services
         }
 
         /// <summary>
-        ///     Installs the package asynchronous.
+        ///     Executes the installation or de-installation of the package based on the parameters.
         /// </summary>
         /// <param name="package">The package.</param>
         /// <param name="parameters">The parameters.</param>
@@ -134,11 +126,11 @@ namespace Chauffeur.Jenkins.Services
         }
 
         /// <summary>
-        /// Installs the build MSI packages using the "msiexec.exe" utility on the windows machine.
+        ///     Installs the build MSI packages using the "msiexec.exe" utility on the windows machine.
         /// </summary>
         /// <param name="build">The build.</param>
         /// <param name="packages">The packages.</param>
-        private async void InstallPackagesAsync(Build build, List<string> packages)
+        private async void InstallPackages(Build build, string[] packages)
         {
             Dictionary<string, string> parameters = new Dictionary<string, string>
             {
@@ -146,7 +138,7 @@ namespace Chauffeur.Jenkins.Services
                 {@"/i", ConfigurationManager.AppSettings["chauffeur.install"]}
             };
 
-            this.Log("Installing {0} package(s).", packages.Count);
+            this.Log("Installing {0} package(s).", packages.Length);
 
             foreach (var pkg in packages)
             {
@@ -157,7 +149,7 @@ namespace Chauffeur.Jenkins.Services
             }
 
             NotificationService service = new NotificationService();
-            if (service.Send(build)) this.Log("Build notification completed.");
+            await service.SendAsync(build).ContinueWith((task) => this.Log("Build notification sent."));
         }
 
         #endregion

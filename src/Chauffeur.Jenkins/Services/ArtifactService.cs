@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.ServiceModel;
+using System.ServiceModel.Web;
 using System.Threading.Tasks;
 
 using Chauffeur.Jenkins.Client;
@@ -25,16 +26,16 @@ namespace Chauffeur.Jenkins.Services
         /// <param name="build">The build.</param>
         /// <param name="directory">The directory.</param>
         /// <returns>
-        ///     Returns a <see cref="IEnumerable{String}" /> that representing the paths to the local artifacts.
+        ///     Returns a <see cref="IEnumerable{T}" /> that representing the paths to the local artifacts.
         /// </returns>
         [OperationContract]
-        List<string> DownloadArtifacts(Build build, string directory);
+        Task<string[]> DownloadArtifactsAsync(Build build, string directory);
 
         #endregion
     }
 
     /// <summary>
-    /// A service used to obtain the build artifacts from jenkins.
+    ///     A service used to obtain the build artifacts from jenkins.
     /// </summary>
     public class ArtifactService : JenkinsService, IArtifactService
     {
@@ -64,38 +65,34 @@ namespace Chauffeur.Jenkins.Services
 
         #endregion
 
-        #region Public Methods
+        #region IArtifactService Members
 
         /// <summary>
-        /// Downloads all of the artifacts from the build into the specified directory.
+        ///     Downloads all of the artifacts from the build into the specified directory.
         /// </summary>
         /// <param name="build">The build.</param>
         /// <param name="directory">The directory.</param>
         /// <returns>
-        /// Returns a <see cref="IEnumerable{String}" /> that representing the paths to the local artifacts.
+        ///     Returns a <see cref="IEnumerable{String}" /> that representing the paths to the local artifacts.
         /// </returns>
-        /// <exception cref="System.ServiceModel.FaultException">
-        /// The build was not provided.
-        /// or
-        /// The directory was not provided.
-        /// </exception>       
-        public List<string> DownloadArtifacts(Build build, string directory)
+        public Task<string[]> DownloadArtifactsAsync(Build build, string directory)
         {
             if (build == null)
-                throw new FaultException("The build was not provided.");
+                throw new WebFaultException<ErrorData>(new ErrorData("The build was not provided.", "The build argument must be specified."), HttpStatusCode.BadRequest);
 
             if (directory == null)
-                throw new FaultException("The directory was not provided.");
+                throw new WebFaultException<ErrorData>(new ErrorData("The directory was not provided.", "The directory argument must be specified."), HttpStatusCode.BadRequest);
 
             this.Log("Downloading artifacts for build '{0}' to the '{1}' directory.", build.Number, directory);
 
             if (!Directory.Exists(directory))
                 Directory.CreateDirectory(directory);
 
-            var tasks = build.Artifacts.Select(artifact => this.DownloadArtifactAsync(build, artifact, directory)).ToArray();
-            Task.WaitAll(tasks);
-
-            return tasks.Select(o => o.Result).ToList();
+            return Task.Run(() =>
+            {
+                var tasks = build.Artifacts.Select(artifact => this.DownloadArtifactAsync(build, artifact, directory));
+                return tasks.Select(o => o.Result).ToArray();
+            });
         }
 
         #endregion
@@ -103,44 +100,27 @@ namespace Chauffeur.Jenkins.Services
         #region Private Methods
 
         /// <summary>
-        /// Downloads the artifact into the directory.
+        ///     Downloads the artifact into the directory.
         /// </summary>
         /// <param name="build">The build.</param>
         /// <param name="artifact">The artifact.</param>
         /// <param name="directory">The directory.</param>
         /// <returns>
-        /// Returns a <see cref="string" /> representing the full path to the local artifact.
+        ///     Returns a <see cref="string" /> representing the full path to the local artifact.
         /// </returns>
-        /// <exception cref="System.ServiceModel.FaultException">
-        /// The build was not provided.
-        /// or
-        /// The artifact was not provided.
-        /// or
-        /// The directory was not provided.
-        /// </exception>
         private string DownloadArtifact(Build build, Artifact artifact, string directory)
         {
-            if (build == null)
-                throw new FaultException("The build was not provided.");
-
-            if(artifact == null)
-                throw new FaultException("The artifact was not provided.");
-
-            if (directory == null)
-                throw new FaultException("The directory was not provided.");
-
             string fileName = Path.Combine(directory, artifact.FileName);
             WebRequest request;
 
             try
             {
-                
                 Uri absoluteUri = new Uri(build.Url, @"artifact/" + artifact.RelativePath);
                 request = base.Client.GetRequest(absoluteUri);
             }
             catch (WebException)
             {
-                throw new FaultException("The artifact was not found.");
+                throw new WebFaultException<ErrorData>(new ErrorData("The artifact was not found.", "The build artifact: {0} " + artifact.RelativePath + " was not found on the server."), HttpStatusCode.NotFound);
             }
 
             using (var response = request.GetResponse())
