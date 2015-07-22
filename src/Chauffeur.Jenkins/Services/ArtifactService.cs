@@ -81,12 +81,12 @@ namespace Chauffeur.Jenkins.Services
                 throw new WebFaultException<ErrorData>(new ErrorData("The build was not provided.", "The build argument must be specified."), HttpStatusCode.BadRequest);
 
             if (directory == null)
-                throw new WebFaultException<ErrorData>(new ErrorData("The directory was not provided.", "The directory argument must be specified."), HttpStatusCode.BadRequest);
-
-            this.Log("Downloading artifacts for build '{0}' to the '{1}' directory.", build.Number, directory);
+                throw new WebFaultException<ErrorData>(new ErrorData("The directory was not provided.", "The directory argument must be specified."), HttpStatusCode.BadRequest);           
 
             if (!Directory.Exists(directory))
                 Directory.CreateDirectory(directory);
+
+            this.Log("Downloading {0} package(s) into the {1} directory.", build.Artifacts.Count, directory);
 
             return Task.Run(() =>
             {
@@ -161,7 +161,12 @@ namespace Chauffeur.Jenkins.Services
         /// <returns>Returns a <see cref="string" /> representing the full path to the local artifact.</returns>
         private Task<string> DownloadArtifactAsync(Build build, Artifact artifact, string directory)
         {
-            return Task.Run(() => this.DownloadArtifact(build, artifact, directory));
+            return Task.Run(() => this.DownloadArtifact(build, artifact, directory)).ContinueWith((task) =>
+            {                
+                this.Log("\t: {0}. {1}", task.Result, task.Status);
+
+                return task.Result;
+            });
         }
 
         #endregion

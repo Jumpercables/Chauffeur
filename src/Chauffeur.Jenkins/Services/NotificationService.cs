@@ -25,8 +25,11 @@ namespace Chauffeur.Jenkins.Services
         ///     Sends a notification of the specified build.
         /// </summary>
         /// <param name="build">The build.</param>
+        /// <returns>
+        ///     Returns <see cref="bool" /> when the notification was sent.
+        /// </returns>
         [OperationContract]
-        Task SendAsync(Build build);
+        Task<bool> SendAsync(Build build);
 
         #endregion
     }
@@ -34,7 +37,7 @@ namespace Chauffeur.Jenkins.Services
     /// <summary>
     ///     Provides a WFC contract that will send out a notification for the build.
     /// </summary>
-    public class NotificationService : INotificationService
+    public class NotificationService : JenkinsService, INotificationService
     {
         #region INotificationService Members
 
@@ -42,12 +45,15 @@ namespace Chauffeur.Jenkins.Services
         ///     Sends a notification of the specified build.
         /// </summary>
         /// <param name="build">The build.</param>
-        public Task SendAsync(Build build)
+        /// <returns>
+        ///     Returns <see cref="bool" /> when the notification was sent.
+        /// </returns>
+        public Task<bool> SendAsync(Build build)
         {
             return Task.Run(() =>
             {
                 string to = ConfigurationManager.AppSettings["email.to"];
-                if (string.IsNullOrEmpty(to)) return;
+                if (string.IsNullOrEmpty(to)) return false;
 
                 string host = ConfigurationManager.AppSettings["email.host"];
                 if (string.IsNullOrEmpty(host))
@@ -68,6 +74,10 @@ namespace Chauffeur.Jenkins.Services
                     using (SmtpClient client = new SmtpClient(host))
                         client.Send(message);
                 }
+
+                this.Log("Build Notification: {0}", to);
+
+                return true;
             });
         }
 

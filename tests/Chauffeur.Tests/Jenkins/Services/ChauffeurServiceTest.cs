@@ -10,10 +10,10 @@ namespace Chauffeur.Tests.Jenkins.Services
     public class ChauffeurServiceTest
     {
         [TestMethod]
-        public void ChauffeurService_InstallLastSuccessfulBuild()
+        public async void ChauffeurService_InstallBuildAsync()
         {
             ChauffeurService service  = new ChauffeurService();
-            var build = service.InstallLastSuccessfulBuild("Sempra_Release_9.3.1_SP2_HPDB");
+            var build = await service.InstallBuildAsync("Sempra_Release_9.3.1_SP2_HPDB");
         }
     }
 }

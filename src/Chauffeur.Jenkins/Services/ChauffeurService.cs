@@ -49,12 +49,11 @@ namespace Chauffeur.Jenkins.Services
         /// <returns>
         ///     Returns the <see cref="Build" /> that was installed on the machine.
         /// </returns>
-        /// <exception cref="System.ServiceModel.FaultException">The job name was not provided.</exception>
         public async Task<Build> InstallBuildAsync(string jobName)
         {
             // Query for the job information from the server.            
             var service = new JobService(base.BaseUri, base.Client);
-            var build = service.GetBuild(jobName);
+            var build = await service.GetBuildAsync(jobName);
 
             // Download the packages.
             var packages = await this.DownloadPackages(build);
@@ -77,7 +76,7 @@ namespace Chauffeur.Jenkins.Services
         private async Task<string[]> DownloadPackages(Build build)
         {
             // Install the last successful build but move to the next method and don't wait for completion. 
-            var directory = this.GetArtifactsPath();
+            var directory = this.GetPackagesPath();            
 
             // Download the build artifacts for the job.
             var service = new ArtifactService(base.BaseUri, base.Client);
@@ -87,17 +86,17 @@ namespace Chauffeur.Jenkins.Services
         }
 
         /// <summary>
-        ///     Gets the artifacts.
+        ///     Gets the packages path.
         /// </summary>
         /// <returns>Returns a <see cref="string" /> representing the path to the artifacts directory.</returns>
-        private string GetArtifactsPath()
+        private string GetPackagesPath()
         {
             // Use the directory specified in the app.config, otherwise use the fallback directory.
-            var directory = ConfigurationManager.AppSettings["chauffuer.artifacts"];
+            var directory = ConfigurationManager.AppSettings["chauffuer.packages"];
             if (string.IsNullOrEmpty(directory) || !Directory.Exists(directory))
             {
                 directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Jenkins");
-                this.Log("The 'chauffuer.artifacts' directory does not exist, using default directory: {0}", directory);
+                this.Log("The 'chauffuer.packages' directory does not exist (using default directory: {0})", directory);
             }
 
             return directory;
@@ -149,7 +148,7 @@ namespace Chauffeur.Jenkins.Services
             }
 
             NotificationService service = new NotificationService();
-            await service.SendAsync(build).ContinueWith((task) => this.Log("Build notification sent."));
+            await service.SendAsync(build);
         }
 
         #endregion

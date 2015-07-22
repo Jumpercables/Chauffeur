@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.ServiceModel;
 using System.ServiceModel.Web;
+using System.Threading.Tasks;
 
 using Chauffeur.Jenkins.Client;
 using Chauffeur.Jenkins.Model;
@@ -18,6 +19,15 @@ namespace Chauffeur.Jenkins.Services
         #region Public Methods
 
         /// <summary>
+        ///     Gets the last successful build for the job.
+        /// </summary>
+        /// <param name="jobName">Name of the job.</param>
+        /// <returns>Returns a <see cref="Build" /> representing the last successful build for the job.</returns>
+        [OperationContract]
+        [WebGet(UriTemplate = "Build/{jobName}")]
+        Task<Build> GetBuildAsync(string jobName);
+
+        /// <summary>
         ///     Gets the job from server with the specified name.
         /// </summary>
         /// <param name="jobName">Name of the job.</param>
@@ -25,22 +35,16 @@ namespace Chauffeur.Jenkins.Services
         ///     Returns a <see cref="Job" /> representing the job.
         /// </returns>
         [OperationContract]
-        Job GetJob(string jobName);
+        [WebGet(UriTemplate = "Job/{jobName}")]
+        Task<Job> GetJobAsync(string jobName);
 
         /// <summary>
         ///     Gets all of the jobs that have been configured in jenkins.
         /// </summary>
         /// <returns>Returns a <see cref="IList{Job}" /> representing jobs configured.</returns>
         [OperationContract]
-        IList<Job> GetJobs();
-
-        /// <summary>
-        ///     Gets the last successful build for the job.
-        /// </summary>
-        /// <param name="jobName">Name of the job.</param>
-        /// <returns>Returns a <see cref="Build" /> representing the last successful build for the job.</returns>
-        [OperationContract]
-        Build GetBuild(string jobName);
+        [WebGet(UriTemplate = "Jobs")]
+        Task<IList<Job>> GetJobsAsync();
 
         #endregion
     }
@@ -85,23 +89,31 @@ namespace Chauffeur.Jenkins.Services
         /// <returns>
         ///     Returns a <see cref="Job" /> representing the job.
         /// </returns>
-        /// <exception cref="System.ServiceModel.FaultException">
-        ///     The job name was not provided.
+        /// <exception cref="WebFaultException{T}">
+        ///     new ErrorData(The job name was not provided., The jobName argument cannot be null.)
         ///     or
-        ///     The job could not be found.
+        ///     new ErrorData(The job was not found., A job with the specified name does not exist.)
         /// </exception>
-        public Job GetJob(string jobName)
+        /// <exception cref="ErrorData">
+        ///     The job name was not provided.;The jobName argument cannot be null.
+        ///     or
+        ///     The job was not found.;A job with the specified name does not exist.
+        /// </exception>
+        public Task<Job> GetJobAsync(string jobName)
         {
             if (string.IsNullOrEmpty(jobName))
                 throw new WebFaultException<ErrorData>(new ErrorData("The job name was not provided.", "The jobName argument cannot be null."), HttpStatusCode.NotFound);
 
-            this.Log("Job: {0}", jobName);
-
             try
             {
-                var queryUri = this.CreateUri(jobName);
-                var job = base.Client.GetResource<Job>(queryUri, 1);
-                return job;
+                return Task.Run(() =>
+                {
+                    var queryUri = this.CreateUri(jobName);
+                    var job = base.Client.GetResource<Job>(queryUri, 1);
+
+                    this.Log("Job: {0}", jobName);
+                    return job;
+                });
             }
             catch (WebException)
             {
@@ -113,27 +125,36 @@ namespace Chauffeur.Jenkins.Services
         ///     Gets the last successful build.
         /// </summary>
         /// <param name="jobName">Name of the job.</param>
-        /// <returns></returns>
-        /// <exception cref="System.ServiceModel.FaultException">
-        ///     The job name was not provided.
+        /// <returns>
+        ///     Returns a <see cref="Build" /> representing the last successful build for the job.
+        /// </returns>
+        /// <exception cref="WebFaultException{ErrorData}">
+        ///     new ErrorData(The job name was not provided., The jobName argument cannot be null.)
         ///     or
-        ///     The job could not be found.
+        ///     new ErrorData(The job was not found., A job with the specified name does not exist.)
         /// </exception>
-        public Build GetBuild(string jobName)
+        /// <exception cref="ErrorData">
+        ///     The job name was not provided.;The jobName argument cannot be null.
+        ///     or
+        ///     The job was not found.;A job with the specified name does not exist.
+        /// </exception>
+        public Task<Build> GetBuildAsync(string jobName)
         {
             if (string.IsNullOrEmpty(jobName))
                 throw new WebFaultException<ErrorData>(new ErrorData("The job name was not provided.", "The jobName argument cannot be null."), HttpStatusCode.NotFound);
 
-            this.Log("Job: {0}", jobName);
-
             try
             {
-                var queryUri = this.CreateUri(jobName, "lastSuccessfulBuild");
-                var build = base.Client.GetResource<Build>(queryUri, 1);
+                return Task.Run(() =>
+                {
+                    var queryUri = this.CreateUri(jobName, "lastSuccessfulBuild");
+                    var build = base.Client.GetResource<Build>(queryUri, 1);
 
-                this.Log("Last successful build: {0}", build.Number);
+                    this.Log("Job: {0}", jobName);
+                    this.Log("Build: {0}", build.Number);
 
-                return build;
+                    return build;
+                });
             }
             catch (WebException)
             {
@@ -144,13 +165,18 @@ namespace Chauffeur.Jenkins.Services
         /// <summary>
         ///     Gets all of the jobs that have been configured in jenkins.
         /// </summary>
-        /// <returns>Returns a <see cref="IList{Job}" /> representing jobs configured.</returns>
-        public IList<Job> GetJobs()
+        /// <returns>
+        ///     Returns a <see cref="IList{Job}" /> representing all of the jobs.
+        /// </returns>
+        public Task<IList<Job>> GetJobsAsync()
         {
-            var tree = base.Client.GetResource<Tree>(base.BaseUri, 1);
-            if (tree == null) return null;
+            return Task.Run(() =>
+            {
+                var tree = base.Client.GetResource<Tree>(base.BaseUri, 1);
+                if (tree == null) return null;
 
-            return tree.Jobs;
+                return tree.Jobs;
+            });
         }
 
         #endregion

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Configuration;
 using System.Diagnostics;
+using System.Net;
 using System.Runtime.Serialization;
+using System.ServiceModel.Web;
 
 using Chauffeur.Jenkins.Client;
 
@@ -20,10 +22,20 @@ namespace Chauffeur.Jenkins.Services
         protected JenkinsService()
         {
             string url = ConfigurationManager.AppSettings["jenkins.server"];
-            this.BaseUri = new Uri(url);
+
+            if (string.IsNullOrEmpty(url))
+                throw new WebFaultException<ErrorData>(new ErrorData("The 'server' must be provided.", "The 'jenkins.server' must be provided in the configuration file."), HttpStatusCode.NotFound);
+
 
             string user = ConfigurationManager.AppSettings["jenkins.user"];
+            if (string.IsNullOrEmpty(user))
+                throw new WebFaultException<ErrorData>(new ErrorData("The 'user' must be provided.", "The 'jenkins.user' must be provided in the configuration file."), HttpStatusCode.NotFound);
+
             string token = ConfigurationManager.AppSettings["jenkins.token"];
+            if (string.IsNullOrEmpty(token))
+                throw new WebFaultException<ErrorData>(new ErrorData("The 'token' must be provided.", "The 'jenkins.token' must be provided in the configuration file."), HttpStatusCode.NotFound);
+
+            this.BaseUri = new Uri(url);
             this.Client = new JsonJenkinsClient(user, token);
         }
 
@@ -87,13 +99,15 @@ namespace Chauffeur.Jenkins.Services
     }
 
     /// <summary>
-    /// A light weight structure used for the details in the WebFaultException.
+    ///     A light weight structure used for the details in the WebFaultException.
     /// </summary>
     [DataContract]
     public class ErrorData
     {
+        #region Constructors
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="ErrorData"/> class.
+        ///     Initializes a new instance of the <see cref="ErrorData" /> class.
         /// </summary>
         /// <param name="reason">The reason.</param>
         /// <param name="detailedInformation">The detailed information.</param>
@@ -103,22 +117,28 @@ namespace Chauffeur.Jenkins.Services
             this.DetailedInformation = detailedInformation;
         }
 
+        #endregion
+
+        #region Public Properties
+
         /// <summary>
-        /// Gets the reason.
+        ///     Gets the detailed information.
         /// </summary>
         /// <value>
-        /// The reason.
+        ///     The detailed information.
+        /// </value>
+        [DataMember]
+        public string DetailedInformation { get; private set; }
+
+        /// <summary>
+        ///     Gets the reason.
+        /// </summary>
+        /// <value>
+        ///     The reason.
         /// </value>
         [DataMember]
         public string Reason { get; private set; }
 
-        /// <summary>
-        /// Gets the detailed information.
-        /// </summary>
-        /// <value>
-        /// The detailed information.
-        /// </value>
-        [DataMember]
-        public string DetailedInformation { get; private set; }
+        #endregion
     }
 }
