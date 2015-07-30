@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.ServiceModel;
 using System.ServiceModel.Web;
 using System.Threading.Tasks;
@@ -51,24 +50,24 @@ namespace Chauffeur.Jenkins.Services
         /// </returns>
         public async Task<Build> InstallBuildAsync(string jobName)
         {
-            // Query for the job information from the server.            
+            // Query the server for the last successful build for the job.         
             var service = new JobService(base.BaseUri, base.Client);
             var build = await service.GetBuildAsync(jobName);
 
             // Download the packages.
             var packages = await this.DownloadPackages(build);
 
-            // Install the packages once the download completes.
+            // Install the packages.
             this.InstallPackages(build, packages);
 
-            // Return the build installed.
+            // Return the build.
             return build;
         }
 
         #endregion
 
         #region Private Methods
-
+      
         /// <summary>
         ///     Downloads the packages of the build.
         /// </summary>
@@ -133,8 +132,8 @@ namespace Chauffeur.Jenkins.Services
         {
             Dictionary<string, string> parameters = new Dictionary<string, string>
             {
-                {@"/x", ConfigurationManager.AppSettings["chauffeur.uninstall"]},
-                {@"/i", ConfigurationManager.AppSettings["chauffeur.install"]}
+                {@"/x", ConfigurationManager.AppSettings["chauffeur.uninstall"] ?? "/quiet"},
+                {@"/i", ConfigurationManager.AppSettings["chauffeur.install"] ?? "/quiet"}
             };
 
             this.Log("Installing {0} package(s).", packages.Length);
@@ -148,7 +147,7 @@ namespace Chauffeur.Jenkins.Services
             }
 
             NotificationService service = new NotificationService();
-            await service.SendAsync(build);
+            await service.SendAsync(build).ContinueWith((task) => this.Log("Notification: {0}", task.Result));
         }
 
         #endregion

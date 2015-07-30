@@ -37,7 +37,7 @@ namespace Chauffeur.Jenkins.Services
     /// <summary>
     ///     Provides a WFC contract that will send out a notification for the build.
     /// </summary>
-    public class NotificationService : JenkinsService, INotificationService
+    public class NotificationService : INotificationService
     {
         #region INotificationService Members
 
@@ -60,7 +60,7 @@ namespace Chauffeur.Jenkins.Services
                     throw new WebFaultException<ErrorData>(new ErrorData("The 'host' must be provided.", "The 'email.host' must be provided in the configuration file."), HttpStatusCode.NotFound);
 
                 string from = ConfigurationManager.AppSettings["email.from"];
-                if (string.IsNullOrEmpty(host))
+                if (string.IsNullOrEmpty(from))
                     throw new WebFaultException<ErrorData>(new ErrorData("The 'from' must be provided.", "The 'email.from' must be provided in the configuration file."), HttpStatusCode.NotFound);
 
                 using (MailMessage message = new MailMessage())
@@ -73,9 +73,7 @@ namespace Chauffeur.Jenkins.Services
 
                     using (SmtpClient client = new SmtpClient(host))
                         client.Send(message);
-                }
-
-                this.Log("Build Notification: {0}", to);
+                }               
 
                 return true;
             });

@@ -86,7 +86,7 @@ namespace Chauffeur.Jenkins.Services
             if (!Directory.Exists(directory))
                 Directory.CreateDirectory(directory);
 
-            this.Log("Downloading {0} package(s) into the {1} directory.", build.Artifacts.Count, directory);
+            this.Log("Downloading {0} artifact(s) into the {1} directory.", build.Artifacts.Count, directory);
 
             return Task.Run(() =>
             {
@@ -111,17 +111,7 @@ namespace Chauffeur.Jenkins.Services
         private string DownloadArtifact(Build build, Artifact artifact, string directory)
         {
             string fileName = Path.Combine(directory, artifact.FileName);
-            WebRequest request;
-
-            try
-            {
-                Uri absoluteUri = new Uri(build.Url, @"artifact/" + artifact.RelativePath);
-                request = base.Client.GetRequest(absoluteUri);
-            }
-            catch (WebException)
-            {
-                throw new WebFaultException<ErrorData>(new ErrorData("The artifact was not found.", "The build artifact: {0} " + artifact.RelativePath + " was not found on the server."), HttpStatusCode.NotFound);
-            }
+            WebRequest request = this.CreateRequest(build, artifact);
 
             using (var response = request.GetResponse())
             {
@@ -153,6 +143,27 @@ namespace Chauffeur.Jenkins.Services
         }
 
         /// <summary>
+        /// Creates the request.
+        /// </summary>
+        /// <param name="build">The build.</param>
+        /// <param name="artifact">The artifact.</param>
+        /// <returns>
+        /// Returns a <see cref="WebRequest" /> representing the request to the server.
+        /// </returns>
+        private WebRequest CreateRequest(Build build, Artifact artifact)
+        {
+            try
+            {
+                Uri absoluteUri = new Uri(build.Url, @"artifact/" + artifact.RelativePath);
+                return base.Client.GetRequest(absoluteUri);
+            }
+            catch (WebException)
+            {
+                throw new WebFaultException<ErrorData>(new ErrorData("The artifact was not found.", "The build artifact: {0} " + artifact.RelativePath + " was not found on the server."), HttpStatusCode.NotFound);
+            }
+        }
+
+        /// <summary>
         ///     Asynchronously downloads the artifact into the directory.
         /// </summary>
         /// <param name="build">The build.</param>
@@ -163,7 +174,7 @@ namespace Chauffeur.Jenkins.Services
         {
             return Task.Run(() => this.DownloadArtifact(build, artifact, directory)).ContinueWith((task) =>
             {                
-                this.Log("\t: {0}. {1}", task.Result, task.Status);
+                this.Log("\t{0}: {1} = {2}.", artifact.FileName, task.Result, task.Status);
 
                 return task.Result;
             });

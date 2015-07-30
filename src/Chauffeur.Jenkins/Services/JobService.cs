@@ -108,10 +108,10 @@ namespace Chauffeur.Jenkins.Services
             {
                 return Task.Run(() =>
                 {
-                    var queryUri = this.CreateUri(jobName);
-                    var job = base.Client.GetResource<Job>(queryUri, 1);
-
                     this.Log("Job: {0}", jobName);
+
+                    var queryUri = this.CreateUri(jobName);
+                    var job = base.Client.GetResource<Job>(queryUri, 1);                   
                     return job;
                 });
             }
@@ -147,10 +147,11 @@ namespace Chauffeur.Jenkins.Services
             {
                 return Task.Run(() =>
                 {
+                    this.Log("Job: {0}", jobName);
+
                     var queryUri = this.CreateUri(jobName, "lastSuccessfulBuild");
                     var build = base.Client.GetResource<Build>(queryUri, 1);
-
-                    this.Log("Job: {0}", jobName);
+                    
                     this.Log("Build: {0}", build.Number);
 
                     return build;
@@ -173,9 +174,7 @@ namespace Chauffeur.Jenkins.Services
             return Task.Run(() =>
             {
                 var tree = base.Client.GetResource<Tree>(base.BaseUri, 1);
-                if (tree == null) return null;
-
-                return tree.Jobs;
+                return tree != null ? tree.Jobs : null;
             });
         }
 
