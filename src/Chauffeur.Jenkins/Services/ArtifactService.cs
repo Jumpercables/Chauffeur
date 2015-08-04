@@ -174,7 +174,7 @@ namespace Chauffeur.Jenkins.Services
         {
             return Task.Run(() => this.DownloadArtifact(build, artifact, directory)).ContinueWith((task) =>
             {                
-                this.Log("\t{0}: {1} = {2}.", artifact.FileName, task.Result, task.Status);
+                this.Log("\t{0} = {1}.", artifact.FileName, task.Status);
 
                 return task.Result;
             });

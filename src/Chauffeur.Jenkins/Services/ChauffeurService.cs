@@ -27,7 +27,7 @@ namespace Chauffeur.Jenkins.Services
         ///     Returns the <see cref="Build" /> that was installed on the machine.
         /// </returns>
         [OperationContract]
-        [WebGet(UriTemplate = "Install/{jobName}", ResponseFormat = WebMessageFormat.Json)]
+        [WebGet(UriTemplate = "Install/{jobName}", ResponseFormat = WebMessageFormat.Json, RequestFormat =  WebMessageFormat.Json)]
         Task<Build> InstallBuildAsync(string jobName);
 
         #endregion
@@ -67,7 +67,7 @@ namespace Chauffeur.Jenkins.Services
         #endregion
 
         #region Private Methods
-      
+        
         /// <summary>
         ///     Downloads the packages of the build.
         /// </summary>
@@ -151,5 +151,5 @@ namespace Chauffeur.Jenkins.Services
         }
 
         #endregion
-    }
+    }   
 }

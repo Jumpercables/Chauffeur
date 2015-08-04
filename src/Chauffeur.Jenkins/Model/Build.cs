@@ -260,7 +260,7 @@ namespace Chauffeur.Jenkins.Model
         ///     The date.
         /// </value>
         [DataMember(Name = "date")]
-        public DateTime Date { get; set; }
+        public string Date { get; set; }
 
         /// <summary>
         ///     Gets or sets the identifier.
