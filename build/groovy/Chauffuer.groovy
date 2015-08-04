@@ -11,27 +11,35 @@
         Author         : Kyle Baesler
         Prerequisite   : Groovy 1.8.9
     .EXAMPLE
-        Chauffeur.groovy Chauffeur_Nightly MACHINE_1 MACHINE_2 LOCALHOST
+        Chauffeur.groovy
  */
 class Chauffuer {
+
+    // The name of the job in the build environment.
+    static final def JOB_NAME = ""
+
+    // The name of the computers that host the Chauffuer service.
+    static final def MACHINE_NAMES = []
+
     static void main(String... args) {
 
-        // There must be at least two arguments.
-        if(!args || args.length < 2){
-            println('Chauffuer.groovy [jobName] [machineName]')
+        // The name of the job in the build.
+        if(JOB_NAME == "" || JOB_NAME == null) {
+            println("The <JOB_NAME> must be specified.")
+            return
+        }
+
+        // The name of the machines that should be notified.
+        if(MACHINE_NAMES == null || MACHINE_NAMES.size() == 0) {
+            println("The <MACHINE_NAMES> must be specified.")
             return
         }
 
         try {
-            args.eachWithIndex { String s, int i ->
-
-                // Assumption: The 1st argument is the job name.
-                if(i > 0)
-                {
-                    def url = new URL('http://' + s + ':8080/Chauffeur.Jenkins.Services/ChauffeurService/rest/Install/' + args[0])
-                    def text = url.getText()
-                    println(text)
-                }
+            MACHINE_NAMES.eachWithIndex { String s, int i ->
+                def url = new URL('http://' + s + ':8080/Chauffeur.Jenkins.Services/ChauffeurService/rest/Install/' + JOB_NAME)
+                def text = url.getText()
+                println(text)
             }
         } catch (Exception e) {
             e.printStackTrace()
