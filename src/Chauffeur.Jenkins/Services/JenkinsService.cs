@@ -114,7 +114,7 @@ namespace Chauffeur.Jenkins.Services
         public ErrorData(string reason, string detailedInformation)
         {
             this.Reason = reason;
-            this.DetailedInformation = detailedInformation;
+            this.Details = detailedInformation;
         }
 
         #endregion
@@ -128,7 +128,7 @@ namespace Chauffeur.Jenkins.Services
         ///     The detailed information.
         /// </value>
         [DataMember]
-        public string DetailedInformation { get; private set; }
+        public string Details { get; private set; }
 
         /// <summary>
         ///     Gets the reason.

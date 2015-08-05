@@ -51,15 +51,7 @@ namespace Chauffeur.Jenkins.Services
         /// </returns>
         [OperationContract]
         [WebGet(UriTemplate = "Job/{jobName}")]
-        Task<Job> GetJobAsync(string jobName);
-
-        /// <summary>
-        ///     Gets all of the jobs that have been configured in jenkins.
-        /// </summary>
-        /// <returns>Returns a <see cref="IList{Job}" /> representing jobs configured.</returns>
-        [OperationContract]
-        [WebGet(UriTemplate = "Jobs")]
-        Task<IList<Job>> GetJobsAsync();
+        Task<Job> GetJobAsync(string jobName);      
 
         /// <summary>
         ///     Gets the last build.
@@ -158,37 +150,17 @@ namespace Chauffeur.Jenkins.Services
         /// <param name="jobName">Name of the job.</param>
         /// <returns>
         ///     Returns a <see cref="Job" /> representing the job.
-        /// </returns>
-        /// <exception cref="WebFaultException{T}">
-        ///     new ErrorData(The job name was not provided., The jobName argument cannot be null.)
-        ///     or
-        ///     new ErrorData(The job was not found., A job with the specified name does not exist.)
-        /// </exception>
-        /// <exception cref="ErrorData">
-        ///     The job name was not provided.;The jobName argument cannot be null.
-        ///     or
-        ///     The job was not found.;A job with the specified name does not exist.
-        /// </exception>
+        /// </returns>       
         public Task<Job> GetJobAsync(string jobName)
         {
-            if (string.IsNullOrEmpty(jobName))
-                throw new WebFaultException<ErrorData>(new ErrorData("The job name was not provided.", "The jobName argument cannot be null."), HttpStatusCode.NotFound);
-
-            try
+            return Task.Run(() =>
             {
-                return Task.Run(() =>
-                {
-                    this.Log("Job: {0}", jobName);
+                this.Log("Job: {0}", jobName);
 
-                    var job = this.Client.GetResource<Job>(base.BaseUri, "job", jobName);
+                var job = this.Client.GetResource<Job>(base.BaseUri, "job", jobName);
 
-                    return job;
-                });
-            }
-            catch (WebException)
-            {
-                throw new WebFaultException<ErrorData>(new ErrorData("The job was not found.", "A job with the specified name does not exist."), HttpStatusCode.NotFound);
-            }
+                return job;
+            });
         }
 
         /// <summary>
@@ -212,21 +184,7 @@ namespace Chauffeur.Jenkins.Services
         {
             return this.GetBuild(jobName, "lastSuccessfulBuild");
         }
-
-        /// <summary>
-        ///     Gets all of the jobs that have been configured in jenkins.
-        /// </summary>
-        /// <returns>
-        ///     Returns a <see cref="IList{Job}" /> representing all of the jobs.
-        /// </returns>
-        public Task<IList<Job>> GetJobsAsync()
-        {
-            return Task.Run(() =>
-            {
-                var node = base.Client.GetResource<Node>(base.BaseUri, 1);
-                return node != null ? node.Jobs : null;
-            });
-        }
+        
 
         /// <summary>
         ///     Gets the build with the specified build number for the job.
@@ -313,26 +271,16 @@ namespace Chauffeur.Jenkins.Services
         /// <returns>Returns a <see cref="Build" /> representing the build for the build type.</returns>
         private Task<Build> GetBuild(string jobName, string buildType)
         {
-            if (string.IsNullOrEmpty(jobName))
-                throw new WebFaultException<ErrorData>(new ErrorData("The job name was not provided.", "The jobName argument cannot be null."), HttpStatusCode.NotFound);
-
-            try
+            return Task.Run(() =>
             {
-                return Task.Run(() =>
-                {
-                    this.Log("Job: {0}", jobName);
+                this.Log("Job: {0}", jobName);
 
-                    var build = this.Client.GetResource<Build>(base.BaseUri, "job", jobName, buildType);
+                var build = this.Client.GetResource<Build>(base.BaseUri, "job", jobName, buildType);
 
-                    this.Log("Build: {0}", build.Number);
+                this.Log("Build: {0}", build.Number);
 
-                    return build;
-                });
-            }
-            catch (WebException)
-            {
-                throw new WebFaultException<ErrorData>(new ErrorData("The job was not found.", "A job with the specified name does not exist."), HttpStatusCode.NotFound);
-            }
+                return build;
+            });
         }
 
         #endregion
