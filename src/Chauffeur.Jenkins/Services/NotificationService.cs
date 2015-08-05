@@ -9,6 +9,7 @@ using System.ServiceModel.Web;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
+using Chauffeur.Jenkins.Configuration;
 using Chauffeur.Jenkins.Model;
 
 namespace Chauffeur.Jenkins.Services
@@ -52,26 +53,25 @@ namespace Chauffeur.Jenkins.Services
         {
             return Task.Run(() =>
             {
-                string to = ConfigurationManager.AppSettings["email.to"];
-                if (string.IsNullOrEmpty(to)) return false;
+                var config = new ChauffeurConfiguration().Notifications;
 
-                string host = ConfigurationManager.AppSettings["email.host"];
-                if (string.IsNullOrEmpty(host))
+                if (string.IsNullOrEmpty(config.To)) return false;
+
+                if (string.IsNullOrEmpty(config.Host))
                     throw new WebFaultException<ErrorData>(new ErrorData("The 'host' must be provided.", "The 'email.host' must be provided in the configuration file."), HttpStatusCode.NotFound);
 
-                string from = ConfigurationManager.AppSettings["email.from"];
-                if (string.IsNullOrEmpty(from))
+                if (string.IsNullOrEmpty(config.From))
                     throw new WebFaultException<ErrorData>(new ErrorData("The 'from' must be provided.", "The 'email.from' must be provided in the configuration file."), HttpStatusCode.NotFound);
 
                 using (MailMessage message = new MailMessage())
                 {
-                    message.To.Add(to);
-                    message.From = new MailAddress(from);
-                    message.Subject = this.ApplyTemplates(build, ConfigurationManager.AppSettings["email.subject"]);
-                    message.Body = this.ApplyTemplates(build, ConfigurationManager.AppSettings["email.body"]);
-                    message.IsBodyHtml = "true".Equals(ConfigurationManager.AppSettings["email.html"], StringComparison.OrdinalIgnoreCase);
+                    message.To.Add(config.To);
+                    message.From = new MailAddress(config.From);
+                    message.Subject = this.ApplyTemplates(build, config.Subject);
+                    message.Body = this.ApplyTemplates(build, config.Body);
+                    message.IsBodyHtml = config.IsHtml;
 
-                    using (SmtpClient client = new SmtpClient(host))
+                    using (SmtpClient client = new SmtpClient(config.Host))
                         client.Send(message);
                 }               
 

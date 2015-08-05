@@ -48,22 +48,7 @@ namespace Chauffeur.Jenkins.Client
             _ApiToken = apiToken;
         }
 
-        #endregion
-
-        #region Internal Properties
-
-        /// <summary>
-        ///     Gets the API token.
-        /// </summary>
-        /// <value>
-        ///     The API token.
-        /// </value>
-        internal string ApiToken
-        {
-            get { return _ApiToken; }
-        }
-
-        #endregion
+        #endregion       
 
         #region Protected Properties
 

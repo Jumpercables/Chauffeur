@@ -26,16 +26,22 @@ namespace Chauffeur.Client.ServiceReference {
         private Chauffeur.Client.ServiceReference.Artifact[] artifactsField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private string buildOnField;
+        private bool buildingField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private bool buildingField;
+        private string builtOnField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
         private Chauffeur.Client.ServiceReference.ChangeSet changeSetField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
         private Chauffeur.Client.ServiceReference.User[] culpritsField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string descriptionField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string displayNameField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
         private int durationField;
@@ -82,19 +88,6 @@ namespace Chauffeur.Client.ServiceReference {
         }
         
         [System.Runtime.Serialization.DataMemberAttribute()]
-        public string buildOn {
-            get {
-                return this.buildOnField;
-            }
-            set {
-                if ((object.ReferenceEquals(this.buildOnField, value) != true)) {
-                    this.buildOnField = value;
-                    this.RaisePropertyChanged("buildOn");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute()]
         public bool building {
             get {
                 return this.buildingField;
@@ -103,6 +96,19 @@ namespace Chauffeur.Client.ServiceReference {
                 if ((this.buildingField.Equals(value) != true)) {
                     this.buildingField = value;
                     this.RaisePropertyChanged("building");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string builtOn {
+            get {
+                return this.builtOnField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.builtOnField, value) != true)) {
+                    this.builtOnField = value;
+                    this.RaisePropertyChanged("builtOn");
                 }
             }
         }
@@ -129,6 +135,32 @@ namespace Chauffeur.Client.ServiceReference {
                 if ((object.ReferenceEquals(this.culpritsField, value) != true)) {
                     this.culpritsField = value;
                     this.RaisePropertyChanged("culprits");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string description {
+            get {
+                return this.descriptionField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.descriptionField, value) != true)) {
+                    this.descriptionField = value;
+                    this.RaisePropertyChanged("description");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string displayName {
+            get {
+                return this.displayNameField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.displayNameField, value) != true)) {
+                    this.displayNameField = value;
+                    this.RaisePropertyChanged("displayName");
                 }
             }
         }
@@ -366,16 +398,10 @@ namespace Chauffeur.Client.ServiceReference {
         private System.Runtime.Serialization.ExtensionDataObject extensionDataField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private string descriptionField;
+        private System.Uri absoluteUrlField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
         private string fullNameField;
-        
-        [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private string idField;
-        
-        [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private System.Uri urlField;
         
         [global::System.ComponentModel.BrowsableAttribute(false)]
         public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
@@ -388,14 +414,14 @@ namespace Chauffeur.Client.ServiceReference {
         }
         
         [System.Runtime.Serialization.DataMemberAttribute()]
-        public string description {
+        public System.Uri absoluteUrl {
             get {
-                return this.descriptionField;
+                return this.absoluteUrlField;
             }
             set {
-                if ((object.ReferenceEquals(this.descriptionField, value) != true)) {
-                    this.descriptionField = value;
-                    this.RaisePropertyChanged("description");
+                if ((object.ReferenceEquals(this.absoluteUrlField, value) != true)) {
+                    this.absoluteUrlField = value;
+                    this.RaisePropertyChanged("absoluteUrl");
                 }
             }
         }
@@ -409,32 +435,6 @@ namespace Chauffeur.Client.ServiceReference {
                 if ((object.ReferenceEquals(this.fullNameField, value) != true)) {
                     this.fullNameField = value;
                     this.RaisePropertyChanged("fullName");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute()]
-        public string id {
-            get {
-                return this.idField;
-            }
-            set {
-                if ((object.ReferenceEquals(this.idField, value) != true)) {
-                    this.idField = value;
-                    this.RaisePropertyChanged("id");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute()]
-        public System.Uri url {
-            get {
-                return this.urlField;
-            }
-            set {
-                if ((object.ReferenceEquals(this.urlField, value) != true)) {
-                    this.urlField = value;
-                    this.RaisePropertyChanged("url");
                 }
             }
         }
@@ -459,22 +459,31 @@ namespace Chauffeur.Client.ServiceReference {
         private System.Runtime.Serialization.ExtensionDataObject extensionDataField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string[] affectedPathsField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
         private Chauffeur.Client.ServiceReference.User authorField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
         private string commentField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private System.DateTime dateField;
+        private string dateField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
         private string idField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private Chauffeur.Client.ServiceReference.ChangeSetPath[] itemsField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
         private string msgField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private Chauffeur.Client.ServiceReference.ChangeSetPath[] pathsField;
+        private string userField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string versionField;
         
         [global::System.ComponentModel.BrowsableAttribute(false)]
         public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
@@ -483,6 +492,19 @@ namespace Chauffeur.Client.ServiceReference {
             }
             set {
                 this.extensionDataField = value;
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string[] affectedPaths {
+            get {
+                return this.affectedPathsField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.affectedPathsField, value) != true)) {
+                    this.affectedPathsField = value;
+                    this.RaisePropertyChanged("affectedPaths");
+                }
             }
         }
         
@@ -513,12 +535,12 @@ namespace Chauffeur.Client.ServiceReference {
         }
         
         [System.Runtime.Serialization.DataMemberAttribute()]
-        public System.DateTime date {
+        public string date {
             get {
                 return this.dateField;
             }
             set {
-                if ((this.dateField.Equals(value) != true)) {
+                if ((object.ReferenceEquals(this.dateField, value) != true)) {
                     this.dateField = value;
                     this.RaisePropertyChanged("date");
                 }
@@ -539,6 +561,19 @@ namespace Chauffeur.Client.ServiceReference {
         }
         
         [System.Runtime.Serialization.DataMemberAttribute()]
+        public Chauffeur.Client.ServiceReference.ChangeSetPath[] items {
+            get {
+                return this.itemsField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.itemsField, value) != true)) {
+                    this.itemsField = value;
+                    this.RaisePropertyChanged("items");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
         public string msg {
             get {
                 return this.msgField;
@@ -552,14 +587,27 @@ namespace Chauffeur.Client.ServiceReference {
         }
         
         [System.Runtime.Serialization.DataMemberAttribute()]
-        public Chauffeur.Client.ServiceReference.ChangeSetPath[] paths {
+        public string user {
             get {
-                return this.pathsField;
+                return this.userField;
             }
             set {
-                if ((object.ReferenceEquals(this.pathsField, value) != true)) {
-                    this.pathsField = value;
-                    this.RaisePropertyChanged("paths");
+                if ((object.ReferenceEquals(this.userField, value) != true)) {
+                    this.userField = value;
+                    this.RaisePropertyChanged("user");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string version {
+            get {
+                return this.versionField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.versionField, value) != true)) {
+                    this.versionField = value;
+                    this.RaisePropertyChanged("version");
                 }
             }
         }
@@ -587,7 +635,7 @@ namespace Chauffeur.Client.ServiceReference {
         private string editTypeField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private string fileField;
+        private string pathField;
         
         [global::System.ComponentModel.BrowsableAttribute(false)]
         public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
@@ -613,14 +661,14 @@ namespace Chauffeur.Client.ServiceReference {
         }
         
         [System.Runtime.Serialization.DataMemberAttribute()]
-        public string file {
+        public string path {
             get {
-                return this.fileField;
+                return this.pathField;
             }
             set {
-                if ((object.ReferenceEquals(this.fileField, value) != true)) {
-                    this.fileField = value;
-                    this.RaisePropertyChanged("file");
+                if ((object.ReferenceEquals(this.pathField, value) != true)) {
+                    this.pathField = value;
+                    this.RaisePropertyChanged("path");
                 }
             }
         }

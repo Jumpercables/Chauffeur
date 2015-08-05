@@ -6,6 +6,7 @@ using System.Runtime.Serialization;
 using System.ServiceModel.Web;
 
 using Chauffeur.Jenkins.Client;
+using Chauffeur.Jenkins.Configuration;
 
 namespace Chauffeur.Jenkins.Services
 {
@@ -21,22 +22,9 @@ namespace Chauffeur.Jenkins.Services
         /// </summary>
         protected JenkinsService()
         {
-            string url = ConfigurationManager.AppSettings["jenkins.server"];
-
-            if (string.IsNullOrEmpty(url))
-                throw new WebFaultException<ErrorData>(new ErrorData("The 'server' must be provided.", "The 'jenkins.server' must be provided in the configuration file."), HttpStatusCode.NotFound);
-
-
-            string user = ConfigurationManager.AppSettings["jenkins.user"];
-            if (string.IsNullOrEmpty(user))
-                throw new WebFaultException<ErrorData>(new ErrorData("The 'user' must be provided.", "The 'jenkins.user' must be provided in the configuration file."), HttpStatusCode.NotFound);
-
-            string token = ConfigurationManager.AppSettings["jenkins.token"];
-            if (string.IsNullOrEmpty(token))
-                throw new WebFaultException<ErrorData>(new ErrorData("The 'token' must be provided.", "The 'jenkins.token' must be provided in the configuration file."), HttpStatusCode.NotFound);
-
-            this.BaseUri = new Uri(url);
-            this.Client = new JsonJenkinsClient(user, token);
+            this.Configuration = new ChauffeurConfiguration();
+            this.BaseUri = new Uri(this.Configuration.Jenkins.Server);
+            this.Client = new JsonJenkinsClient(this.Configuration.Jenkins.User, this.Configuration.Jenkins.Token);
         }
 
         /// <summary>
@@ -64,6 +52,14 @@ namespace Chauffeur.Jenkins.Services
         #endregion
 
         #region Protected Properties
+
+        /// <summary>
+        /// Gets the configuration.
+        /// </summary>
+        /// <value>
+        /// The configuration.
+        /// </value>
+        protected ChauffeurConfiguration Configuration { get; private set; }
 
         /// <summary>
         ///     Gets or sets the base URI.

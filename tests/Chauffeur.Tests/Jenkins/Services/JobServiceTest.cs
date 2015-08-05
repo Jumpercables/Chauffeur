@@ -50,17 +50,7 @@ namespace Chauffeur.Tests.Jenkins.Services
             Assert.AreEqual(false, job.ConcurrentBuild);
             Assert.AreEqual(0, job.DownstreamProjects.Count);
             Assert.AreEqual(0, job.UpstreamProjects.Count);
-        }
-
-        [TestMethod]
-        public void JobService_GetJobs()
-        {
-            var tree = this.GetResource<Tree>("tree.valid.json");
-
-            Assert.IsNotNull(tree);
-            Assert.IsNotNull(tree.Jobs);
-            Assert.AreEqual(2, tree.Jobs.Count);
-        }
+        }        
 
         #endregion
     }

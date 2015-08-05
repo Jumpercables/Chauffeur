@@ -75,6 +75,9 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="Properties\DataSources\Chauffeur.Jenkins.Model.Build.datasource" />
+    <None Include="Service References\ServiceReference\Arrays.xsd">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Service References\ServiceReference\Chauffeur.Client.ServiceReference.Build.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
     </None>

@@ -26,6 +26,7 @@
     <MetadataFile FileName="service3.xsd" MetadataType="Schema" ID="1635d260-bd02-4d57-9125-a87c7c7071fd" SourceId="1" SourceUrl="http://localhost:8733/Design_Time_Addresses/Chauffeur.Jenkins.Services/ChauffeurService/mex" />
     <MetadataFile FileName="service4.xsd" MetadataType="Schema" ID="19f55c2a-235a-4634-9f8d-e8bb41f8f397" SourceId="1" SourceUrl="http://localhost:8733/Design_Time_Addresses/Chauffeur.Jenkins.Services/ChauffeurService/mex" />
     <MetadataFile FileName="Chauffeur.Jenkins.Model2.xsd" MetadataType="Schema" ID="bcd66d7c-64be-4397-82fd-14fbf31fe861" SourceId="1" SourceUrl="http://localhost:8733/Design_Time_Addresses/Chauffeur.Jenkins.Services/ChauffeurService/mex" />
+    <MetadataFile FileName="Arrays.xsd" MetadataType="Schema" ID="98aa8284-3d66-42d3-9e70-4b4ce4274d2a" SourceId="1" SourceUrl="http://localhost:8733/Design_Time_Addresses/Chauffeur.Jenkins.Services/ChauffeurService/mex" />
   </Metadata>
   <Extensions>
     <ExtensionFile FileName="configuration91.svcinfo" Name="configuration91.svcinfo" />
