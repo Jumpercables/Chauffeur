@@ -162,6 +162,21 @@ namespace Chauffeur.Jenkins.Client
         }
 
         /// <summary>
+        /// Gets the resource by requesting it from the server.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="resourceUri">The resource URI.</param>
+        /// <param name="queries">The query string.</param>
+        /// <returns>
+        /// Returns a <see cref="T" /> representing the resource.
+        /// </returns>
+        public T GetResource<T>(Uri resourceUri, params string[] queries) where T : class, IUrl
+        {
+            var queryUri = new Uri(resourceUri, string.Join("/", queries) + "/");
+            return this.GetResource<T>(queryUri, 1);
+        }
+
+        /// <summary>
         ///     Retrieves a jenkins resource given it's URI and optional tree parameter.
         /// </summary>
         /// <typeparam name="T"></typeparam>

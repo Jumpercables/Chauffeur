@@ -48,7 +48,7 @@ namespace Chauffeur.Jenkins.Model
         /// <value>
         ///     The built on.
         /// </value>
-        [DataMember(Name = "buildOn")]
+        [DataMember(Name = "builtOn")]
         public string BuiltOn { get; set; }
 
         /// <summary>
@@ -68,6 +68,24 @@ namespace Chauffeur.Jenkins.Model
         /// </value>
         [DataMember(Name = "culprits")]
         public IList<User> Culprits { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the description.
+        /// </summary>
+        /// <value>
+        ///     The description.
+        /// </value>
+        [DataMember(Name = "description")]
+        public string Description { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the display name.
+        /// </summary>
+        /// <value>
+        ///     The display name.
+        /// </value>
+        [DataMember(Name = "displayName")]
+        public string DisplayName { get; set; }
 
         /// <summary>
         ///     Gets or sets the duration.
@@ -236,6 +254,15 @@ namespace Chauffeur.Jenkins.Model
         #region Public Properties
 
         /// <summary>
+        ///     Gets or sets the affected paths.
+        /// </summary>
+        /// <value>
+        ///     The affected paths.
+        /// </value>
+        [DataMember(Name = "affectedPaths")]
+        public IList<string> AffectedPaths { get; set; }
+
+        /// <summary>
         ///     Gets or sets the author.
         /// </summary>
         /// <value>
@@ -272,6 +299,15 @@ namespace Chauffeur.Jenkins.Model
         public string Id { get; set; }
 
         /// <summary>
+        /// Gets or sets the version.
+        /// </summary>
+        /// <value>
+        /// The version.
+        /// </value>
+        [DataMember(Name = "version")]
+        public string Version { get; set; }
+
+        /// <summary>
         ///     Gets or sets the message.
         /// </summary>
         /// <value>
@@ -286,8 +322,17 @@ namespace Chauffeur.Jenkins.Model
         /// <value>
         ///     The paths.
         /// </value>
-        [DataMember(Name = "paths")]
+        [DataMember(Name = "items")]
         public IList<ChangeSetPath> Paths { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the user.
+        /// </summary>
+        /// <value>
+        ///     The user.
+        /// </value>
+        [DataMember(Name = "user")]
+        public string User { get; set; }
 
         #endregion
     }
@@ -312,8 +357,8 @@ namespace Chauffeur.Jenkins.Model
         /// <value>
         ///     The file.
         /// </value>
-        [DataMember(Name = "file")]
-        public string File { get; set; }
+        [DataMember(Name = "path")]
+        public string Path { get; set; }
 
         #endregion
     }

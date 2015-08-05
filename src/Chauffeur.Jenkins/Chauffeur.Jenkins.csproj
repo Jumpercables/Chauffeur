@@ -81,7 +81,7 @@
     <Compile Include="Client\JsonJenkinsClient.cs" />
     <Compile Include="Model\Build.cs" />
     <Compile Include="Model\Job.cs" />
-    <Compile Include="Model\Tree.cs" />
+    <Compile Include="Model\Node.cs" />
     <Compile Include="Model\User.cs" />
     <Compile Include="Model\View.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

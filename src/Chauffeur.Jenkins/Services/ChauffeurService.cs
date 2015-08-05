@@ -52,7 +52,7 @@ namespace Chauffeur.Jenkins.Services
         {
             // Query the server for the last successful build for the job.         
             var service = new JobService(base.BaseUri, base.Client);
-            var build = await service.GetBuildAsync(jobName);
+            var build = await service.GetLastSuccessfulBuildAsync(jobName);
 
             // Download the packages.
             var packages = await this.DownloadPackages(build);

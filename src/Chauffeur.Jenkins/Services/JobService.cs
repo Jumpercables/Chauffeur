@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net;
 using System.ServiceModel;
 using System.ServiceModel.Web;
@@ -19,13 +20,27 @@ namespace Chauffeur.Jenkins.Services
         #region Public Methods
 
         /// <summary>
-        ///     Gets the last successful build for the job.
+        ///     Gets the build with the specified build number for the job.
         /// </summary>
         /// <param name="jobName">Name of the job.</param>
-        /// <returns>Returns a <see cref="Build" /> representing the last successful build for the job.</returns>
+        /// <param name="buildNumber">The build number.</param>
+        /// <returns>
+        ///     Returns a <see cref="Build" /> representing the build for the job.
+        /// </returns>
         [OperationContract]
-        [WebGet(UriTemplate = "Build/{jobName}")]
-        Task<Build> GetBuildAsync(string jobName);
+        [WebGet(UriTemplate = "Job/{jobName}/Build/{buildNumber}")]
+        Task<Build> GetBuildAsync(string jobName, int buildNumber);
+
+        /// <summary>
+        ///     Gets the first build.
+        /// </summary>
+        /// <param name="jobName">Name of the job.</param>
+        /// <returns>
+        ///     Returns a <see cref="Build" /> representing the first build.
+        /// </returns>
+        [OperationContract]
+        [WebGet(UriTemplate = "Job/{jobName}/FirstBuild")]
+        Task<Build> GetFirstBuild(string jobName);
 
         /// <summary>
         ///     Gets the job from server with the specified name.
@@ -45,6 +60,61 @@ namespace Chauffeur.Jenkins.Services
         [OperationContract]
         [WebGet(UriTemplate = "Jobs")]
         Task<IList<Job>> GetJobsAsync();
+
+        /// <summary>
+        ///     Gets the last build.
+        /// </summary>
+        /// <param name="jobName">Name of the job.</param>
+        /// <returns>
+        ///     Returns a <see cref="Build" /> representing the last build.
+        /// </returns>
+        [OperationContract]
+        [WebGet(UriTemplate = "Job/{jobName}/LastBuild")]
+        Task<Build> GetLastBuild(string jobName);
+
+        /// <summary>
+        ///     Gets the last completed build.
+        /// </summary>
+        /// <param name="jobName">Name of the job.</param>
+        /// <returns>
+        ///     Returns a <see cref="Build" /> representing the last completed build.
+        /// </returns>
+        [OperationContract]
+        [WebGet(UriTemplate = "Job/{jobName}/LastCompletedBuild")]
+        Task<Build> GetLastCompletedBuild(string jobName);
+
+        /// <summary>
+        ///     Gets the last failed build.
+        /// </summary>
+        /// <param name="jobName">Name of the job.</param>
+        /// <returns>
+        ///     Returns a <see cref="Build" /> representing the last failed build.
+        /// </returns>
+        [OperationContract]
+        [WebGet(UriTemplate = "Job/{jobName}/LastFailedBuild")]
+        Task<Build> GetLastFailedBuild(string jobName);
+
+        /// <summary>
+        ///     Gets the last stable build.
+        /// </summary>
+        /// <param name="jobName">Name of the job.</param>
+        /// <returns>
+        ///     Returns a <see cref="Build" /> representing the last stable build.
+        /// </returns>
+        [OperationContract]
+        [WebGet(UriTemplate = "Job/{jobName}/LastStableBuild")]
+        Task<Build> GetLastStableBuild(string jobName);
+
+        /// <summary>
+        ///     Gets the last successful build for the job.
+        /// </summary>
+        /// <param name="jobName">Name of the job.</param>
+        /// <returns>
+        ///     Returns a <see cref="Build" /> representing the last successful build for the job.
+        /// </returns>
+        [OperationContract]
+        [WebGet(UriTemplate = "Job/{jobName}/LastSuccessfulBuild")]
+        Task<Build> GetLastSuccessfulBuildAsync(string jobName);
 
         #endregion
     }
@@ -110,8 +180,8 @@ namespace Chauffeur.Jenkins.Services
                 {
                     this.Log("Job: {0}", jobName);
 
-                    var queryUri = this.CreateUri(jobName);
-                    var job = base.Client.GetResource<Job>(queryUri, 1);                   
+                    var job = this.Client.GetResource<Job>(base.BaseUri, "job", jobName);
+
                     return job;
                 });
             }
@@ -138,29 +208,9 @@ namespace Chauffeur.Jenkins.Services
         ///     or
         ///     The job was not found.;A job with the specified name does not exist.
         /// </exception>
-        public Task<Build> GetBuildAsync(string jobName)
+        public Task<Build> GetLastSuccessfulBuildAsync(string jobName)
         {
-            if (string.IsNullOrEmpty(jobName))
-                throw new WebFaultException<ErrorData>(new ErrorData("The job name was not provided.", "The jobName argument cannot be null."), HttpStatusCode.NotFound);
-
-            try
-            {
-                return Task.Run(() =>
-                {
-                    this.Log("Job: {0}", jobName);
-
-                    var queryUri = this.CreateUri(jobName, "lastSuccessfulBuild");
-                    var build = base.Client.GetResource<Build>(queryUri, 1);
-                    
-                    this.Log("Build: {0}", build.Number);
-
-                    return build;
-                });
-            }
-            catch (WebException)
-            {
-                throw new WebFaultException<ErrorData>(new ErrorData("The job was not found.", "A job with the specified name does not exist."), HttpStatusCode.NotFound);
-            }
+            return this.GetBuild(jobName, "lastSuccessfulBuild");
         }
 
         /// <summary>
@@ -173,27 +223,116 @@ namespace Chauffeur.Jenkins.Services
         {
             return Task.Run(() =>
             {
-                var tree = base.Client.GetResource<Tree>(base.BaseUri, 1);
-                return tree != null ? tree.Jobs : null;
+                var node = base.Client.GetResource<Node>(base.BaseUri, 1);
+                return node != null ? node.Jobs : null;
             });
+        }
+
+        /// <summary>
+        ///     Gets the build with the specified build number for the job.
+        /// </summary>
+        /// <param name="jobName">Name of the job.</param>
+        /// <param name="buildNumber">The build number.</param>
+        /// <returns>
+        ///     Returns a <see cref="Build" /> representing the build for the job.
+        /// </returns>
+        public async Task<Build> GetBuildAsync(string jobName, int buildNumber)
+        {
+            return await Task.Run(() => this.Client.GetResource<Build>(base.BaseUri, "job", jobName, buildNumber.ToString(CultureInfo.InvariantCulture)));
+        }
+
+        /// <summary>
+        /// Gets the last stable build.
+        /// </summary>
+        /// <param name="jobName">Name of the job.</param>
+        /// <returns>
+        /// Returns a <see cref="Build" /> representing the last stable build.
+        /// </returns>
+        public Task<Build> GetLastStableBuild(string jobName)
+        {
+            return this.GetBuild(jobName, "lastStableBuild");
+        }
+
+        /// <summary>
+        /// Gets the last build.
+        /// </summary>
+        /// <param name="jobName">Name of the job.</param>
+        /// <returns>
+        /// Returns a <see cref="Build" /> representing the last build.
+        /// </returns>
+        public Task<Build> GetLastBuild(string jobName)
+        {
+            return this.GetBuild(jobName, "lastBuild");
+        }
+
+        /// <summary>
+        /// Gets the last completed build.
+        /// </summary>
+        /// <param name="jobName">Name of the job.</param>
+        /// <returns>
+        /// Returns a <see cref="Build" /> representing the last completed build.
+        /// </returns>
+        public Task<Build> GetLastCompletedBuild(string jobName)
+        {
+            return this.GetBuild(jobName, "lastCompletedBuild");
+        }
+
+        /// <summary>
+        /// Gets the first build.
+        /// </summary>
+        /// <param name="jobName">Name of the job.</param>
+        /// <returns>
+        /// Returns a <see cref="Build" /> representing the first build.
+        /// </returns>
+        public Task<Build> GetFirstBuild(string jobName)
+        {
+            return this.GetBuild(jobName, "firstBuild");
+        }
+
+        /// <summary>
+        /// Gets the last failed build.
+        /// </summary>
+        /// <param name="jobName">Name of the job.</param>
+        /// <returns>
+        /// Returns a <see cref="Build" /> representing the last failed build.
+        /// </returns>
+        public Task<Build> GetLastFailedBuild(string jobName)
+        {
+            return this.GetBuild(jobName, "lastFailedBuild");
         }
 
         #endregion
 
-        #region Protected Methods
+        #region Private Methods
 
         /// <summary>
-        ///     Creates the URI for the specific job.
+        ///     Gets the build for the specified build type.
         /// </summary>
         /// <param name="jobName">Name of the job.</param>
-        /// <param name="queryString">The query string.</param>
-        /// <returns>
-        ///     Returns a <see cref="Uri" /> representing the query string for the job.
-        /// </returns>
-        protected Uri CreateUri(string jobName, params string[] queryString)
+        /// <param name="buildType">Type of the build.</param>
+        /// <returns>Returns a <see cref="Build" /> representing the build for the build type.</returns>
+        private Task<Build> GetBuild(string jobName, string buildType)
         {
-            var queryUri = new Uri(base.BaseUri, @"/job/" + jobName + "/" + string.Join("/", queryString) + "/");
-            return queryUri;
+            if (string.IsNullOrEmpty(jobName))
+                throw new WebFaultException<ErrorData>(new ErrorData("The job name was not provided.", "The jobName argument cannot be null."), HttpStatusCode.NotFound);
+
+            try
+            {
+                return Task.Run(() =>
+                {
+                    this.Log("Job: {0}", jobName);
+
+                    var build = this.Client.GetResource<Build>(base.BaseUri, "job", jobName, buildType);
+
+                    this.Log("Build: {0}", build.Number);
+
+                    return build;
+                });
+            }
+            catch (WebException)
+            {
+                throw new WebFaultException<ErrorData>(new ErrorData("The job was not found.", "A job with the specified name does not exist."), HttpStatusCode.NotFound);
+            }
         }
 
         #endregion
