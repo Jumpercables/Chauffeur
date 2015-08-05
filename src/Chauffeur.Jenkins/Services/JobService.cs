@@ -236,9 +236,9 @@ namespace Chauffeur.Jenkins.Services
         /// <returns>
         ///     Returns a <see cref="Build" /> representing the build for the job.
         /// </returns>
-        public async Task<Build> GetBuildAsync(string jobName, int buildNumber)
+        public Task<Build> GetBuildAsync(string jobName, int buildNumber)
         {
-            return await Task.Run(() => this.Client.GetResource<Build>(base.BaseUri, "job", jobName, buildNumber.ToString(CultureInfo.InvariantCulture)));
+            return Task.Run(() => this.Client.GetResource<Build>(base.BaseUri, "job", jobName, buildNumber.ToString(CultureInfo.InvariantCulture)));
         }
 
         /// <summary>
