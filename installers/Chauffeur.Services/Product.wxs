@@ -68,11 +68,15 @@
   </Fragment>
 
   <Fragment>
-    <ComponentGroup Id="ProductComponents" Directory="APPLICATIONBINFOLDER">
-         
-      <Component Id="WindowsService" Guid="34B2A0C2-EC50-4BC8-9BD6-6D0A5CB37802">        
-        <File Id="Chauffeur.exe" Source="$(var.BuildArtifactDir)\Chauffeur.exe" />
+    <ComponentGroup Id="ProductComponents" Directory="APPLICATIONBINFOLDER">         
+      <Component Id="WindowsService" Guid="34B2A0C2-EC50-4BC8-9BD6-6D0A5CB37802">
+
+        <File Id="Newtonsoft.Json" Source="$(var.BuildArtifactDir)\Newtonsoft.Json.dll"/>
+        <File Id="Chauffeur.Jenkins.dll" Source="$(var.BuildArtifactDir)\Chauffeur.Jenkins.dll" />
+        <File Id="Chauffeur.exe" Source="$(var.BuildArtifactDir)\Chauffeur.exe"/>
         <File Id="Chauffeur.exe.config"  Source="$(var.BuildArtifactDir)\Chauffeur.exe.config" />
+        
+        
         <ServiceInstall Id="ServiceInstaller"
                         Type="ownProcess"
                         Vital="yes"
@@ -83,13 +87,15 @@
                         Account="LocalSystem"
                         ErrorControl="ignore"
                         Interactive="no"/>
+        
         <ServiceControl Id="StartService"
                         Start="install"
                         Stop="both"
                         Remove="uninstall"
                         Name="ChauffeurService"
                         Wait="yes" />
-        <File Id="Chauffeur.Jenkins.dll" Source="$(var.BuildArtifactDir)\Chauffeur.Jenkins.dll" />     
+        
+        
         <RemoveFile Id="DeleteFilesWindowsService" Name="*.*" On="uninstall" />
       </Component>     
     </ComponentGroup>
