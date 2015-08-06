@@ -8,6 +8,7 @@ using System.ServiceModel.Web;
 using System.Threading.Tasks;
 
 using Chauffeur.Jenkins.Client;
+using Chauffeur.Jenkins.Configuration;
 using Chauffeur.Jenkins.Model;
 
 namespace Chauffeur.Jenkins.Services
@@ -52,13 +53,14 @@ namespace Chauffeur.Jenkins.Services
         /// </summary>
         /// <param name="baseUri">The base URI.</param>
         /// <param name="client">The client.</param>
+        /// <param name="configuration">The configuration.</param>
         /// <exception cref="System.ArgumentNullException">
         ///     baseUri
         ///     or
         ///     client
         /// </exception>
-        internal ArtifactService(Uri baseUri, JenkinsClient client)
-            : base(baseUri, client)
+        internal ArtifactService(Uri baseUri, JenkinsClient client, ChauffeurConfiguration configuration)
+            : base(baseUri, client, configuration)
         {
         }
 
@@ -75,14 +77,14 @@ namespace Chauffeur.Jenkins.Services
         /// </returns>
         public Task<string[]> DownloadArtifactsAsync(Build build)
         {
-            if (!Directory.Exists(this.Configuration.Packages.DownloadDirectory))
-                Directory.CreateDirectory(this.Configuration.Packages.DownloadDirectory);
+            if (!Directory.Exists(this.Configuration.DataDirectory))
+                Directory.CreateDirectory(this.Configuration.DataDirectory);
 
-            this.Log("Downloading {0} artifact(s) into the {1} directory.", build.Artifacts.Count, this.Configuration.Packages.DownloadDirectory);
+            this.Log("Downloading {0} artifact(s) into the {1} directory.", build.Artifacts.Count, this.Configuration.DataDirectory);
 
             return Task.Run(() =>
             {
-                var tasks = build.Artifacts.Select(artifact => this.DownloadArtifactAsync(build, artifact, this.Configuration.Packages.DownloadDirectory));
+                var tasks = build.Artifacts.Select(artifact => this.DownloadArtifactAsync(build, artifact, this.Configuration.DataDirectory));
                 return tasks.Select(o => o.Result).ToArray();
             });
         }

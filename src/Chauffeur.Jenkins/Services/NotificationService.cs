@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Linq;
 using System.Net;
 using System.Net.Mail;
@@ -53,27 +52,27 @@ namespace Chauffeur.Jenkins.Services
         {
             return Task.Run(() =>
             {
-                var config = new ChauffeurConfiguration().Notifications;
+                var configuration = new ChauffeurConfiguration();
 
-                if (string.IsNullOrEmpty(config.To)) return false;
+                if (string.IsNullOrEmpty(configuration.To)) return false;
 
-                if (string.IsNullOrEmpty(config.Host))
+                if (string.IsNullOrEmpty(configuration.Host))
                     throw new WebFaultException<ErrorData>(new ErrorData("The 'host' must be provided.", "The 'email.host' must be provided in the configuration file."), HttpStatusCode.NotFound);
 
-                if (string.IsNullOrEmpty(config.From))
+                if (string.IsNullOrEmpty(configuration.From))
                     throw new WebFaultException<ErrorData>(new ErrorData("The 'from' must be provided.", "The 'email.from' must be provided in the configuration file."), HttpStatusCode.NotFound);
 
                 using (MailMessage message = new MailMessage())
                 {
-                    message.To.Add(config.To);
-                    message.From = new MailAddress(config.From);
-                    message.Subject = this.ApplyTemplates(build, config.Subject);
-                    message.Body = this.ApplyTemplates(build, config.Body);
-                    message.IsBodyHtml = config.IsHtml;
+                    message.To.Add(configuration.To);
+                    message.From = new MailAddress(configuration.From);
+                    message.Subject = this.ApplyTemplates(build, configuration.Subject);
+                    message.Body = this.ApplyTemplates(build, configuration.Body);
+                    message.IsBodyHtml = configuration.IsHtml;
 
-                    using (SmtpClient client = new SmtpClient(config.Host))
+                    using (SmtpClient client = new SmtpClient(configuration.Host))
                         client.Send(message);
-                }               
+                }
 
                 return true;
             });

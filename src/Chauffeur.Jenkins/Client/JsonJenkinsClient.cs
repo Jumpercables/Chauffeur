@@ -1,5 +1,7 @@
-﻿using System.Net;
-using System.Runtime.Serialization.Json;
+﻿using System.IO;
+using System.Net;
+
+using Newtonsoft.Json;
 
 namespace Chauffeur.Jenkins.Client
 {
@@ -63,8 +65,11 @@ namespace Chauffeur.Jenkins.Client
                 {
                     if (stream == null) return default(T);
 
-                    DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof (T));
-                    return (T) serializer.ReadObject(stream);
+                    using (JsonTextReader reader = new JsonTextReader(new StreamReader(stream)))
+                    {
+                        JsonSerializer serializer = new JsonSerializer();
+                        return serializer.Deserialize<T>(reader);
+                    }
                 }
             }
         }

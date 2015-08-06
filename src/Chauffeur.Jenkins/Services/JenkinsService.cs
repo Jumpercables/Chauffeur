@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Configuration;
 using System.Diagnostics;
-using System.Net;
+using System.Runtime.Remoting.Messaging;
 using System.Runtime.Serialization;
-using System.ServiceModel.Web;
 
 using Chauffeur.Jenkins.Client;
 using Chauffeur.Jenkins.Configuration;
@@ -21,23 +19,30 @@ namespace Chauffeur.Jenkins.Services
         ///     Initializes a new instance of the <see cref="JenkinsService" /> class.
         /// </summary>
         protected JenkinsService()
+            : this(new ChauffeurConfiguration())
         {
-            this.Configuration = new ChauffeurConfiguration();
-            this.BaseUri = new Uri(this.Configuration.Jenkins.Server);
-            this.Client = new JsonJenkinsClient(this.Configuration.Jenkins.User, this.Configuration.Jenkins.Token);
         }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="JenkinsService" /> class.
+        /// Initializes a new instance of the <see cref="JenkinsService"/> class.
+        /// </summary>
+        /// <param name="configuration">The configuration.</param>
+        protected JenkinsService(ChauffeurConfiguration configuration)
+            : this(new Uri(configuration.Server), new JsonJenkinsClient(configuration.User, configuration.Token), configuration)
+        {
+            
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JenkinsService" /> class.
         /// </summary>
         /// <param name="baseUri">The base URI.</param>
         /// <param name="client">The client.</param>
-        /// <exception cref="System.ArgumentNullException">
-        ///     baseUri
-        ///     or
-        ///     client
-        /// </exception>
-        protected JenkinsService(Uri baseUri, JenkinsClient client)
+        /// <param name="configuration">The configuration.</param>
+        /// <exception cref="System.ArgumentNullException">baseUri
+        /// or
+        /// client</exception>
+        protected JenkinsService(Uri baseUri, JenkinsClient client, ChauffeurConfiguration configuration)
         {
             if (baseUri == null)
                 throw new ArgumentNullException("baseUri");
@@ -47,19 +52,12 @@ namespace Chauffeur.Jenkins.Services
 
             this.BaseUri = baseUri;
             this.Client = client;
+            this.Configuration = configuration;
         }
 
         #endregion
 
         #region Protected Properties
-
-        /// <summary>
-        /// Gets the configuration.
-        /// </summary>
-        /// <value>
-        /// The configuration.
-        /// </value>
-        protected ChauffeurConfiguration Configuration { get; private set; }
 
         /// <summary>
         ///     Gets or sets the base URI.
@@ -76,6 +74,14 @@ namespace Chauffeur.Jenkins.Services
         ///     The client.
         /// </value>
         protected JenkinsClient Client { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the configuration.
+        /// </summary>
+        /// <value>
+        ///     The configuration.
+        /// </value>
+        protected ChauffeurConfiguration Configuration { get; set; }
 
         #endregion
 

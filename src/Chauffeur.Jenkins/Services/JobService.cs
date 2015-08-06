@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Net;
 using System.ServiceModel;
 using System.ServiceModel.Web;
 using System.Threading.Tasks;
 
 using Chauffeur.Jenkins.Client;
+using Chauffeur.Jenkins.Configuration;
 using Chauffeur.Jenkins.Model;
 
 namespace Chauffeur.Jenkins.Services
@@ -28,8 +27,8 @@ namespace Chauffeur.Jenkins.Services
         ///     Returns a <see cref="Build" /> representing the build for the job.
         /// </returns>
         [OperationContract]
-        [WebGet(UriTemplate = "Job/{jobName}/Build/{buildNumber}")]
-        Task<Build> GetBuildAsync(string jobName, int buildNumber);
+        [WebGet(UriTemplate = "Job/{jobName}/Build/{buildNumber}", ResponseFormat = WebMessageFormat.Json)]
+        Task<Build> GetBuildAsync(string jobName, string buildNumber);
 
         /// <summary>
         ///     Gets the first build.
@@ -39,7 +38,7 @@ namespace Chauffeur.Jenkins.Services
         ///     Returns a <see cref="Build" /> representing the first build.
         /// </returns>
         [OperationContract]
-        [WebGet(UriTemplate = "Job/{jobName}/FirstBuild")]
+        [WebGet(UriTemplate = "Job/{jobName}/FirstBuild", ResponseFormat = WebMessageFormat.Json)]
         Task<Build> GetFirstBuild(string jobName);
 
         /// <summary>
@@ -50,8 +49,8 @@ namespace Chauffeur.Jenkins.Services
         ///     Returns a <see cref="Job" /> representing the job.
         /// </returns>
         [OperationContract]
-        [WebGet(UriTemplate = "Job/{jobName}")]
-        Task<Job> GetJobAsync(string jobName);      
+        [WebGet(UriTemplate = "Job/{jobName}", ResponseFormat = WebMessageFormat.Json)]
+        Task<Job> GetJobAsync(string jobName);
 
         /// <summary>
         ///     Gets the last build.
@@ -61,7 +60,7 @@ namespace Chauffeur.Jenkins.Services
         ///     Returns a <see cref="Build" /> representing the last build.
         /// </returns>
         [OperationContract]
-        [WebGet(UriTemplate = "Job/{jobName}/LastBuild")]
+        [WebGet(UriTemplate = "Job/{jobName}/LastBuild", ResponseFormat = WebMessageFormat.Json)]
         Task<Build> GetLastBuild(string jobName);
 
         /// <summary>
@@ -72,7 +71,7 @@ namespace Chauffeur.Jenkins.Services
         ///     Returns a <see cref="Build" /> representing the last completed build.
         /// </returns>
         [OperationContract]
-        [WebGet(UriTemplate = "Job/{jobName}/LastCompletedBuild")]
+        [WebGet(UriTemplate = "Job/{jobName}/LastCompletedBuild", ResponseFormat = WebMessageFormat.Json)]
         Task<Build> GetLastCompletedBuild(string jobName);
 
         /// <summary>
@@ -83,7 +82,7 @@ namespace Chauffeur.Jenkins.Services
         ///     Returns a <see cref="Build" /> representing the last failed build.
         /// </returns>
         [OperationContract]
-        [WebGet(UriTemplate = "Job/{jobName}/LastFailedBuild")]
+        [WebGet(UriTemplate = "Job/{jobName}/LastFailedBuild", ResponseFormat = WebMessageFormat.Json)]
         Task<Build> GetLastFailedBuild(string jobName);
 
         /// <summary>
@@ -94,7 +93,7 @@ namespace Chauffeur.Jenkins.Services
         ///     Returns a <see cref="Build" /> representing the last stable build.
         /// </returns>
         [OperationContract]
-        [WebGet(UriTemplate = "Job/{jobName}/LastStableBuild")]
+        [WebGet(UriTemplate = "Job/{jobName}/LastStableBuild", ResponseFormat = WebMessageFormat.Json)]
         Task<Build> GetLastStableBuild(string jobName);
 
         /// <summary>
@@ -105,7 +104,7 @@ namespace Chauffeur.Jenkins.Services
         ///     Returns a <see cref="Build" /> representing the last successful build for the job.
         /// </returns>
         [OperationContract]
-        [WebGet(UriTemplate = "Job/{jobName}/LastSuccessfulBuild")]
+        [WebGet(UriTemplate = "Job/{jobName}/LastSuccessfulBuild", ResponseFormat = WebMessageFormat.Json)]
         Task<Build> GetLastSuccessfulBuildAsync(string jobName);
 
         #endregion
@@ -126,17 +125,16 @@ namespace Chauffeur.Jenkins.Services
         }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="JobService" /> class.
+        /// Initializes a new instance of the <see cref="JobService" /> class.
         /// </summary>
         /// <param name="baseUri">The base URI.</param>
         /// <param name="client">The client.</param>
-        /// <exception cref="System.ArgumentNullException">
-        ///     baseUri
-        ///     or
-        ///     client
-        /// </exception>
-        internal JobService(Uri baseUri, JenkinsClient client)
-            : base(baseUri, client)
+        /// <param name="configuration">The configuration.</param>
+        /// <exception cref="System.ArgumentNullException">baseUri
+        /// or
+        /// client</exception>
+        internal JobService(Uri baseUri, JenkinsClient client, ChauffeurConfiguration configuration)
+            : base(baseUri, client, configuration)
         {
         }
 
@@ -150,7 +148,7 @@ namespace Chauffeur.Jenkins.Services
         /// <param name="jobName">Name of the job.</param>
         /// <returns>
         ///     Returns a <see cref="Job" /> representing the job.
-        /// </returns>       
+        /// </returns>
         public Task<Job> GetJobAsync(string jobName)
         {
             return Task.Run(() =>
@@ -170,7 +168,7 @@ namespace Chauffeur.Jenkins.Services
         /// <returns>
         ///     Returns a <see cref="Build" /> representing the last successful build for the job.
         /// </returns>
-        /// <exception cref="WebFaultException{ErrorData}">
+        /// <exception cref="WebFaultException{T}">
         ///     new ErrorData(The job name was not provided., The jobName argument cannot be null.)
         ///     or
         ///     new ErrorData(The job was not found., A job with the specified name does not exist.)
@@ -184,7 +182,7 @@ namespace Chauffeur.Jenkins.Services
         {
             return this.GetBuild(jobName, "lastSuccessfulBuild");
         }
-        
+
 
         /// <summary>
         ///     Gets the build with the specified build number for the job.
@@ -194,17 +192,17 @@ namespace Chauffeur.Jenkins.Services
         /// <returns>
         ///     Returns a <see cref="Build" /> representing the build for the job.
         /// </returns>
-        public Task<Build> GetBuildAsync(string jobName, int buildNumber)
+        public Task<Build> GetBuildAsync(string jobName, string buildNumber)
         {
-            return Task.Run(() => this.Client.GetResource<Build>(base.BaseUri, "job", jobName, buildNumber.ToString(CultureInfo.InvariantCulture)));
+            return Task.Run(() => this.Client.GetResource<Build>(base.BaseUri, "job", jobName, buildNumber));
         }
 
         /// <summary>
-        /// Gets the last stable build.
+        ///     Gets the last stable build.
         /// </summary>
         /// <param name="jobName">Name of the job.</param>
         /// <returns>
-        /// Returns a <see cref="Build" /> representing the last stable build.
+        ///     Returns a <see cref="Build" /> representing the last stable build.
         /// </returns>
         public Task<Build> GetLastStableBuild(string jobName)
         {
@@ -212,11 +210,11 @@ namespace Chauffeur.Jenkins.Services
         }
 
         /// <summary>
-        /// Gets the last build.
+        ///     Gets the last build.
         /// </summary>
         /// <param name="jobName">Name of the job.</param>
         /// <returns>
-        /// Returns a <see cref="Build" /> representing the last build.
+        ///     Returns a <see cref="Build" /> representing the last build.
         /// </returns>
         public Task<Build> GetLastBuild(string jobName)
         {
@@ -224,11 +222,11 @@ namespace Chauffeur.Jenkins.Services
         }
 
         /// <summary>
-        /// Gets the last completed build.
+        ///     Gets the last completed build.
         /// </summary>
         /// <param name="jobName">Name of the job.</param>
         /// <returns>
-        /// Returns a <see cref="Build" /> representing the last completed build.
+        ///     Returns a <see cref="Build" /> representing the last completed build.
         /// </returns>
         public Task<Build> GetLastCompletedBuild(string jobName)
         {
@@ -236,11 +234,11 @@ namespace Chauffeur.Jenkins.Services
         }
 
         /// <summary>
-        /// Gets the first build.
+        ///     Gets the first build.
         /// </summary>
         /// <param name="jobName">Name of the job.</param>
         /// <returns>
-        /// Returns a <see cref="Build" /> representing the first build.
+        ///     Returns a <see cref="Build" /> representing the first build.
         /// </returns>
         public Task<Build> GetFirstBuild(string jobName)
         {
@@ -248,11 +246,11 @@ namespace Chauffeur.Jenkins.Services
         }
 
         /// <summary>
-        /// Gets the last failed build.
+        ///     Gets the last failed build.
         /// </summary>
         /// <param name="jobName">Name of the job.</param>
         /// <returns>
-        /// Returns a <see cref="Build" /> representing the last failed build.
+        ///     Returns a <see cref="Build" /> representing the last failed build.
         /// </returns>
         public Task<Build> GetLastFailedBuild(string jobName)
         {

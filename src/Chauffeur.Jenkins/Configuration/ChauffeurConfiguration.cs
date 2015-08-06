@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Configuration;
+using System.IO;
 using System.Linq;
 
 namespace Chauffeur.Jenkins.Configuration
@@ -22,9 +23,22 @@ namespace Chauffeur.Jenkins.Configuration
 
         #region Public Properties
 
-        public JenkinsTypedSettings Jenkins { get; private set; }
-        public NotificationsTypedSettings Notifications { get; private set; }
-        public PackagesTypedSettings Packages { get; private set; }
+        public string Body { get; private set; }
+        public string PackagesJsonFile
+        {
+            get { return Path.Combine(this.DataDirectory, "Packages.json"); }
+        }
+        public string DataDirectory { get; private set; }
+        public string From { get; private set; }
+        public string Host { get; private set; }
+        public string InstallPropertyReferences { get; private set; }
+        public bool IsHtml { get; private set; }
+        public string Server { get; private set; }
+        public string Subject { get; private set; }
+        public string To { get; private set; }
+        public string Token { get; private set; }
+        public string UninstallPropertyReferences { get; private set; }
+        public string User { get; private set; }
 
         #endregion
 
@@ -38,15 +52,29 @@ namespace Chauffeur.Jenkins.Configuration
 
         private void Initialize()
         {
-            this.Jenkins = new JenkinsTypedSettings(this.Settings);
-            this.Packages = new PackagesTypedSettings(this.Settings);
-            this.Notifications = new NotificationsTypedSettings(this.Settings);
+            StronglyTypedChauffeurSettings typedChauffeurSettings = new StronglyTypedChauffeurSettings();
+            typedChauffeurSettings.Initialize(this.Settings);
+
+            this.Server = typedChauffeurSettings.Server.Value;
+            this.User = typedChauffeurSettings.User.Value;
+            this.Token = typedChauffeurSettings.Token.Value;
+
+            this.Host = typedChauffeurSettings.Host.Value;
+            this.To = typedChauffeurSettings.To.Value;
+            this.From = typedChauffeurSettings.From.Value;
+            this.IsHtml = typedChauffeurSettings.IsHtml.Value;
+            this.Subject = typedChauffeurSettings.Subject.Value;
+            this.Body = typedChauffeurSettings.Body.Value;
+
+            this.DataDirectory = typedChauffeurSettings.DataDirectory.Value;
+            this.InstallPropertyReferences = typedChauffeurSettings.InstallPropertyReferences.Value;
+            this.UninstallPropertyReferences = typedChauffeurSettings.UninstallPropertyReferences.Value;
         }
 
         private void LoadConfigurationAndInitialize(IEnumerable<Tuple<string, string>> values)
         {
             this.Settings = new NameValueCollection();
-            
+
             foreach (Tuple<string, string> tuple in values)
             {
                 if (tuple.Item1.StartsWith("Chauffeur/", StringComparison.OrdinalIgnoreCase))
@@ -54,60 +82,6 @@ namespace Chauffeur.Jenkins.Configuration
             }
 
             this.Initialize();
-        }
-
-        #endregion
-
-        #region Nested Type: BooleanSetting
-
-        internal class BooleanSetting : TypedSetting<bool>
-        {
-            #region Constructors
-
-            public BooleanSetting(NameValueCollection settings, string name, bool value)
-                : base(settings, name, value)
-            {
-            }
-
-            #endregion
-        }
-
-        #endregion
-
-        #region Nested Type: StringSetting
-
-        internal class StringSetting : TypedSetting<string>
-        {
-            #region Constructors
-
-            public StringSetting(NameValueCollection settings, string name, string value)
-                : base(settings, name, value)
-            {
-            }
-
-            #endregion
-        }
-
-        #endregion
-
-        #region Nested Type: StronglyTypedSetting
-
-        internal abstract class TypedSetting<TValue>
-        {
-            #region Constructors
-
-            public TypedSetting(NameValueCollection settings, string name, TValue value)
-            {
-                this.Value = string.IsNullOrEmpty(settings[name]) ? value : (TValue) Convert.ChangeType(settings[name], typeof (TValue));
-            }
-
-            #endregion
-
-            #region Public Properties
-
-            public TValue Value { get; private set; }
-
-            #endregion
         }
 
         #endregion
