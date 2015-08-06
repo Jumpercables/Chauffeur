@@ -148,9 +148,9 @@ namespace Chauffeur.Jenkins.Services
         ///     Adds the build that was installed to the chauffuer file.
         /// </summary>
         /// <param name="jobName">Name of the job.</param>
-        /// <param name="value">The value.</param>
+        /// <param name="build">The build.</param>
         /// <param name="paths">The paths.</param>
-        private async void AddPackage(string jobName, Build value, string[] paths)
+        private async void AddPackage(string jobName, Build build, string[] paths)
         {
             List<Package> packages = await this.GetPackagesAsync();
             var package = packages.FirstOrDefault(o => o.Job.Equals(jobName, StringComparison.OrdinalIgnoreCase));
@@ -159,7 +159,7 @@ namespace Chauffeur.Jenkins.Services
                 package = new Package
                 {
                     Job = jobName,
-                    Build = value,
+                    Build = build,
                     Paths = paths
                 };
 
@@ -167,7 +167,7 @@ namespace Chauffeur.Jenkins.Services
             }
             else
             {
-                package.Build = value;
+                package.Build = build;
                 package.Paths = paths;
                 package.Date = DateTime.Now.ToShortDateString();
             }
