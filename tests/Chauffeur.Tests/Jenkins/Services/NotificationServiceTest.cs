@@ -13,12 +13,13 @@ namespace Chauffeur.Tests.Jenkins.Services
         #region Public Methods
 
         [TestMethod]
-        public async void NotificationService_SendAsync()
+        public void NotificationService_SendAsync()
         {
             var build = this.GetResource<Build>("build.valid.json");
-            
-            NotificationService service = new NotificationService();
-            bool result = await service.SendAsync(build);
+
+            var service = new NotificationService();           
+            var task = service.SendAsync(build);
+            task.Wait();
         }
 
         #endregion

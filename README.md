@@ -21,16 +21,20 @@ A console application that notifies the Jenkins Chauffeur Service that a success
 
 ## Getting Started ##
 
-1. Install the Chauffuer Windows Service on the machine that will have the builds installed and uninstalled.
+1. Download and install the Jenkins Chauffuer Windows Service.
+2. Setup the service by navigating to the `Chauffuer.exe.config` file.
 
-2. Change the Jenkins keys in the `Chauffeur.exe.config` file that is installed with the Chauffeur Windows Service.
+    - `Chauffuer/Jenkins/Server` - The URL to the Jenkins CI.
+    - `Chauffuer/Jenkins/User` - The name of the user that has access to the Jenkins CI.
+    - `Chauffuer/Jenkins/Token` - The API token for the user.
 
-    - `jenkins.server` - The URL to the Jenkins CI.
-    - `jenkins.user` - The name of the user that has access to the Jenkins CI.
-    - `jenkins.token` - The API token for the user.     
+    - `Chauffuer/Packages/DataDirectory` - The path to the directory that will contain the downloaded artifacts for the builds.
+    - `Chauffuer/Packages/InstallPropertyReferences` - The property references that are passed to the MSI during install.
+    - `Chauffuer/Packages/UninstallPropertyReferences` - The property references that are passed to the MSI during uninstall.
 
-3. Change the Chauffeur keys in the `Chauffeur.exe.config` file that is installed with the Chauffeur Windows Service.
-
-    - `chauffeur.packages` - The path to the directory that will contain the downloaded artifacts for the builds `(default %COMMONAPPDATA%\Jenkins)`
-    - `chauffeur.install` - The parameters that are passed during install `(default /quiet)`.
-    - `chauffeur.uninstall` - The parameters that are passed during uninstall `(default /quiet)`.     
+    - `Chauffeur/Notification/Host` - The STMP server.
+    - `Chauffeur/Notification/To` - The group alias or individual e-mail addresses separated by commas.
+    - `Chauffeur/Notification/From` - The group alias or e-mail address.
+    - `Chauffeur/Notification/IsHtml` - When `true` the body can be expressed as HTML.
+    - `Chauffeur/Notification/Subject` - The subject of the e-mail.
+    - `Chauffeur/Notification/Body` - The body of the e-mail.

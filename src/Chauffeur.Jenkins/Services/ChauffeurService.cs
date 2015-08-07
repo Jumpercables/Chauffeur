@@ -70,14 +70,14 @@ namespace Chauffeur.Jenkins.Services
         /// </returns>
         public async Task<Build> InstallBuildAsync(string jobName)
         {
-            // Uninstall previous packages.
-            await this.UninstallBuildAsync(jobName);
-
             // Query jenkins for the build information.
-            var build = await this.GetBuild(jobName);
+            var build = await this.GetBuildAsync(jobName);
 
             // Download the packages.
-            var packages = await this.DownloadPackages(build);
+            var packages = await this.DownloadPackagesAsync(build);
+
+            // Uninstall previous packages.
+            await this.UninstallBuildAsync(jobName);
 
             // Install the packages.
             this.InstallPackages(packages);
@@ -152,7 +152,7 @@ namespace Chauffeur.Jenkins.Services
         /// <param name="paths">The paths.</param>
         private async void AddPackage(string jobName, Build build, string[] paths)
         {
-            List<Package> packages = await this.GetPackagesAsync();
+            var packages = await this.GetPackagesAsync();
             var package = packages.FirstOrDefault(o => o.Job.Equals(jobName, StringComparison.OrdinalIgnoreCase));
             if (package == null)
             {
@@ -179,7 +179,7 @@ namespace Chauffeur.Jenkins.Services
         ///     Downloads the packages of the build.
         /// </summary>
         /// <param name="build">The build.</param>
-        private async Task<string[]> DownloadPackages(Build build)
+        private async Task<string[]> DownloadPackagesAsync(Build build)
         {
             var service = new ArtifactService(base.BaseUri, base.Client, base.Configuration);
             return await service.DownloadArtifactsAsync(build);
@@ -192,9 +192,9 @@ namespace Chauffeur.Jenkins.Services
         /// <returns>
         ///     Returns a <see cref="Build" /> representing the last successful build.
         /// </returns>
-        private async Task<Build> GetBuild(string jobName)
+        private async Task<Build> GetBuildAsync(string jobName)
         {
-            var service = new JobService(base.BaseUri, base.Client, base.Configuration);
+            var service = new JobService(base.BaseUri, base.Client, base.Configuration);            
             return await service.GetLastSuccessfulBuildAsync(jobName);
         }
 

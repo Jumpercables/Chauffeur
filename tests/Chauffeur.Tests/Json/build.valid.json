@@ -1,1 +1,132 @@
-﻿{"actions":[{"causes":[{"shortDescription":"Started by user Baesler, Kyle","userId":"kbaesler","userName":"Baesler, Kyle"}]},{},{},{},{}],"artifacts":[{"displayPath":"Chaffuer_1.0.0.2264.msi","fileName":"Chaffuer_1.0.0.2264.msi","relativePath":"BuildIntegration/Installers/Output/Assemblies/Chaffuer_1.0.0.2264.msi"}],"building":false,"description":"Added Sempra.GWD.DesignQAQCRules to GAC.","duration":330139,"estimatedDuration":268404,"executor":null,"fullDisplayName":"Sempra_Development_9.3.2_SP1_Desktop_Gas #2264","id":"2015-07-16_18-14-35","keepLog":false,"number":2264,"result":"SUCCESS","timestamp":1437095675647,"url":"http://AP-TFS2010-P02:8080/view/SDG%20and%20SCG/job/Sempra_Development_9.3.2_SP1_Desktop_Gas/2264/","builtOn":"","changeSet":{"items":[],"kind":null},"culprits":[]}
+﻿{
+  "actions" : [
+    {
+      "causes" : [
+        {
+          "shortDescription" : "Started by an SCM change"
+        }
+      ]
+    },
+    {
+      
+    },
+    null,
+    {
+      
+    },
+    {
+      
+    },
+    {
+      
+    },
+    {
+      
+    },
+    {
+      
+    }
+  ],
+  "artifacts" : [
+    {
+      "displayPath" : "Sempra.Desktop_Gas_Debug_9.3.21.16.msi",
+      "fileName" : "Sempra.Desktop_Gas_Debug_9.3.21.16.msi",
+      "relativePath" : "BuildIntegration/Installers/Output/Assemblies/Sempra.Desktop_Gas_Debug_9.3.21.16.msi"
+    },
+    {
+      "displayPath" : "Sempra.Desktop_Gas_Debug_9.3.21.17.msi",
+      "fileName" : "Sempra.Desktop_Gas_Debug_9.3.21.17.msi",
+      "relativePath" : "BuildIntegration/Installers/Output/Assemblies/Sempra.Desktop_Gas_Debug_9.3.21.17.msi"
+    }
+  ],
+  "building" : false,
+  "description" : null,
+  "displayName" : "#17",
+  "duration" : 279173,
+  "estimatedDuration" : 325601,
+  "executor" : null,
+  "fullDisplayName" : "Sempra_Development_9.3.2_SP1_Desktop_Gas_Tester #17",
+  "id" : "2015-07-30_16-14-21",
+  "keepLog" : false,
+  "number" : 17,
+  "queueId" : -1,
+  "result" : "SUCCESS",
+  "timestamp" : 1438298061000,
+  "url" : "http://AP-TFS2010-P02:8080/job/Sempra_Development_9.3.2_SP1_Desktop_Gas_Tester/17/",
+  "builtOn" : "",
+  "changeSet" : {
+    "items" : [
+      {
+        "affectedPaths" : [
+          "$/OpEx GIS/EGIS/Gas_Dev/AdminTools/Swizzler/swizzler/Program.cs"
+        ],
+        "author" : {
+          "absoluteUrl" : "http://AP-TFS2010-P02:8080/user/pyallama",
+          "fullName" : "Yallamanda, PurnaChand"
+        },
+        "commitId" : null,
+        "msg" : "Task 1792: Enabled batch processing",
+        "timestamp" : -1,
+        "comment" : "Task 1792: Enabled batch processing",
+        "date" : 1438297348000,
+        "domain" : null,
+        "items" : [
+          {
+            "action" : "edit",
+            "editType" : "edit",
+            "path" : "$/OpEx GIS/EGIS/Gas_Dev/AdminTools/Swizzler/swizzler/Program.cs"
+          }
+        ],
+        "user" : "PYallama",
+        "version" : "13326"
+      },
+      {
+        "affectedPaths" : [
+          "$/OpEx GIS/EGIS/Gas_Dev/Integration/DCUInterfaceProcess/DCUInterfaceProcess.csproj",
+          "$/OpEx GIS/EGIS/Gas_Dev/Integration/DCUInterfaceProcess/SCGasProcess.cs",
+          "$/OpEx GIS/EGIS/Gas_Dev/Integration/DCUInterfaceProcess/SQLProcessor.cs"
+        ],
+        "author" : {
+          "absoluteUrl" : "http://AP-TFS2010-P02:8080/user/amalik",
+          "fullName" : "Malik, Amit"
+        },
+        "commitId" : null,
+        "msg" : "Amit Malik - DCU Updates for commit, rollback, stored procedures",
+        "timestamp" : -1,
+        "comment" : "Amit Malik - DCU Updates for commit, rollback, stored procedures",
+        "date" : 1438297454000,
+        "domain" : null,
+        "items" : [
+          {
+            "action" : "edit",
+            "editType" : "edit",
+            "path" : "$/OpEx GIS/EGIS/Gas_Dev/Integration/DCUInterfaceProcess/DCUInterfaceProcess.csproj"
+          },
+          {
+            "action" : "edit",
+            "editType" : "edit",
+            "path" : "$/OpEx GIS/EGIS/Gas_Dev/Integration/DCUInterfaceProcess/SCGasProcess.cs"
+          },
+          {
+            "action" : "edit",
+            "editType" : "edit",
+            "path" : "$/OpEx GIS/EGIS/Gas_Dev/Integration/DCUInterfaceProcess/SQLProcessor.cs"
+          }
+        ],
+        "user" : "AMalik",
+        "version" : "13327"
+      }
+    ],
+    "kind" : null
+  },
+  "culprits" : [
+    {
+      "absoluteUrl" : "http://AP-TFS2010-P02:8080/user/amalik",
+      "fullName" : "Malik, Amit"
+    },
+    {
+      "absoluteUrl" : "http://AP-TFS2010-P02:8080/user/pyallama",
+      "fullName" : "Yallamanda, PurnaChand"
+    }
+  ]
+}

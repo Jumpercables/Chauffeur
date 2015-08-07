@@ -54,20 +54,23 @@ namespace Chauffeur.Jenkins.Services
             {
                 var configuration = new ChauffeurConfiguration();
 
-                if (string.IsNullOrEmpty(configuration.To)) return false;
+                if (string.IsNullOrEmpty(configuration.To)) 
+                    return false;
 
                 if (string.IsNullOrEmpty(configuration.Host))
-                    throw new WebFaultException<ErrorData>(new ErrorData("The 'host' must be provided.", "The 'email.host' must be provided in the configuration file."), HttpStatusCode.NotFound);
+                    throw new WebFaultException<ErrorData>(new ErrorData("The 'host' must be provided.", "The configuration must be provided in the configuration file."), HttpStatusCode.NotFound);
 
                 if (string.IsNullOrEmpty(configuration.From))
-                    throw new WebFaultException<ErrorData>(new ErrorData("The 'from' must be provided.", "The 'email.from' must be provided in the configuration file."), HttpStatusCode.NotFound);
+                    throw new WebFaultException<ErrorData>(new ErrorData("The 'from' must be provided.", "The configuration must be provided in the configuration file."), HttpStatusCode.NotFound);
+
+                var templates = this.GetTemplates(build);
 
                 using (MailMessage message = new MailMessage())
                 {
                     message.To.Add(configuration.To);
                     message.From = new MailAddress(configuration.From);
-                    message.Subject = this.ApplyTemplates(build, configuration.Subject);
-                    message.Body = this.ApplyTemplates(build, configuration.Body);
+                    message.Subject = this.ApplyTemplates(configuration.Subject, templates);
+                    message.Body = this.ApplyTemplates(configuration.Body, templates);
                     message.IsBodyHtml = configuration.IsHtml;
 
                     using (SmtpClient client = new SmtpClient(configuration.Host))
@@ -94,44 +97,47 @@ namespace Chauffeur.Jenkins.Services
         }
 
         /// <summary>
-        ///     Applies the templates to the data string.
+        ///     Replaces all of the occurances of the tokens in the string with the corresponding values.
         /// </summary>
-        /// <param name="build">The build.</param>
         /// <param name="data">The data.</param>
-        /// <returns>Returns</returns>
-        private string ApplyTemplates(Build build, string data)
+        /// <param name="templates">The templates.</param>
+        /// <returns>
+        ///     Returns a <see cref="string" /> representing the data replaced with the tokens.
+        /// </returns>
+        private string ApplyTemplates(string data, IEnumerable<Dictionary<string, string>> templates)
         {
-            Dictionary<string, string>[] templates =
-            {
-                this.GetBuildTemplate(build),
-                this.GetChauffeurTemplate()
-            };
-
             return templates.Aggregate(data, this.ApplyTemplate);
         }
 
         /// <summary>
-        ///     Gets the build template.
+        ///     Gets the change set template.
         /// </summary>
-        /// <param name="build">The build.</param>
-        /// <returns>Returns a <see cref="Dictionary{String, String}" /> representing the build template.</returns>
-        private Dictionary<string, string> GetBuildTemplate(Build build)
+        /// <param name="changeSet">The change set.</param>
+        /// <returns>Returns a <see cref="Dictionary{String, String}" /> representing the property template.</returns>
+        private Dictionary<string, string> GetChangeSetTemplate(ChangeSet changeSet)
         {
-            Dictionary<string, string> template = new Dictionary<string, string>();
+            Dictionary<string, string> list = new Dictionary<string, string>();
 
-            Type t = build.GetType();
-            var properties = t.GetProperties();
-            foreach (var p in properties)
-            {
-                if (p.PropertyType == typeof (int) || p.PropertyType == typeof (string) || p.PropertyType == typeof (bool) || p.PropertyType == typeof (Uri))
+            if (changeSet != null)
+            {                
+                foreach (var changeSetItem in changeSet.Items)
                 {
-                    string key = @"\{" + string.Format(@"BUILD\({0}\)", p.Name.ToUpperInvariant()) + @"\}";
-                    string value = string.Format("{0}", p.GetValue(build));
-                    template.Add(key, value);
+                    var t = this.GetPropertyTemplate(changeSetItem, "CHANGESET");                    
+                    foreach (var o in t)
+                    {
+                        if (!list.ContainsKey(o.Key))
+                        {
+                            list.Add(o.Key, o.Value);
+                        }
+                        else
+                        {
+                            list[o.Key] = string.Concat(list[o.Key], Environment.NewLine, o.Value);
+                        }
+                    }
                 }
             }
 
-            return template;
+            return list;
         }
 
         /// <summary>
@@ -140,10 +146,67 @@ namespace Chauffeur.Jenkins.Services
         /// <returns>Returns a <see cref="Dictionary{String, String}" /> representing the chauffeur template.</returns>
         private Dictionary<string, string> GetChauffeurTemplate()
         {
-            Dictionary<string, string> template = new Dictionary<string, string>();
-            template.Add(@"\{CHAUFFEUR\(MACHINENAME\)\}", Environment.MachineName);
+            Dictionary<string, string> list = new Dictionary<string, string>();
+            list.Add(@"\{CHAUFFEUR\(MACHINENAME\)\}", Environment.MachineName);
 
-            return template;
+            return list;
+        }
+
+        /// <summary>
+        ///     Gets the property template.
+        /// </summary>
+        /// <param name="o">The object with public properties.</param>
+        /// <param name="token">The token.</param>
+        /// <returns>Returns a <see cref="Dictionary{String, String}" /> representing the property template.</returns>
+        private Dictionary<string, string> GetPropertyTemplate(object o, string token)
+        {
+            Dictionary<string, string> list = new Dictionary<string, string>();
+
+            if (o != null)
+            {
+                Type t = o.GetType();
+                var props = t.GetProperties();
+                foreach (var p in props)
+                {
+                    string key = @"\{" + string.Format(@"{0}\({1}\)", token, p.Name.ToUpperInvariant()) + @"\}";
+
+                    if (p.PropertyType == typeof (int) || p.PropertyType == typeof (string) || p.PropertyType == typeof (bool) || p.PropertyType == typeof (Uri))
+                    {
+                        string value = string.Format("{0}", p.GetValue(o));
+                        list.Add(key, value);
+                    }
+                    else if (p.PropertyType == typeof (IList<string>))
+                    {
+                        IList<string> values = p.GetValue(o) as IList<string>;
+                        if (values != null)
+                        {
+                            string value = string.Format("{0}", string.Join(Environment.NewLine, values));
+                            list.Add(key, value);
+                        }
+                    }
+                }
+            }
+
+            return list;
+        }
+
+        /// <summary>
+        ///     Gets the templates.
+        /// </summary>
+        /// <param name="build">The build.</param>
+        /// <returns>
+        ///     Returns a <see cref="Dictionary{String, String}" /> representing the templates.
+        /// </returns>
+        private Dictionary<string, string>[] GetTemplates(Build build)
+        {
+            Dictionary<string, string>[] templates =
+            {
+                this.GetPropertyTemplate(build, "BUILD"),
+                this.GetChangeSetTemplate(build.ChangeSet),
+                this.GetChauffeurTemplate()
+            };
+
+            return templates;
         }
 
         #endregion

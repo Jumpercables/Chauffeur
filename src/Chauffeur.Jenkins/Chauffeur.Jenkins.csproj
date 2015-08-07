@@ -89,7 +89,6 @@
     <Compile Include="Client\JenkinsClient.cs" />
     <Compile Include="Client\JsonJenkinsClient.cs" />
     <Compile Include="Configuration\ChauffeurConfiguration.cs" />
-    <Compile Include="Configuration\Internal\StronglyTypedChauffeurSettings.cs" />
     <Compile Include="Model\Build.cs" />
     <Compile Include="Model\Job.cs" />
     <Compile Include="Model\Node.cs" />
