@@ -9,6 +9,7 @@ using System.ServiceModel.Web;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
+using Chauffeur.Jenkins.Configuration;
 using Chauffeur.Jenkins.Model;
 
 namespace Chauffeur.Jenkins.Services
@@ -37,8 +38,32 @@ namespace Chauffeur.Jenkins.Services
     /// <summary>
     ///     Provides a WFC contract that will send out a notification for the build.
     /// </summary>
-    public class NotificationService : JenkinsService, INotificationService
+    public class NotificationService : INotificationService
     {
+        #region Constructors
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="NotificationService" /> class.
+        /// </summary>
+        public NotificationService()
+        {
+            this.Configuration = new ChauffeurConfiguration();
+        }
+
+        #endregion
+
+        #region Protected Properties
+
+        /// <summary>
+        ///     Gets or sets the configuration.
+        /// </summary>
+        /// <value>
+        ///     The configuration.
+        /// </value>
+        protected ChauffeurConfiguration Configuration { get; set; }
+
+        #endregion
+
         #region INotificationService Members
 
         /// <summary>

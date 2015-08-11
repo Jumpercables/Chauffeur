@@ -1,32 +1,71 @@
-﻿{
+﻿[
+  {
     "url": "C:\\ProgramData\\Jenkins\\Packages.json",
-    "job": "Sempra_Development_9.3.2_SP1_Desktop_Gas",
-    "date": "8/10/2015",
+    "job": "Chauffuer_Development_Tester",
+    "date": "8/11/2015",
     "paths": [
-        "C:\\ProgramData\\Jenkins\\Sempra.Desktop_Gas_Debug_9.3.21.2281.msi"
+      "C:\\ProgramData\\Jenkins\\Chauffuer_Development_Tester_32.msi"
     ],
     "build": {
-        "artifacts": [
-            {
-                "displayPath": "Sempra.Desktop_Gas_Debug_9.3.21.2281.msi",
-                "fileName": "Sempra.Desktop_Gas_Debug_9.3.21.2281.msi",
-                "relativePath": "BuildIntegration/Installers/Output/Assemblies/Sempra.Desktop_Gas_Debug_9.3.21.2281.msi"
-            }
-        ],
-        "building": false,
-        "builtOn": "",
-        "changeSet": {
-            "items": [ ]
-        },
-        "culprits": [ ],
-        "description": null,
-        "displayName": "#2281",
-        "duration": 345330,
-        "fullDisplayName": "Sempra_Development_9.3.2_SP1_Desktop_Gas #2281",
-        "id": "2281",
-        "keepLog": false,
-        "number": 2281,
-        "result": "SUCCESS",
-        "url": "http://AP-TFS2010-P02:8080/job/Sempra_Development_9.3.2_SP1_Desktop_Gas/2281/"
+      "artifacts": [
+        {
+          "displayPath": "Chauffuer_Development_Tester_32.msi",
+          "fileName": "Chauffuer_Development_Tester_32.msi",
+          "relativePath": "BuildIntegration/Installers/Output/Assemblies/Chauffuer_Development_Tester_32.msi"
+        }
+      ],
+      "building": false,
+      "builtOn": "",
+      "changeSet": {
+        "items": [
+          {
+            "affectedPaths": [
+              "$/Tests/Chauffer/Chauffuer.Desktop/Configurations/QA/Model/QAQCJunctionValidation.cs",
+              "$/Tests/Chauffer/Chauffuer.Desktop/Configurations/QA/QAQCValidation.cs",
+              "$/Tests/Chauffer/Chauffuer.Desktop/Configurations/QA/QAQCValidation.xsd"
+            ],
+            "author": {
+              "fullName": "Baesler, Kyle",
+              "absoluteUrl": "http://AP-TFS2010-P02:8080/user/corp_kbaesler"
+            },
+            "comment": "Task 2103:(QA / QC Enhancement not to allow Plastic Fittings, Valves and Service Connections on Steel pipes).Bug Fix in the rule validating with attribute Domain values.\n\nModified class files:\nQAQCJunctionValidation.cs\nQAQCValidation.xsd\nQAQCValidation.cs",
+            "date": "1439284271000",
+            "id": null,
+            "version": "13452",
+            "msg": "Task 2103:(QA / QC Enhancement not to allow Plastic Fittings, Valves and Service Connections on Steel pipes).Bug Fix in the rule validating with attribute Domain values.\n\nModified class files:\nQAQCJunctionValidation.cs\nQAQCValidation.xsd\nQAQCValidation.cs",
+            "items": [
+              {
+                "editType": "edit",
+                "path": "$/Tests/Chauffer/Chauffuer.Desktop/Configurations/QA/Model/QAQCJunctionValidation.cs"
+              },
+              {
+                "editType": "edit",
+                "path": "$/Tests/Chauffer/Chauffuer.Desktop/Configurations/QA/QAQCValidation.cs"
+              },
+              {
+                "editType": "edit",
+                "path": "$/Tests/Chauffer/Chauffuer.Desktop/Configurations/QA/QAQCValidation.xsd"
+              }
+            ],
+            "user": "corp_kbaesler"
+          }
+        ]
+      },
+      "culprits": [
+        {
+          "fullName": "Baesler, Kyle",
+          "absoluteUrl": "http://AP-TFS2010-P02:8080/user/corp_mnagarju"
+        }
+      ],
+      "description": null,
+      "displayName": "#32",
+      "duration": 497050,
+      "fullDisplayName": "Chauffuer_Development_9.3.2_SP1_Desktop_Gas_Tester #32",
+      "id": "32",
+      "keepLog": false,
+      "number": 32,
+      "result": "SUCCESS",
+      "url": "http://AP-TFS2010-P02:8080/job/Chauffuer_Development_Tester/32/"
     }
-}
+  }
+]

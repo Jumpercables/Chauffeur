@@ -13,6 +13,9 @@
     .EXAMPLE
         Chauffeur.groovy
  */
+
+import hudson.scm.*
+
 class Chauffuer {
 
     // The name of the job in the build environment.
@@ -37,7 +40,7 @@ class Chauffuer {
 
         try {
             MACHINE_NAMES.eachWithIndex { String s, int i ->
-                def url = new URL('http://' + s + ':8080/Chauffeur.Jenkins.Services/ChauffeurService/rest/Install/' + JOB_NAME)
+                def url = new URL('http://' + s + ':8080/Chauffeur.Jenkins.Services/ChauffeurService/rest/InstallLastSuccesfulBuild/' + JOB_NAME)
                 def text = url.getText()
                 println(text)
             }
