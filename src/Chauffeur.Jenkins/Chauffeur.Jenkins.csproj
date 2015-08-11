@@ -92,6 +92,7 @@
     <Compile Include="Model\Build.cs" />
     <Compile Include="Model\Job.cs" />
     <Compile Include="Model\Node.cs" />
+    <Compile Include="Model\Package.cs" />
     <Compile Include="Model\User.cs" />
     <Compile Include="Model\View.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -107,7 +108,9 @@
     </None>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="Resources\NotificationsBody.html" />
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <VSToolsPath Condition="'$(VSToolsPath)' == '' and '$(VisualStudioVersion)' != '' and '$(VisualStudioVersion)' != '11.0'">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>

@@ -1,0 +1,93 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">    
+    <head>
+        <title>Build Notification.</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <style type="text/css">
+            body {
+                font-family: 'Helvetica Neue', Helvetica, Arial;
+                font-size: 14px;
+                line-height: 20px;
+                font-weight: 400;
+            }
+
+            table {
+                width: 100%;
+                display: table;
+                border-collapse: collapse;
+            }
+
+            table, td, th {
+                white-space: nowrap;
+                border: 1px solid #a9a9a9;
+            }
+
+            thead {
+                display: table-header-group;
+                vertical-align: middle;
+                background: #27ae60;
+                color: #ffffff;
+                padding: 6px 12px;
+            }
+
+            tbody {
+                background: #ffffff;
+                padding: 6px;
+            }
+
+            td { padding: 6px 12px; }
+
+            th {
+                display: table-cell;
+                vertical-align: inherit;
+                padding: 6px 12px;
+                text-align: center;
+            }
+
+            tr:nth-child(even) { background: #f6f6f6; }
+
+            caption {
+                vertical-align: middle;
+                color: #27ae60;
+                font-weight: bold;
+                padding: 6px 12px;
+                font-size: 18px;
+            }
+
+            span {
+                font-size: 8px;
+                text-transform: uppercase;
+                color: dimgray;
+            }
+        </style>
+    </head>
+    <body>
+        <div>
+            <table id="table">                
+                <thead>
+                    <tr>
+                        <th>Name:</th>                        
+                    </tr>
+                    <tr>
+                        <th>Number:</th>
+                    </tr>
+                    <tr>
+                        <th>Files:</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{BUILD(FULLDISPLAYNAME)}</td>
+                    </tr>
+                    <tr>
+                        <td>{BUILD(NUMBER)}</td>
+                    </tr>
+                    <tr>
+                        <td>{CHANGESET(AFFECTEDPATHS)}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </body>
+</html>

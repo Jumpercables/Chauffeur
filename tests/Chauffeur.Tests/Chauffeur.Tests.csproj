@@ -91,6 +91,7 @@
   <ItemGroup>
     <None Include="App.config" />
     <EmbeddedResource Include="Json\build.valid.json" />
+    <EmbeddedResource Include="Json\package.valid.json" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

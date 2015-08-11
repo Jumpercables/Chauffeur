@@ -1,0 +1,32 @@
+﻿{
+    "url": "C:\\ProgramData\\Jenkins\\Packages.json",
+    "job": "Sempra_Development_9.3.2_SP1_Desktop_Gas",
+    "date": "8/10/2015",
+    "paths": [
+        "C:\\ProgramData\\Jenkins\\Sempra.Desktop_Gas_Debug_9.3.21.2281.msi"
+    ],
+    "build": {
+        "artifacts": [
+            {
+                "displayPath": "Sempra.Desktop_Gas_Debug_9.3.21.2281.msi",
+                "fileName": "Sempra.Desktop_Gas_Debug_9.3.21.2281.msi",
+                "relativePath": "BuildIntegration/Installers/Output/Assemblies/Sempra.Desktop_Gas_Debug_9.3.21.2281.msi"
+            }
+        ],
+        "building": false,
+        "builtOn": "",
+        "changeSet": {
+            "items": [ ]
+        },
+        "culprits": [ ],
+        "description": null,
+        "displayName": "#2281",
+        "duration": 345330,
+        "fullDisplayName": "Sempra_Development_9.3.2_SP1_Desktop_Gas #2281",
+        "id": "2281",
+        "keepLog": false,
+        "number": 2281,
+        "result": "SUCCESS",
+        "url": "http://AP-TFS2010-P02:8080/job/Sempra_Development_9.3.2_SP1_Desktop_Gas/2281/"
+    }
+}

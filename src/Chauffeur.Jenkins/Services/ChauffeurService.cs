@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization;
 using System.ServiceModel;
 using System.ServiceModel.Web;
 using System.Threading.Tasks;
@@ -82,11 +81,11 @@ namespace Chauffeur.Jenkins.Services
             // Install the packages.
             this.InstallPackages(packages);
 
-            // Send the notifications.
-            this.Notify(build);
-
             // Save the last build installed.
-            this.AddPackage(jobName, build, packages);
+            var package = await this.AddPackage(jobName, build, packages);
+
+            // Send the notifications.
+            this.Notify(package);
 
             // Return the build.
             return build;
@@ -150,14 +149,17 @@ namespace Chauffeur.Jenkins.Services
         /// <param name="jobName">Name of the job.</param>
         /// <param name="build">The build.</param>
         /// <param name="paths">The paths.</param>
-        private async void AddPackage(string jobName, Build build, string[] paths)
+        /// <returns>Returns a <see cref="Package" /> representigng the new package.</returns>
+        private async Task<Package> AddPackage(string jobName, Build build, string[] paths)
         {
             var packages = await this.GetPackagesAsync();
+
             var package = packages.FirstOrDefault(o => o.Job.Equals(jobName, StringComparison.OrdinalIgnoreCase));
             if (package == null)
             {
                 package = new Package
                 {
+                    Url = new Uri(this.Configuration.PackagesJsonFile),
                     Job = jobName,
                     Build = build,
                     Paths = paths
@@ -173,6 +175,8 @@ namespace Chauffeur.Jenkins.Services
             }
 
             this.UpdatePackages(packages);
+
+            return package;
         }
 
         /// <summary>
@@ -194,7 +198,7 @@ namespace Chauffeur.Jenkins.Services
         /// </returns>
         private async Task<Build> GetBuildAsync(string jobName)
         {
-            var service = new JobService(base.BaseUri, base.Client, base.Configuration);            
+            var service = new JobService(base.BaseUri, base.Client, base.Configuration);
             return await service.GetLastSuccessfulBuildAsync(jobName);
         }
 
@@ -258,11 +262,11 @@ namespace Chauffeur.Jenkins.Services
         /// <summary>
         ///     Sends the notification of the completion.
         /// </summary>
-        /// <param name="build">The build.</param>
-        private async void Notify(Build build)
+        /// <param name="package">The package.</param>
+        private async void Notify(Package package)
         {
             NotificationService service = new NotificationService();
-            await service.SendAsync(build).ContinueWith((task) => this.Log("Notification: {0}", task.Result));
+            await service.SendAsync(package).ContinueWith((task) => this.Log("Notification: {0}", task.Result));
         }
 
         /// <summary>
@@ -293,38 +297,6 @@ namespace Chauffeur.Jenkins.Services
             var json = JsonConvert.SerializeObject(packages, Formatting.Indented);
             File.WriteAllText(base.Configuration.PackagesJsonFile, json);
         }
-
-        #endregion
-    }
-
-    [DataContract]
-    public class Package
-    {
-        #region Constructors
-
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="Package" /> class.
-        /// </summary>
-        public Package()
-        {
-            this.Date = DateTime.Now.ToShortDateString();
-        }
-
-        #endregion
-
-        #region Public Properties
-
-        [DataMember(Name = "build", Order = 4)]
-        public Build Build { get; set; }
-
-        [DataMember(Name = "date", Order = 2)]
-        public string Date { get; set; }
-
-        [DataMember(Name = "job", Order = 1)]
-        public string Job { get; set; }
-
-        [DataMember(Name = "paths", Order = 3)]
-        public string[] Paths { get; set; }
 
         #endregion
     }

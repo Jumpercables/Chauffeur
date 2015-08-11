@@ -15,10 +15,9 @@ namespace Chauffeur.Tests.Jenkins.Services
         [TestMethod]
         public void NotificationService_SendAsync()
         {
-            var build = this.GetResource<Build>("build.valid.json");
-
+            var package = this.GetResource<Package>("package.valid.json");
             var service = new NotificationService();           
-            var task = service.SendAsync(build);
+            var task = service.SendAsync(package);
             task.Wait();
         }
 

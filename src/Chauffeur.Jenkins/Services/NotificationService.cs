@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Mail;
@@ -8,7 +9,6 @@ using System.ServiceModel.Web;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-using Chauffeur.Jenkins.Configuration;
 using Chauffeur.Jenkins.Model;
 
 namespace Chauffeur.Jenkins.Services
@@ -22,14 +22,14 @@ namespace Chauffeur.Jenkins.Services
         #region Public Methods
 
         /// <summary>
-        ///     Sends a notification of the specified build.
+        ///     Sends a notification that the package was installed.
         /// </summary>
-        /// <param name="build">The build.</param>
+        /// <param name="package">The build.</param>
         /// <returns>
         ///     Returns <see cref="bool" /> when the notification was sent.
         /// </returns>
         [OperationContract]
-        Task<bool> SendAsync(Build build);
+        Task<bool> SendAsync(Package package);
 
         #endregion
     }
@@ -37,43 +37,43 @@ namespace Chauffeur.Jenkins.Services
     /// <summary>
     ///     Provides a WFC contract that will send out a notification for the build.
     /// </summary>
-    public class NotificationService : INotificationService
+    public class NotificationService : JenkinsService, INotificationService
     {
         #region INotificationService Members
 
         /// <summary>
         ///     Sends a notification of the specified build.
         /// </summary>
-        /// <param name="build">The build.</param>
+        /// <param name="package">The build.</param>
         /// <returns>
         ///     Returns <see cref="bool" /> when the notification was sent.
         /// </returns>
-        public Task<bool> SendAsync(Build build)
+        public Task<bool> SendAsync(Package package)
         {
             return Task.Run(() =>
             {
-                var configuration = new ChauffeurConfiguration();
-
-                if (string.IsNullOrEmpty(configuration.To)) 
+                if (string.IsNullOrEmpty(this.Configuration.To))
                     return false;
 
-                if (string.IsNullOrEmpty(configuration.Host))
+                if (string.IsNullOrEmpty(this.Configuration.Host))
                     throw new WebFaultException<ErrorData>(new ErrorData("The 'host' must be provided.", "The configuration must be provided in the configuration file."), HttpStatusCode.NotFound);
 
-                if (string.IsNullOrEmpty(configuration.From))
+                if (string.IsNullOrEmpty(this.Configuration.From))
                     throw new WebFaultException<ErrorData>(new ErrorData("The 'from' must be provided.", "The configuration must be provided in the configuration file."), HttpStatusCode.NotFound);
 
-                var templates = this.GetTemplates(build);
+                var templates = this.GetTemplates(package);
+                var subject = this.ApplyTemplates(this.Configuration.Subject, templates);
+                var body = this.GetBody(templates);
 
                 using (MailMessage message = new MailMessage())
                 {
-                    message.To.Add(configuration.To);
-                    message.From = new MailAddress(configuration.From);
-                    message.Subject = this.ApplyTemplates(configuration.Subject, templates);
-                    message.Body = this.ApplyTemplates(configuration.Body, templates);
-                    message.IsBodyHtml = configuration.IsHtml;
+                    message.To.Add(this.Configuration.To);
+                    message.From = new MailAddress(this.Configuration.From);
+                    message.Subject = subject;
+                    message.Body = body;
+                    message.IsBodyHtml = this.Configuration.IsHtml;
 
-                    using (SmtpClient client = new SmtpClient(configuration.Host))
+                    using (SmtpClient client = new SmtpClient(this.Configuration.Host))
                         client.Send(message);
                 }
 
@@ -110,6 +110,27 @@ namespace Chauffeur.Jenkins.Services
         }
 
         /// <summary>
+        ///     Gets the body of the notification.
+        /// </summary>
+        /// <param name="templates">The templates.</param>
+        /// <returns>
+        ///     Returns a <see cref="string" /> representing the body.
+        /// </returns>
+        private string GetBody(IEnumerable<Dictionary<string, string>> templates)
+        {
+            if (this.Configuration.IsHtml)
+            {
+                if (File.Exists(this.Configuration.Body))
+                {
+                    string value = File.ReadAllText(this.Configuration.Body);
+                    return this.ApplyTemplates(value, templates);
+                }
+            }
+
+            return this.Configuration.Body;
+        }
+
+        /// <summary>
         ///     Gets the change set template.
         /// </summary>
         /// <param name="changeSet">The change set.</param>
@@ -119,10 +140,10 @@ namespace Chauffeur.Jenkins.Services
             Dictionary<string, string> list = new Dictionary<string, string>();
 
             if (changeSet != null)
-            {                
+            {
                 foreach (var changeSetItem in changeSet.Items)
                 {
-                    var t = this.GetPropertyTemplate(changeSetItem, "CHANGESET");                    
+                    var t = this.GetPropertyTemplate(changeSetItem, "CHANGESET");
                     foreach (var o in t)
                     {
                         if (!list.ContainsKey(o.Key))
@@ -193,16 +214,17 @@ namespace Chauffeur.Jenkins.Services
         /// <summary>
         ///     Gets the templates.
         /// </summary>
-        /// <param name="build">The build.</param>
+        /// <param name="package">The build.</param>
         /// <returns>
         ///     Returns a <see cref="Dictionary{String, String}" /> representing the templates.
         /// </returns>
-        private Dictionary<string, string>[] GetTemplates(Build build)
+        private Dictionary<string, string>[] GetTemplates(Package package)
         {
             Dictionary<string, string>[] templates =
             {
-                this.GetPropertyTemplate(build, "BUILD"),
-                this.GetChangeSetTemplate(build.ChangeSet),
+                this.GetPropertyTemplate(package, "PACKAGE"),
+                this.GetPropertyTemplate(package.Build, "BUILD"),
+                this.GetChangeSetTemplate(package.Build.ChangeSet),
                 this.GetChauffeurTemplate()
             };
 
