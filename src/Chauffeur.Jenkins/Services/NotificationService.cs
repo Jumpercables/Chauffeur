@@ -229,6 +229,10 @@ namespace Chauffeur.Jenkins.Services
                             string value = string.Format("{0}", string.Join(Environment.NewLine, values));
                             list.Add(key, value);
                         }
+                        else
+                        {
+                            list.Add(key, "");
+                        }
                     }
                 }
             }

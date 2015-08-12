@@ -1,71 +1,64 @@
-﻿[
-  {
-    "url": "C:\\ProgramData\\Jenkins\\Packages.json",
-    "job": "Chauffuer_Development_Tester",
-    "date": "8/11/2015",
+﻿{
+    "url": "file:///C:/ProgramData/Jenkins/Packages.json",
+    "job": "Chauffer-Nightly-Build",
+    "date": "8/12/2015",
     "paths": [
-      "C:\\ProgramData\\Jenkins\\Chauffuer_Development_Tester_32.msi"
+        "C:\\ProgramData\\Jenkins\\Chauffer-Nightly-Build.34.msi"
     ],
     "build": {
-      "artifacts": [
-        {
-          "displayPath": "Chauffuer_Development_Tester_32.msi",
-          "fileName": "Chauffuer_Development_Tester_32.msi",
-          "relativePath": "BuildIntegration/Installers/Output/Assemblies/Chauffuer_Development_Tester_32.msi"
-        }
-      ],
-      "building": false,
-      "builtOn": "",
-      "changeSet": {
-        "items": [
-          {
-            "affectedPaths": [
-              "$/Tests/Chauffer/Chauffuer.Desktop/Configurations/QA/Model/QAQCJunctionValidation.cs",
-              "$/Tests/Chauffer/Chauffuer.Desktop/Configurations/QA/QAQCValidation.cs",
-              "$/Tests/Chauffer/Chauffuer.Desktop/Configurations/QA/QAQCValidation.xsd"
-            ],
-            "author": {
-              "fullName": "Baesler, Kyle",
-              "absoluteUrl": "http://AP-TFS2010-P02:8080/user/corp_kbaesler"
-            },
-            "comment": "Task 2103:(QA / QC Enhancement not to allow Plastic Fittings, Valves and Service Connections on Steel pipes).Bug Fix in the rule validating with attribute Domain values.\n\nModified class files:\nQAQCJunctionValidation.cs\nQAQCValidation.xsd\nQAQCValidation.cs",
-            "date": "1439284271000",
-            "id": null,
-            "version": "13452",
-            "msg": "Task 2103:(QA / QC Enhancement not to allow Plastic Fittings, Valves and Service Connections on Steel pipes).Bug Fix in the rule validating with attribute Domain values.\n\nModified class files:\nQAQCJunctionValidation.cs\nQAQCValidation.xsd\nQAQCValidation.cs",
+        "artifacts": [
+            {
+                "displayPath": "Chauffer-Nightly-Build.34.msi",
+                "fileName": "Chauffer-Nightly-Build.34.msi",
+                "relativePath": "BuildIntegration/Installers/Output/Assemblies/Chauffer-Nightly-Build.34.msi"
+            }
+        ],
+        "building": false,
+        "builtOn": "",
+        "changeSet": {
             "items": [
-              {
-                "editType": "edit",
-                "path": "$/Tests/Chauffer/Chauffuer.Desktop/Configurations/QA/Model/QAQCJunctionValidation.cs"
-              },
-              {
-                "editType": "edit",
-                "path": "$/Tests/Chauffer/Chauffuer.Desktop/Configurations/QA/QAQCValidation.cs"
-              },
-              {
-                "editType": "edit",
-                "path": "$/Tests/Chauffer/Chauffuer.Desktop/Configurations/QA/QAQCValidation.xsd"
-              }
-            ],
-            "user": "corp_kbaesler"
-          }
-        ]
-      },
-      "culprits": [
-        {
-          "fullName": "Baesler, Kyle",
-          "absoluteUrl": "http://AP-TFS2010-P02:8080/user/corp_mnagarju"
-        }
-      ],
-      "description": null,
-      "displayName": "#32",
-      "duration": 497050,
-      "fullDisplayName": "Chauffuer_Development_9.3.2_SP1_Desktop_Gas_Tester #32",
-      "id": "32",
-      "keepLog": false,
-      "number": 32,
-      "result": "SUCCESS",
-      "url": "http://AP-TFS2010-P02:8080/job/Chauffuer_Development_Tester/32/"
+                {
+                    "affectedPaths": [
+                        "$/TFS/Chauffer/SCM/Configurations/BooleanSettings.cs",
+                        "$/TFS/Chauffer/SCM/Configurations/StringSettings.cs"
+                    ],
+                    "author": {
+                        "absoluteUrl": "http://localhost:8080/user/corp_jsmith",
+                        "fullName": "Smith, John"
+                    },
+                    "comment": "Fixed: The fallback was always being called for empty strings.",
+                    "date": "1439382033000",
+                    "id": null,
+                    "items": [
+                        {
+                            "editType": "edit",
+                            "path": "$/TFS/Chauffer/SCM/Configurations/BooleanSettings.cs"
+                        },
+                        {
+                            "editType": "edit",
+                            "path": "$/TFS/Chauffer/SCM/Configurations/StringSettings.cs"
+                        }
+                    ],
+                    "msg": "Fixed: The fallback was always being called for empty strings.",
+                    "user": "corp_jsmith",
+                    "version": "13467"
+                }
+            ]
+        },
+        "culprits": [
+            {
+                "absoluteUrl": "http://localhost:8080/user/corp_jsmith",
+                "fullName": "Smith, John"
+            }
+        ],
+        "description": null,
+        "displayName": "#34",
+        "duration": 368737,
+        "fullDisplayName": "Chauffer-Nightly-Build #34",
+        "id": "34",
+        "keepLog": false,
+        "number": 34,
+        "result": "SUCCESS",
+        "url": "http://localhost:8080/job/Chauffer-Nightly-Build/34/"
     }
-  }
-]
+}

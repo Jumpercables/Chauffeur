@@ -2,17 +2,13 @@
 using System.Reflection;
 
 using Chauffeur.Jenkins.Client;
-using Chauffeur.Tests.Jenkins.Client;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Chauffeur.Tests.Jenkins.Services
+namespace Chauffeur.Tests.Jenkins.Client
 {
-    /// <summary>
-    ///     Summary description for JenkinsServiceTest
-    /// </summary>
     [TestClass]
-    public class JenkinsServiceTest
+    public abstract class JenkinsClientTest
     {
         #region Fields
 
