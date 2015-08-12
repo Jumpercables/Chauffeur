@@ -1,34 +1,32 @@
 ﻿using System;
 
 using Chauffeur.Jenkins.Model;
+using Chauffeur.Tests.Jenkins.Client;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Chauffeur.Tests.Jenkins.Services
+namespace Chauffeur.Tests.Jenkins.Model
 {
-    /// <summary>
-    ///     Summary description for JobServiceTest
-    /// </summary>
     [TestClass]
-    public class JobServiceTest : JenkinsServiceTest
+    public class JobTest : JenkinsClientTest
     {
         #region Public Methods
 
         [TestMethod]
-        public void JobService_GetJob()
+        public void Job_Validate()
         {
             var job = this.GetResource<Job>("job.valid.json");
 
             Assert.IsNotNull(job);
-            Assert.AreEqual("The Chauffeur .NET 4.5 Nightly build.", job.Description);
-            Assert.AreEqual("Chauffeur_4.5_Nightly", job.DisplayName);
-            Assert.AreEqual("Chauffeur_4.5_Nightly", job.Name);
-            Assert.AreEqual(new Uri("http://localhost:8080/view/job/Chauffeur_4.5_Nightly/"), job.Url);
+            Assert.AreEqual("The nightly build of the chauffuer test client.", job.Description);
+            Assert.AreEqual("Chauffer-Nightly-Build", job.DisplayName);
+            Assert.AreEqual("Chauffer-Nightly-Build", job.Name);
+            Assert.AreEqual(new Uri("http://localhost:8080/view/job/Chauffer-Nightly-Build/"), job.Url);
             Assert.AreEqual(true, job.Buildable);
 
             Assert.AreEqual(25, job.Builds.Count);
             Assert.AreEqual(2208, job.Builds[3].Number);
-            Assert.AreEqual(new Uri("http://localhost:8080/view/job/Chauffeur_4.5_Nightly/2211/"), job.Builds[0].Url);
+            Assert.AreEqual(new Uri("http://localhost:8080/view/job/Chauffer-Nightly-Build/2211/"), job.Builds[0].Url);
             Assert.AreEqual("blue", job.Color);
             Assert.AreEqual(2187, job.FirstBuild.Number);
 
@@ -50,7 +48,7 @@ namespace Chauffeur.Tests.Jenkins.Services
             Assert.AreEqual(false, job.ConcurrentBuild);
             Assert.AreEqual(0, job.DownstreamProjects.Count);
             Assert.AreEqual(0, job.UpstreamProjects.Count);
-        }        
+        }
 
         #endregion
     }

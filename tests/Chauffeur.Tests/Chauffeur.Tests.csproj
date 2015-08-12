@@ -72,15 +72,15 @@
     <Compile Include="Jenkins\Client\MockWebRequest.cs" />
     <Compile Include="Jenkins\Client\MockWebRequestFactory.cs" />
     <Compile Include="Jenkins\Client\MockWebResponse.cs" />
+    <Compile Include="Jenkins\Model\BuildTest.cs" />
+    <Compile Include="Jenkins\Model\PackageTest.cs" />
     <Compile Include="Jenkins\Services\NotificationServiceTest.cs" />
-    <Compile Include="Jenkins\Services\JenkinsServiceTest.cs" />
-    <Compile Include="Jenkins\Services\JobServiceTest.cs" />
-    <Compile Include="Jenkins\Services\ChauffeurServiceTest.cs" />
+    <Compile Include="Jenkins\Client\JenkinsClientTest.cs" />
+    <Compile Include="Jenkins\Model\JobTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Json\job.valid.json" />
-    <EmbeddedResource Include="Json\tree.valid.json" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Chauffeur.Jenkins\Chauffeur.Jenkins.csproj">
@@ -94,9 +94,7 @@
     <EmbeddedResource Include="Json\package.valid.json" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Resources\NotificationsBody.html">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <Folder Include="Resources\" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

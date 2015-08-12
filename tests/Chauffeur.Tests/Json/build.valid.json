@@ -1,132 +1,56 @@
 ﻿{
-  "actions" : [
+  "artifacts": [
     {
-      "causes" : [
-        {
-          "shortDescription" : "Started by an SCM change"
-        }
-      ]
-    },
-    {
-      
-    },
-    null,
-    {
-      
-    },
-    {
-      
-    },
-    {
-      
-    },
-    {
-      
-    },
-    {
-      
+      "displayPath": "Chauffer-Nightly-Build.34.msi",
+      "fileName": "Chauffer-Nightly-Build.34.msi",
+      "relativePath": "BuildIntegration/Installers/Output/Assemblies/Chauffer-Nightly-Build.34.msi"
     }
   ],
-  "artifacts" : [
-    {
-      "displayPath" : "Sempra.Desktop_Gas_Debug_9.3.21.16.msi",
-      "fileName" : "Sempra.Desktop_Gas_Debug_9.3.21.16.msi",
-      "relativePath" : "BuildIntegration/Installers/Output/Assemblies/Sempra.Desktop_Gas_Debug_9.3.21.16.msi"
-    },
-    {
-      "displayPath" : "Sempra.Desktop_Gas_Debug_9.3.21.17.msi",
-      "fileName" : "Sempra.Desktop_Gas_Debug_9.3.21.17.msi",
-      "relativePath" : "BuildIntegration/Installers/Output/Assemblies/Sempra.Desktop_Gas_Debug_9.3.21.17.msi"
-    }
-  ],
-  "building" : false,
-  "description" : null,
-  "displayName" : "#17",
-  "duration" : 279173,
-  "estimatedDuration" : 325601,
-  "executor" : null,
-  "fullDisplayName" : "Sempra_Development_9.3.2_SP1_Desktop_Gas_Tester #17",
-  "id" : "2015-07-30_16-14-21",
-  "keepLog" : false,
-  "number" : 17,
-  "queueId" : -1,
-  "result" : "SUCCESS",
-  "timestamp" : 1438298061000,
-  "url" : "http://AP-TFS2010-P02:8080/job/Sempra_Development_9.3.2_SP1_Desktop_Gas_Tester/17/",
-  "builtOn" : "",
-  "changeSet" : {
-    "items" : [
+  "building": false,
+  "builtOn": "",
+  "changeSet": {
+    "items": [
       {
-        "affectedPaths" : [
-          "$/OpEx GIS/EGIS/Gas_Dev/AdminTools/Swizzler/swizzler/Program.cs"
+        "affectedPaths": [
+            "$/TFS/Chauffer/SCM/Configurations/BooleanSettings.cs",
+            "$/TFS/Chauffer/SCM/Configurations/StringSettings.cs"
         ],
-        "author" : {
-          "absoluteUrl" : "http://AP-TFS2010-P02:8080/user/pyallama",
-          "fullName" : "Yallamanda, PurnaChand"
+        "author": {
+          "absoluteUrl": "http://localhost:8080/user/corp_jsmith",
+          "fullName": "Smith, John"
         },
-        "commitId" : null,
-        "msg" : "Task 1792: Enabled batch processing",
-        "timestamp" : -1,
-        "comment" : "Task 1792: Enabled batch processing",
-        "date" : 1438297348000,
-        "domain" : null,
-        "items" : [
-          {
-            "action" : "edit",
-            "editType" : "edit",
-            "path" : "$/OpEx GIS/EGIS/Gas_Dev/AdminTools/Swizzler/swizzler/Program.cs"
+        "comment": "Fixed: The fallback was always being called for empty strings.",
+        "date": "1439382033000",
+        "id": null,
+        "items": [
+            {
+                "editType": "edit",
+                "path": "$/TFS/Chauffer/SCM/Configurations/BooleanSettings.cs"
+            },
+            {
+            "editType": "edit",
+            "path": "$/TFS/Chauffer/SCM/Configurations/StringSettings.cs"
           }
         ],
-        "user" : "PYallama",
-        "version" : "13326"
-      },
-      {
-        "affectedPaths" : [
-          "$/OpEx GIS/EGIS/Gas_Dev/Integration/DCUInterfaceProcess/DCUInterfaceProcess.csproj",
-          "$/OpEx GIS/EGIS/Gas_Dev/Integration/DCUInterfaceProcess/SCGasProcess.cs",
-          "$/OpEx GIS/EGIS/Gas_Dev/Integration/DCUInterfaceProcess/SQLProcessor.cs"
-        ],
-        "author" : {
-          "absoluteUrl" : "http://AP-TFS2010-P02:8080/user/amalik",
-          "fullName" : "Malik, Amit"
-        },
-        "commitId" : null,
-        "msg" : "Amit Malik - DCU Updates for commit, rollback, stored procedures",
-        "timestamp" : -1,
-        "comment" : "Amit Malik - DCU Updates for commit, rollback, stored procedures",
-        "date" : 1438297454000,
-        "domain" : null,
-        "items" : [
-          {
-            "action" : "edit",
-            "editType" : "edit",
-            "path" : "$/OpEx GIS/EGIS/Gas_Dev/Integration/DCUInterfaceProcess/DCUInterfaceProcess.csproj"
-          },
-          {
-            "action" : "edit",
-            "editType" : "edit",
-            "path" : "$/OpEx GIS/EGIS/Gas_Dev/Integration/DCUInterfaceProcess/SCGasProcess.cs"
-          },
-          {
-            "action" : "edit",
-            "editType" : "edit",
-            "path" : "$/OpEx GIS/EGIS/Gas_Dev/Integration/DCUInterfaceProcess/SQLProcessor.cs"
-          }
-        ],
-        "user" : "AMalik",
-        "version" : "13327"
+        "msg": "Fixed: The fallback was always being called for empty strings.",
+        "user": "corp_jsmith",
+        "version": "13467"
       }
-    ],
-    "kind" : null
+    ]
   },
-  "culprits" : [
+  "culprits": [
     {
-      "absoluteUrl" : "http://AP-TFS2010-P02:8080/user/amalik",
-      "fullName" : "Malik, Amit"
-    },
-    {
-      "absoluteUrl" : "http://AP-TFS2010-P02:8080/user/pyallama",
-      "fullName" : "Yallamanda, PurnaChand"
+      "absoluteUrl": "http://localhost:8080/user/corp_jsmith",
+      "fullName": "Smith, John"
     }
-  ]
+  ],
+  "description": null,
+  "displayName": "#34",
+  "duration": 368737,
+  "fullDisplayName": "Chauffer-Nightly-Build #34",
+  "id": "34",
+  "keepLog": false,
+  "number": 34,
+  "result": "SUCCESS",
+  "url": "http://localhost:8080/job/Chauffer-Nightly-Build/34/"
 }
