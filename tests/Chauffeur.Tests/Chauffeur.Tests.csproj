@@ -93,9 +93,7 @@
     <EmbeddedResource Include="Json\build.valid.json" />
     <EmbeddedResource Include="Json\package.valid.json" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Resources\" />
-  </ItemGroup>
+  <ItemGroup />
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>

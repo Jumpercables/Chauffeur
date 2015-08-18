@@ -2,6 +2,7 @@
 using System.Linq;
 
 using Chauffeur.Jenkins.Model;
+using Chauffeur.Jenkins.Templates;
 using Chauffeur.Tests.Jenkins.Client;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -14,11 +15,32 @@ namespace Chauffeur.Tests.Jenkins.Model
         #region Public Methods
 
         [TestMethod]
-        public void Package_Validate()
+        public void PackageApplyBodyXslTemplate()
         {
             var package = this.GetResource<Package>("package.valid.json");
-
             Assert.IsNotNull(package);
+
+            var template = new StyleSheetTemplate<Package>(Configuration.BodyXslFile);
+            var data = template.ApplyTemplate(package);
+        }
+
+        [TestMethod]
+        public void PackageApplySubjectXslTemplate()
+        {
+            var package = this.GetResource<Package>("package.valid.json");
+            Assert.IsNotNull(package);
+
+            var template = new StyleSheetTemplate<Package>(Configuration.SubjectXslFile);
+            var data = template.ApplyTemplate(package);
+        }
+
+
+        [TestMethod]
+        public void PackageValidJson()
+        {
+            var package = this.GetResource<Package>("package.valid.json");
+            Assert.IsNotNull(package);
+
             Assert.AreEqual(new Uri("file:///C:/ProgramData/Jenkins/Packages.json"), package.Url);
             Assert.AreEqual("8/12/2015", package.Date);
             Assert.AreEqual("Chauffer-Nightly-Build", package.Job);

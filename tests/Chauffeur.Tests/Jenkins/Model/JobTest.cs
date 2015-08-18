@@ -13,7 +13,7 @@ namespace Chauffeur.Tests.Jenkins.Model
         #region Public Methods
 
         [TestMethod]
-        public void Job_Validate()
+        public void JobValidJson()
         {
             var job = this.GetResource<Job>("job.valid.json");
 

@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
+using System.Xml.Serialization;
 
 using Chauffeur.Jenkins.Client;
 
 namespace Chauffeur.Jenkins.Model
 {
-    [DataContract]
+    [DataContract(Name = "job")]
     public class Job : IUrl
     {
         #region Constructors
@@ -216,6 +217,12 @@ namespace Chauffeur.Jenkins.Model
 
         #region IUrl Members
 
+        /// <summary>
+        /// Gets or sets the URL.
+        /// </summary>
+        /// <value>
+        /// The URL.
+        /// </value>
         [DataMember(Name = "url")]
         public Uri Url { get; set; }
 
@@ -237,7 +244,7 @@ namespace Chauffeur.Jenkins.Model
         #endregion
     }
 
-    [DataContract]
+    [DataContract(Name = "healthReport")]
     public class HealthReport
     {
         #region Public Properties

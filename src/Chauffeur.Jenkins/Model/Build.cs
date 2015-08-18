@@ -7,7 +7,7 @@ using Chauffeur.Jenkins.Client;
 
 namespace Chauffeur.Jenkins.Model
 {
-    [DataContract]
+    [DataContract(Name = "build")]
     public class Build : IUrl
     {
         #region Constructors
@@ -172,7 +172,7 @@ namespace Chauffeur.Jenkins.Model
         #endregion
     }
 
-    [DataContract]
+    [DataContract(Name = "artifact")]
     public class Artifact
     {
         #region Public Properties
@@ -207,7 +207,7 @@ namespace Chauffeur.Jenkins.Model
         #endregion
     }
 
-    [DataContract]
+    [DataContract(Name = "changeSet")]
     public class ChangeSet
     {
         #region Constructors
@@ -236,7 +236,7 @@ namespace Chauffeur.Jenkins.Model
         #endregion
     }
 
-    [DataContract]
+    [DataContract(Name = "changeSetItem")]
     public class ChangeSetItem
     {
         #region Constructors
@@ -337,7 +337,7 @@ namespace Chauffeur.Jenkins.Model
         #endregion
     }
 
-    [DataContract]
+    [DataContract(Name = "changeSetPath")]
     public class ChangeSetPath
     {
         #region Public Properties

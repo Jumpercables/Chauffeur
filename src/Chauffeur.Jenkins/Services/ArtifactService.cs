@@ -77,9 +77,6 @@ namespace Chauffeur.Jenkins.Services
         /// </returns>
         public Task<string[]> DownloadArtifactsAsync(Build build)
         {
-            if (!Directory.Exists(this.Configuration.DataDirectory))
-                Directory.CreateDirectory(this.Configuration.DataDirectory);
-
             this.Log("Downloading {0} artifact(s) into the {1} directory.", build.Artifacts.Count, this.Configuration.DataDirectory);
 
             return Task.Run(() =>

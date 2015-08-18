@@ -2,6 +2,7 @@
 using System.Reflection;
 
 using Chauffeur.Jenkins.Client;
+using Chauffeur.Jenkins.Configuration;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -16,6 +17,11 @@ namespace Chauffeur.Tests.Jenkins.Client
         ///     The client
         /// </summary>
         protected static JsonJenkinsClient Client;
+
+        /// <summary>
+        ///     The configuration
+        /// </summary>
+        protected static ChauffeurConfiguration Configuration;
 
         /// <summary>
         ///     The web request factory
@@ -34,6 +40,7 @@ namespace Chauffeur.Tests.Jenkins.Client
         {
             Client = new JsonJenkinsClient();
             WebRequestFactory = new MockWebRequestFactory("mock");
+            Configuration = new ChauffeurConfiguration();
         }
 
         #endregion

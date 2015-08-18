@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-
-using Chauffeur.Jenkins.Model;
+﻿using Chauffeur.Jenkins.Model;
 using Chauffeur.Jenkins.Services;
 using Chauffeur.Tests.Jenkins.Client;
 
@@ -14,10 +12,10 @@ namespace Chauffeur.Tests.Jenkins.Services
         #region Public Methods
 
         [TestMethod]
-        public void NotificationService_SendAsync_Valid_Package()
+        public void NotificationServiceSendAsyncWithPackage()
         {
             var package = this.GetResource<Package>("package.valid.json");
-            var service = new NotificationService();           
+            var service = new NotificationService();
             var task = service.SendAsync(package);
             task.Wait();
 
