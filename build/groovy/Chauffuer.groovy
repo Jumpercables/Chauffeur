@@ -14,14 +14,12 @@
         Chauffeur.groovy
  */
 
-import hudson.scm.*
-
-class Chauffuer {
+class Chauffeur {
 
     // The name of the job in the build environment.
     static final def JOB_NAME = ""
 
-    // The name of the computers that host the Chauffuer service.
+    // The name of the computers that host the Chauffeur service.
     static final def MACHINE_NAMES = []
 
     static void main(String... args) {
@@ -40,7 +38,7 @@ class Chauffuer {
 
         try {
             MACHINE_NAMES.eachWithIndex { String s, int i ->
-                def url = new URL('http://' + s + ':8080/Chauffeur.Jenkins.Services/ChauffeurService/rest/InstallLastSuccesfulBuild/' + JOB_NAME)
+                def url = new URL('http://' + s + ':8080/Chauffeur.Jenkins.Services/ChauffeurService/rest/InstallLastSuccessfulBuild/' + JOB_NAME)
                 def text = url.getText()
                 println(text)
             }
