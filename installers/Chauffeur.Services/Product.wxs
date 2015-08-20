@@ -10,11 +10,14 @@
       Defines & Variables
    -->
   <?ifndef $(var.BuildArtifactDir)?>
-  <?define BuildArtifactDir = "..\..\src\bin\Debug"?>  
-  <?endif?>
+  <?define BuildArtifactDir = ..\..\src\bin\Debug?>  
+  <?endif?>    
+  
   <?ifndef $(var.Version)?>
-  <?define Version = "1.0.0.0"?>
+  <?define Version = 1.0.0.0?>
   <?endif?>
+  
+  <?define TemplateDir = $(var.BuildArtifactDir)\Templates?>
   <!--
       ====================================================================================
       Package start
@@ -31,7 +34,7 @@
     <Package InstallerVersion="200"
              Compressed="yes"
              InstallScope="perMachine"
-             Description="Jenkins Chauffeur Service for Automatic Installations of Builds."/>
+             Description="Jenkins Chauffeur Service used to install and de-install builds hosted in a Jenkins Continious Integration Service."/>
 
     <!-- Set properties for add/remove programs -->
     <Property Id="PRODUCTNAME" Value="Chauffeur"/>
@@ -49,6 +52,7 @@
       <ComponentGroupRef Id="ProductComponents" />
     </Feature>
 
+    <!-- Properties used by the WixUI_Advanced -->
     <Property Id="ApplicationFolderName" Value="Jenkins" />
     <Property Id="WixAppFolder" Value="WixPerMachineFolder" />
     
@@ -60,7 +64,8 @@
       <Directory Id="ProgramFilesFolder">
         <Directory Id="APPLICATIONFOLDER" Name="Jenkins">
           <Directory Id="CHAUFFEURFOLDER" Name="Chauffeur">
-            <Directory Id="APPLICATIONBINFOLDER" Name="Bin"/>
+            <Directory Id="TEMPLATESFOLDER" Name="Templates"/>
+            <Directory Id="BINFOLDER" Name="Bin"/>
           </Directory>
         </Directory>
       </Directory>
@@ -68,8 +73,8 @@
   </Fragment>
 
   <Fragment>
-    <ComponentGroup Id="ProductComponents" Directory="APPLICATIONBINFOLDER">         
-      <Component Id="WindowsService" Guid="34B2A0C2-EC50-4BC8-9BD6-6D0A5CB37802">
+    <ComponentGroup Id="ProductComponents">
+      <Component Id="WindowsService" Guid="34B2A0C2-EC50-4BC8-9BD6-6D0A5CB37802" Directory="BINFOLDER">
         
         <File Id="Chauffeur.exe" Source="$(var.BuildArtifactDir)\Chauffeur.exe"/>
         <File Id="Chauffeur.exe.config"  Source="$(var.BuildArtifactDir)\Chauffeur.exe.config" />
@@ -79,7 +84,7 @@
                         Vital="yes"
                         Name="ChauffeurService"
                         DisplayName="Jenkins Chauffeur Service"
-                        Description="Jenkins Chauffeur Service for Build Installation"                        
+                        Description="Jenkins Chauffeur Service used to install and de-install builds hosted in a Jenkins Continious Integration Service."                        
                         Start="auto"                       
                         Account="LocalSystem"                        
                         ErrorControl="ignore"                       
@@ -94,9 +99,14 @@
                 
         <File Id="Newtonsoft.Json" Source="$(var.BuildArtifactDir)\Newtonsoft.Json.dll"/>
         <File Id="Chauffeur.Jenkins.dll" Source="$(var.BuildArtifactDir)\Chauffeur.Jenkins.dll" />
-    
+               
         <RemoveFile Id="DeleteFilesWindowsService" Name="*.*" On="uninstall" />
       </Component>     
+    
+      <Component Id="Templates" Guid="BC16FDCA-4EE5-48A4-8807-B26860CA658C" Directory="TEMPLATESFOLDER">
+        <File Id="_Notification_Body.xslt" Source="$(var.TemplateDir)\_Notification-Body.xslt"/>
+        <File Id="_Notification_Subject.xslt"  Source="$(var.TemplateDir)\_Notification-Subject.xslt" /> 
+      </Component>
     </ComponentGroup>
   </Fragment>
 </Wix>
