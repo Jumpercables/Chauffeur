@@ -92,7 +92,9 @@
     <EmbeddedResource Include="Json\build.valid.json" />
     <EmbeddedResource Include="Json\package.valid.json" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Jenkins\Configurations\" />
+  </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>

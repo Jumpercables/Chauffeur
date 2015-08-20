@@ -225,13 +225,13 @@ namespace Chauffeur.Jenkins.Configuration
             if (string.IsNullOrEmpty(configurationValue))
                 configurationValue = fallbackValue;
 
-            string path = configurationValue;
-
-            if (configurationValue.StartsWith("~\\"))
+            if (configurationValue.StartsWith("~"))
             {
-                configurationValue = configurationValue.Replace("~\\", "");
-                path = Path.Combine(Path.GetDirectoryName(AppDomain.CurrentDomain.SetupInformation.ConfigurationFile), configurationValue);
+                configurationValue = configurationValue.Replace("~", "..");                
             }
+
+            string dir = Directory.GetCurrentDirectory();
+            string path = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(dir), configurationValue));
 
             DirectoryInfo directoryInfo = new DirectoryInfo(path);
             if (!directoryInfo.Exists) directoryInfo.Create();
