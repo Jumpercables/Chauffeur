@@ -74,7 +74,6 @@
     <Compile Include="Jenkins\Client\MockWebResponse.cs" />
     <Compile Include="Jenkins\Model\BuildTest.cs" />
     <Compile Include="Jenkins\Model\PackageTest.cs" />
-    <Compile Include="Jenkins\Services\NotificationServiceTest.cs" />
     <Compile Include="Jenkins\Client\JenkinsClientTest.cs" />
     <Compile Include="Jenkins\Model\JobTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

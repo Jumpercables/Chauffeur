@@ -5,7 +5,7 @@ using Chauffeur.Jenkins.Client;
 
 namespace Chauffeur.Jenkins.Model
 {
-    [DataContract(Name = "package")]
+    [DataContract(Name = "package", Namespace = "")]
     public class Package : IUrl
     {
         #region Constructors
@@ -23,37 +23,46 @@ namespace Chauffeur.Jenkins.Model
         #region Public Properties
 
         /// <summary>
-        /// Gets or sets the build.
+        ///     Gets or sets the build.
         /// </summary>
         /// <value>
-        /// The build.
+        ///     The build.
         /// </value>
-        [DataMember(Name = "build", Order = 4)]        
+        [DataMember(Name = "build", Order = 4)]
         public Build Build { get; set; }
 
         /// <summary>
-        /// Gets or sets the date.
+        ///     Gets or sets the date.
         /// </summary>
         /// <value>
-        /// The date.
+        ///     The date.
         /// </value>
         [DataMember(Name = "date", Order = 2)]
         public string Date { get; set; }
 
         /// <summary>
-        /// Gets or sets the job.
+        ///     Gets or sets the job.
         /// </summary>
         /// <value>
-        /// The job.
+        ///     The job.
         /// </value>
         [DataMember(Name = "job", Order = 1)]
         public string Job { get; set; }
 
         /// <summary>
-        /// Gets or sets the paths.
+        ///     Gets or sets the name of the machine.
         /// </summary>
         /// <value>
-        /// The paths.
+        ///     The name of the machine.
+        /// </value>
+        [DataMember(Name = "machineName")]
+        public string MachineName { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the paths.
+        /// </summary>
+        /// <value>
+        ///     The paths.
         /// </value>
         [DataMember(Name = "paths", Order = 3)]
         public string[] Paths { get; set; }
@@ -63,10 +72,10 @@ namespace Chauffeur.Jenkins.Model
         #region IUrl Members
 
         /// <summary>
-        /// Gets or sets the URL.
+        ///     Gets or sets the URL.
         /// </summary>
         /// <value>
-        /// The URL.
+        ///     The URL.
         /// </value>
         [DataMember(Name = "url", Order = 0)]
         public Uri Url { get; set; }

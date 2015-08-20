@@ -1,15 +1,8 @@
-﻿using System.Globalization;
-using System.IO;
-using System.Net;
+﻿using System.Net;
 using System.Net.Mail;
-using System.Runtime.Serialization;
 using System.ServiceModel;
 using System.ServiceModel.Web;
-using System.Text;
 using System.Threading.Tasks;
-using System.Xml;
-using System.Xml.Linq;
-using System.Xml.Xsl;
 
 using Chauffeur.Jenkins.Configuration;
 using Chauffeur.Jenkins.Model;
@@ -93,8 +86,8 @@ namespace Chauffeur.Jenkins.Services
                 {
                     message.To.Add(this.Configuration.To);
                     message.From = new MailAddress(this.Configuration.From);
-                    message.Subject = new StyleSheetTemplate<Package>(this.Configuration.SubjectXslFile).ApplyTemplate(package);
-                    message.Body = new StyleSheetTemplate<Package>(this.Configuration.BodyXslFile).ApplyTemplate(package);
+                    message.Subject = new StyleSheetTemplate<Package>(this.Configuration.SubjectXsltFile).ApplyTemplate(package);
+                    message.Body = new StyleSheetTemplate<Package>(this.Configuration.BodyXsltFile).ApplyTemplate(package);
                     message.IsBodyHtml = true;
 
                     using (SmtpClient client = new SmtpClient(this.Configuration.Host))
@@ -106,5 +99,5 @@ namespace Chauffeur.Jenkins.Services
         }
 
         #endregion
-    }    
+    }
 }

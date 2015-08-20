@@ -6,7 +6,7 @@ using Chauffeur.Jenkins.Client;
 
 namespace Chauffeur.Jenkins.Model
 {
-    [DataContract(Name = "node")]
+    [DataContract(Name = "node", Namespace = "")]
     public class Node : IUrl
     {
         #region Constructors

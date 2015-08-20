@@ -66,6 +66,10 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="log4net, Version=1.2.13.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\..\tests\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -89,6 +93,7 @@
     <Compile Include="Client\Abstract\JenkinsClient.cs" />
     <Compile Include="Client\JsonJenkinsClient.cs" />
     <Compile Include="Configuration\ChauffeurConfiguration.cs" />
+    <Compile Include="Log.cs" />
     <Compile Include="Model\Build.cs" />
     <Compile Include="Model\Job.cs" />
     <Compile Include="Model\Node.cs" />
@@ -113,11 +118,14 @@
     <Content Include="Resources\NotificationsBody.html" />
     <Content Include="Templates\_Notification-Body.xslt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </Content>
     <Content Include="Templates\_Notification-Subject.xslt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Templates\_Package.xml" />
+    <Content Include="Templates\_Package.xml">
+      <SubType>Designer</SubType>
+    </Content>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

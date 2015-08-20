@@ -15,23 +15,24 @@ namespace Chauffeur.Tests.Jenkins.Model
         #region Public Methods
 
         [TestMethod]
-        public void PackageApplyBodyXslTemplate()
+        public void PackageApplyBodyXslt()
         {
             var package = this.GetResource<Package>("package.valid.json");
             Assert.IsNotNull(package);
 
-            var template = new StyleSheetTemplate<Package>(Configuration.BodyXslFile);
+            var template = new StyleSheetTemplate<Package>(Configuration.BodyXsltFile);
             var data = template.ApplyTemplate(package);
         }
 
         [TestMethod]
-        public void PackageApplySubjectXslTemplate()
+        public void PackageApplySubjectXslt()
         {
             var package = this.GetResource<Package>("package.valid.json");
             Assert.IsNotNull(package);
 
-            var template = new StyleSheetTemplate<Package>(Configuration.SubjectXslFile);
+            var template = new StyleSheetTemplate<Package>(Configuration.SubjectXsltFile);
             var data = template.ApplyTemplate(package);
+            Assert.AreEqual("Build 34 Installed.", data);
         }
 
 

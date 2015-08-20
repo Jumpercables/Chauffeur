@@ -6,7 +6,7 @@ using Chauffeur.Jenkins.Client;
 
 namespace Chauffeur.Jenkins.Model
 {
-    [DataContract(Name = "user")]
+    [DataContract(Name = "user", Namespace = "")]
     public class User : IUrl
     {
         #region Public Properties

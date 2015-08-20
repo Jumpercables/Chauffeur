@@ -114,7 +114,7 @@ namespace Chauffeur.Jenkins.Services
             var package = packages.FirstOrDefault(o => o.Job.Equals(jobName, StringComparison.OrdinalIgnoreCase));
             if (package != null)
             {
-                this.Log("Uninstalling {0} package(s).", package.Build.Artifacts.Count);
+                Log.Debug(this, "Uninstalling {0} package(s).", package.Build.Artifacts.Count);
 
                 foreach (var artifact in package.Build.Artifacts)
                 {
@@ -127,7 +127,7 @@ namespace Chauffeur.Jenkins.Services
                         if (packages.Contains(package))
                             packages.Remove(package);
 
-                        this.UpdatePackages(packages);
+                        this.SavePackages(packages);
                     });
                 }
 
@@ -187,19 +187,21 @@ namespace Chauffeur.Jenkins.Services
                     Url = new Uri(this.Configuration.PackagesJsonFile),
                     Job = jobName,
                     Build = build,
-                    Paths = paths
+                    Paths = paths,
+                    MachineName = Environment.MachineName
                 };
 
                 packages.Add(package);
             }
             else
             {
+                package.MachineName = Environment.MachineName;
                 package.Build = build;
                 package.Paths = paths;
                 package.Date = DateTime.Now.ToShortDateString();
             }
 
-            this.UpdatePackages(packages);
+            this.SavePackages(packages);
 
             return package;
         }
@@ -270,7 +272,7 @@ namespace Chauffeur.Jenkins.Services
                 ProcessStartInfo startInfo = new ProcessStartInfo("cmd.exe", string.Format("/c start /MIN /wait msiexec.exe {0} \"{1}\" /quiet {2}", "/i", package, this.Configuration.InstallPropertyReferences));
                 startInfo.WindowStyle = ProcessWindowStyle.Hidden;
 
-                this.Log(string.Format("\t{0} {1}", startInfo.FileName, startInfo.Arguments));
+                Log.Debug(this, string.Format("\t{0} {1}", startInfo.FileName, startInfo.Arguments));
 
                 using (Process process = Process.Start(startInfo))
                     if (process != null) process.WaitForExit();
@@ -283,7 +285,7 @@ namespace Chauffeur.Jenkins.Services
         /// <param name="packages">The packages.</param>
         private async void InstallPackages(string[] packages)
         {
-            this.Log("Installing {0} package(s).", packages.Length);
+            Log.Debug(this, "Installing {0} package(s).", packages.Length);
 
             foreach (var pkg in packages)
             {
@@ -298,7 +300,17 @@ namespace Chauffeur.Jenkins.Services
         private async void Notify(Package package)
         {
             NotificationService service = new NotificationService();
-            await service.SendAsync(package).ContinueWith((task) => this.Log("Notification: {0}", task.Result));
+            await service.SendAsync(package).ContinueWith((task) => Log.Debug(this, "Notification: {0}", task.Result));
+        }
+
+        /// <summary>
+        ///     Saves the packages.
+        /// </summary>
+        /// <param name="packages">The packages.</param>
+        private void SavePackages(List<Package> packages)
+        {
+            var json = JsonConvert.SerializeObject(packages, Formatting.Indented);
+            File.WriteAllText(base.Configuration.PackagesJsonFile, json);
         }
 
         /// <summary>
@@ -313,21 +325,11 @@ namespace Chauffeur.Jenkins.Services
                 ProcessStartInfo startInfo = new ProcessStartInfo("cmd.exe", string.Format("/c start /MIN /wait msiexec.exe {0} \"{1}\" /quiet {2}", "/x", package, this.Configuration.UninstallPropertyReferences));
                 startInfo.WindowStyle = ProcessWindowStyle.Hidden;
 
-                this.Log(string.Format("\t{0} {1}", startInfo.FileName, startInfo.Arguments));
+                Log.Debug(this, string.Format("\t{0} {1}", startInfo.FileName, startInfo.Arguments));
 
                 using (Process process = Process.Start(startInfo))
                     if (process != null) process.WaitForExit();
             });
-        }
-
-        /// <summary>
-        ///     Updates the packages.
-        /// </summary>
-        /// <param name="packages">The packages.</param>
-        private void UpdatePackages(List<Package> packages)
-        {
-            var json = JsonConvert.SerializeObject(packages, Formatting.Indented);
-            File.WriteAllText(base.Configuration.PackagesJsonFile, json);
         }
 
         #endregion

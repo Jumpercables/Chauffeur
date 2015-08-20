@@ -14,14 +14,14 @@ namespace Chauffeur.Jenkins.Configuration
     {
         #region Fields
 
-        private Setting<string> _BodyXslFile;
+        private Setting<string> _BodyXsltFile;
         private Setting<string> _DataDirectory;
         private Setting<string> _From;
         private Setting<string> _Host;
         private Setting<string> _InstallPropertyReferences;
         private Setting<string> _PackagesJsonFile;
         private Setting<string> _Server;
-        private Setting<string> _SubjectXslFile;
+        private Setting<string> _SubjectXsltFile;
         private Setting<string> _TemplateDirectory;
         private Setting<string> _To;
         private Setting<string> _Token;
@@ -50,9 +50,9 @@ namespace Chauffeur.Jenkins.Configuration
         /// <value>
         ///     The body.
         /// </value>
-        public string BodyXslFile
+        public string BodyXsltFile
         {
-            get { return _BodyXslFile.Value; }
+            get { return _BodyXsltFile.Value; }
         }
        
         /// <summary>
@@ -127,9 +127,9 @@ namespace Chauffeur.Jenkins.Configuration
         /// <value>
         ///     The subject.
         /// </value>
-        public string SubjectXslFile
+        public string SubjectXsltFile
         {
-            get { return _SubjectXslFile.Value; }
+            get { return _SubjectXsltFile.Value; }
         }
 
         /// <summary>
@@ -241,8 +241,8 @@ namespace Chauffeur.Jenkins.Configuration
             _Host = new StringSetting(this.Settings, "Chauffeur/Notifications/Host", "");
             _To = new StringSetting(this.Settings, "Chauffeur/Notifications/To", "");
             _From = new StringSetting(this.Settings, "Chauffeur/Notifications/From", "");
-            _SubjectXslFile = new StringSetting(this.Settings, "Chauffeur/Notifications/Subject", Path.Combine(this.TemplateDirectory, "_Notification-Subject.xslt"));
-            _BodyXslFile = new StringSetting(this.Settings, "Chauffeur/Notifications/Body", Path.Combine(this.TemplateDirectory, "_Notification-Body.xslt"));
+            _SubjectXsltFile = new StringSetting(this.Settings, "Chauffeur/Notifications/Subject", Path.Combine(this.TemplateDirectory, "_Notification-Subject.xslt"));
+            _BodyXsltFile = new StringSetting(this.Settings, "Chauffeur/Notifications/Body", Path.Combine(this.TemplateDirectory, "_Notification-Body.xslt"));
 
             _DataDirectory = new Setting<string>(this.Settings, "Chauffeur/Packages/DataDirectory", value => this.CreateDirectory(value, Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Jenkins")));
             _InstallPropertyReferences = new StringSetting(this.Settings, "Chauffeur/Packages/InstallPropertyReferences", "");
