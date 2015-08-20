@@ -20,7 +20,7 @@ namespace Chauffeur.Tests.Jenkins.Model
             var package = this.GetResource<Package>("package.valid.json");
             Assert.IsNotNull(package);
 
-            var template = new StyleSheetTemplate<Package>(Configuration.BodyXsltFile);
+            var template = new StyleSheetTemplate<Package>(Configuration.BodyTemplateFile);
             var data = template.ApplyTemplate(package);
         }
 
@@ -30,7 +30,7 @@ namespace Chauffeur.Tests.Jenkins.Model
             var package = this.GetResource<Package>("package.valid.json");
             Assert.IsNotNull(package);
 
-            var template = new StyleSheetTemplate<Package>(Configuration.SubjectXsltFile);
+            var template = new StyleSheetTemplate<Package>(Configuration.SubjectTemplateFile);
             var data = template.ApplyTemplate(package);
             Assert.AreEqual("Build 34 Installed.", data);
         }

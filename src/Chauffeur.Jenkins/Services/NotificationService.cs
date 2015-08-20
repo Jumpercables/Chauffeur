@@ -86,8 +86,8 @@ namespace Chauffeur.Jenkins.Services
                 {
                     message.To.Add(this.Configuration.To);
                     message.From = new MailAddress(this.Configuration.From);
-                    message.Subject = new StyleSheetTemplate<Package>(this.Configuration.SubjectXsltFile).ApplyTemplate(package);
-                    message.Body = new StyleSheetTemplate<Package>(this.Configuration.BodyXsltFile).ApplyTemplate(package);
+                    message.Subject = new StyleSheetTemplate<Package>(this.Configuration.SubjectTemplateFile).ApplyTemplate(package);
+                    message.Body = new StyleSheetTemplate<Package>(this.Configuration.BodyTemplateFile).ApplyTemplate(package);
                     message.IsBodyHtml = true;
 
                     using (SmtpClient client = new SmtpClient(this.Configuration.Host))

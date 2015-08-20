@@ -8,26 +8,27 @@ using System.Linq;
 namespace Chauffeur.Jenkins.Configuration
 {
     /// <summary>
-    ///     Provides access to the configurations provided in the configuration file.
+    /// Provides access to the configurations provided in the configuration file.
     /// </summary>
     public class ChauffeurConfiguration
     {
         #region Fields
 
-        private Setting<string> _BodyXsltFile;
-        private Setting<string> _DataDirectory;
+        private Setting<string> _BodyTemplateFile;
+        private Setting<string> _ArtifactsDirectory;
         private Setting<string> _From;
         private Setting<string> _Host;
         private Setting<string> _InstallPropertyReferences;
-        private Setting<string> _PackagesJsonFile;
+        private Setting<string> _PackagesDataFile;
         private Setting<string> _Server;
-        private Setting<string> _SubjectXsltFile;
+        private Setting<string> _SubjectTemplateFile;
         private Setting<string> _TemplateDirectory;
         private Setting<string> _To;
         private Setting<string> _Token;
         private Setting<string> _UninstallPropertyReferences;
         private Setting<string> _User;
-
+        private Setting<string> _DataDirectory;
+ 
         #endregion
 
         #region Constructors
@@ -50,20 +51,21 @@ namespace Chauffeur.Jenkins.Configuration
         /// <value>
         ///     The body.
         /// </value>
-        public string BodyXsltFile
+        public string BodyTemplateFile
         {
-            get { return _BodyXsltFile.Value; }
+            get { return _BodyTemplateFile.Value; }
         }
-       
+
+
         /// <summary>
-        ///     Gets the data directory.
+        /// Gets the artifacts directory.
         /// </summary>
         /// <value>
-        ///     The data directory.
+        /// The artifacts directory.
         /// </value>
-        public string DataDirectory
+        public string ArtifactsDirectory
         {
-            get { return _DataDirectory.Value; }
+            get { return _ArtifactsDirectory.Value; }
         }
 
         /// <summary>
@@ -105,9 +107,9 @@ namespace Chauffeur.Jenkins.Configuration
         /// <value>
         ///     The packages json file.
         /// </value>
-        public string PackagesJsonFile
+        public string PackagesDataFile
         {
-            get { return _PackagesJsonFile.Value; }
+            get { return _PackagesDataFile.Value; }
         }
 
         /// <summary>
@@ -127,9 +129,9 @@ namespace Chauffeur.Jenkins.Configuration
         /// <value>
         ///     The subject.
         /// </value>
-        public string SubjectXsltFile
+        public string SubjectTemplateFile
         {
-            get { return _SubjectXsltFile.Value; }
+            get { return _SubjectTemplateFile.Value; }
         }
 
         /// <summary>
@@ -187,6 +189,16 @@ namespace Chauffeur.Jenkins.Configuration
             get { return _User.Value; }
         }
 
+        /// <summary>
+        /// Gets the data directory.
+        /// </summary>
+        /// <value>
+        /// The data directory.
+        /// </value>
+        public string DataDirectory
+        {
+            get { return _DataDirectory.Value; }
+        }
         #endregion
 
         #region Private Properties
@@ -196,7 +208,7 @@ namespace Chauffeur.Jenkins.Configuration
         #endregion
 
         #region Private Methods
-
+        
         /// <summary>
         ///     Creates the directory when it doesn't exist.
         /// </summary>
@@ -232,7 +244,9 @@ namespace Chauffeur.Jenkins.Configuration
         /// </summary>
         private void Initialize()
         {
-            _TemplateDirectory = new Setting<string>(this.Settings, "Chauffeur/Resources/TemplateDirectory", value => this.CreateDirectory(value, "~\\Templates"));
+            _TemplateDirectory = new Setting<string>(this.Settings, "Chauffeur/Resources/Templates", value => this.CreateDirectory(value, "~\\Templates"));
+            _DataDirectory = new Setting<string>(this.Settings, "Chauffeur/Resources/Data", value => this.CreateDirectory(value, "~\\Data"));
+            _PackagesDataFile = new StringSetting(this.Settings, "Chauffeur/Resources/Packages", Path.Combine(this.DataDirectory, "Packages.json")); 
 
             _Server = new StringSetting(this.Settings, "Chauffeur/Jenkins/Server", "http://localhost:8080/");
             _User = new StringSetting(this.Settings, "Chauffeur/Jenkins/User", "");
@@ -241,15 +255,12 @@ namespace Chauffeur.Jenkins.Configuration
             _Host = new StringSetting(this.Settings, "Chauffeur/Notifications/Host", "");
             _To = new StringSetting(this.Settings, "Chauffeur/Notifications/To", "");
             _From = new StringSetting(this.Settings, "Chauffeur/Notifications/From", "");
-            _SubjectXsltFile = new StringSetting(this.Settings, "Chauffeur/Notifications/Subject", Path.Combine(this.TemplateDirectory, "_Notification-Subject.xslt"));
-            _BodyXsltFile = new StringSetting(this.Settings, "Chauffeur/Notifications/Body", Path.Combine(this.TemplateDirectory, "_Notification-Body.xslt"));
+            _SubjectTemplateFile = new StringSetting(this.Settings, "Chauffeur/Notifications/Subject", Path.Combine(this.TemplateDirectory, "_Notification-Subject.xslt"));
+            _BodyTemplateFile = new StringSetting(this.Settings, "Chauffeur/Notifications/Body", Path.Combine(this.TemplateDirectory, "_Notification-Body.xslt"));
 
-            _DataDirectory = new Setting<string>(this.Settings, "Chauffeur/Packages/DataDirectory", value => this.CreateDirectory(value, Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Jenkins")));
+            _ArtifactsDirectory = new Setting<string>(this.Settings, "Chauffeur/Packages/Artifacts", value => this.CreateDirectory(value, Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Jenkins")));
             _InstallPropertyReferences = new StringSetting(this.Settings, "Chauffeur/Packages/InstallPropertyReferences", "");
-            _UninstallPropertyReferences = new StringSetting(this.Settings, "Chauffeur/Packages/UninstallPropertyReferences", "");
-            _PackagesJsonFile = new StringSetting(this.Settings, "Chauffeur/Packages/PackagesJsonFile", Path.Combine(this.DataDirectory, "packages.json"));
-
-            
+            _UninstallPropertyReferences = new StringSetting(this.Settings, "Chauffeur/Packages/UninstallPropertyReferences", "");                       
         }
 
         /// <summary>

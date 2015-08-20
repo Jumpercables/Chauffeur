@@ -112,10 +112,12 @@
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>
+    <None Include="Data\Packages.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Resources\NotificationsBody.html" />
     <Content Include="Templates\_Notification-Body.xslt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <SubType>Designer</SubType>

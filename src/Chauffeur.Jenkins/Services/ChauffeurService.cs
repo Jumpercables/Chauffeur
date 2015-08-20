@@ -118,7 +118,7 @@ namespace Chauffeur.Jenkins.Services
 
                 foreach (var artifact in package.Build.Artifacts)
                 {
-                    string pkg = Path.Combine(this.Configuration.DataDirectory, artifact.FileName);
+                    string pkg = Path.Combine(this.Configuration.ArtifactsDirectory, artifact.FileName);
 
                     await this.UninstallPackageAsync(pkg).ContinueWith((task) =>
                     {
@@ -184,7 +184,7 @@ namespace Chauffeur.Jenkins.Services
             {
                 package = new Package
                 {
-                    Url = new Uri(this.Configuration.PackagesJsonFile),
+                    Url = new Uri(this.Configuration.PackagesDataFile),
                     Job = jobName,
                     Build = build,
                     Paths = paths,
@@ -248,9 +248,9 @@ namespace Chauffeur.Jenkins.Services
             {
                 List<Package> packages = null;
 
-                if (File.Exists(base.Configuration.PackagesJsonFile))
+                if (File.Exists(base.Configuration.PackagesDataFile))
                 {
-                    var json = File.ReadAllText(base.Configuration.PackagesJsonFile);
+                    var json = File.ReadAllText(base.Configuration.PackagesDataFile);
                     packages = JsonConvert.DeserializeObject<List<Package>>(json);
                 }
 
@@ -310,7 +310,7 @@ namespace Chauffeur.Jenkins.Services
         private void SavePackages(List<Package> packages)
         {
             var json = JsonConvert.SerializeObject(packages, Formatting.Indented);
-            File.WriteAllText(base.Configuration.PackagesJsonFile, json);
+            File.WriteAllText(base.Configuration.PackagesDataFile, json);
         }
 
         /// <summary>

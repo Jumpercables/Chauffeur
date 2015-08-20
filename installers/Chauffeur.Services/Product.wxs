@@ -18,6 +18,7 @@
   <?endif?>
   
   <?define TemplateDir = $(var.BuildArtifactDir)\Templates?>
+  <?define DataDir = $(var.BuildArtifactDir)\Data?>
   <!--
       ====================================================================================
       Package start
@@ -66,6 +67,7 @@
           <Directory Id="CHAUFFEURFOLDER" Name="Chauffeur">
             <Directory Id="TEMPLATESFOLDER" Name="Templates"/>
             <Directory Id="BINFOLDER" Name="Bin"/>
+            <Directory Id="DATAFOLDER" Name="Data"/>
           </Directory>
         </Directory>
       </Directory>
@@ -106,6 +108,10 @@
       <Component Id="Templates" Guid="BC16FDCA-4EE5-48A4-8807-B26860CA658C" Directory="TEMPLATESFOLDER">
         <File Id="_Notification_Body.xslt" Source="$(var.TemplateDir)\_Notification-Body.xslt"/>
         <File Id="_Notification_Subject.xslt"  Source="$(var.TemplateDir)\_Notification-Subject.xslt" /> 
+      </Component>
+    
+      <Component Id="Data" Guid="79C3F26D-1BB0-4732-B69F-30D7359D2791" Directory="DATAFOLDER">
+        <File Id="Packages.json" Source="$(var.DataDir)\Packages.json"/>
       </Component>
     </ComponentGroup>
   </Fragment>

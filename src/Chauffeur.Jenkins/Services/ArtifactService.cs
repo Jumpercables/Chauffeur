@@ -77,11 +77,11 @@ namespace Chauffeur.Jenkins.Services
         /// </returns>
         public Task<string[]> DownloadArtifactsAsync(Build build)
         {
-            Log.Debug(this, "Downloading {0} artifact(s) into the {1} directory.", build.Artifacts.Count, this.Configuration.DataDirectory);
+            Log.Debug(this, "Downloading {0} artifact(s) into the {1} directory.", build.Artifacts.Count, this.Configuration.ArtifactsDirectory);
 
             return Task.Run(() =>
             {
-                var tasks = build.Artifacts.Select(artifact => this.DownloadArtifactAsync(build, artifact, this.Configuration.DataDirectory));
+                var tasks = build.Artifacts.Select(artifact => this.DownloadArtifactAsync(build, artifact, this.Configuration.ArtifactsDirectory));
                 return tasks.Select(o => o.Result).ToArray();
             });
         }
