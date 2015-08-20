@@ -76,7 +76,7 @@
 
   <Fragment>
     <ComponentGroup Id="ProductComponents">
-      <Component Id="WindowsService" Guid="34B2A0C2-EC50-4BC8-9BD6-6D0A5CB37802" Directory="BINFOLDER">
+      <Component Id="Service" Guid="34B2A0C2-EC50-4BC8-9BD6-6D0A5CB37802" Directory="BINFOLDER">
         
         <File Id="Chauffeur.exe" Source="$(var.BuildArtifactDir)\Chauffeur.exe"/>
         <File Id="Chauffeur.exe.config"  Source="$(var.BuildArtifactDir)\Chauffeur.exe.config" />
@@ -98,20 +98,26 @@
                         Remove="uninstall"                        
                         Name="ChauffeurService"
                         Wait="yes" />
-                
+
+        <File Id="log4net" Source="$(var.BuildArtifactDir)\log4net.dll"/>
+        <File Id="log4net.config" Source="$(var.BuildArtifactDir)\log4net.config" />
         <File Id="Newtonsoft.Json" Source="$(var.BuildArtifactDir)\Newtonsoft.Json.dll"/>
         <File Id="Chauffeur.Jenkins.dll" Source="$(var.BuildArtifactDir)\Chauffeur.Jenkins.dll" />
                
-        <RemoveFile Id="DeleteFilesWindowsService" Name="*.*" On="uninstall" />
+        <RemoveFile Id="DeleteService" Name="*.*" On="uninstall" />
       </Component>     
     
       <Component Id="Templates" Guid="BC16FDCA-4EE5-48A4-8807-B26860CA658C" Directory="TEMPLATESFOLDER">
         <File Id="_Notification_Body.xslt" Source="$(var.TemplateDir)\_Notification-Body.xslt"/>
-        <File Id="_Notification_Subject.xslt"  Source="$(var.TemplateDir)\_Notification-Subject.xslt" /> 
+        <File Id="_Notification_Subject.xslt"  Source="$(var.TemplateDir)\_Notification-Subject.xslt" />
+
+        <RemoveFile Id="DeleteTemplates" Name="*.*" On="uninstall" />
       </Component>
     
       <Component Id="Data" Guid="79C3F26D-1BB0-4732-B69F-30D7359D2791" Directory="DATAFOLDER">
         <File Id="Packages.json" Source="$(var.DataDir)\Packages.json"/>
+
+        <RemoveFile Id="DeleteData" Name="*.*" On="uninstall" />
       </Component>
     </ComponentGroup>
   </Fragment>
