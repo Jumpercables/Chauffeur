@@ -1,20 +1,17 @@
 /*
     .SYNOPSIS
         The script is designed to act as a client proxy that will notify the
-        machines (that are hosting the Jenkins Chauffuer Service) that a new
+        machines (that are hosting the Jenkins Chauffeur Service) that a new
         build should be installed.
-    .DESCRIPTION
-        <jobName> - The name of the job in Jenkins that will be installed.
-        <machineName> - The machine names of the computers hosting the Jenkins Chauffuer Service.
     .NOTES
-        File Name      : Chauffeur.groovy
+        File Name      : chauffeur.groovy
         Author         : Kyle Baesler
         Prerequisite   : Groovy 1.8.9
     .EXAMPLE
-        Chauffeur.groovy
+        chauffeur.groovy
  */
 
-class Chauffeur {
+class chauffeur {
 
     // The name of the job in the build environment.
     static final def JOB_NAME = ""
