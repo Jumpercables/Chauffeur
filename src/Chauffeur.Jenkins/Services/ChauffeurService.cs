@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.ServiceModel;
 using System.ServiceModel.Web;
 using System.Threading.Tasks;
@@ -82,26 +83,35 @@ namespace Chauffeur.Jenkins.Services
         /// </returns>
         public async Task<Build> InstallBuildAsync(string jobName, string buildNumber)
         {
-            // Query jenkins for the build information.
-            var build = await this.GetBuildAsync(jobName, buildNumber);
+            try
+            {
+                // Query jenkins for the build information.
+                var build = await this.GetBuildAsync(jobName, buildNumber);
 
-            // Download the packages.
-            var packages = await this.DownloadPackagesAsync(build);
+                // Download the packages.
+                var packages = await this.DownloadPackagesAsync(build);
 
-            // Uninstall previous packages.
-            await this.UninstallBuildAsync(jobName);
+                // Uninstall previous packages.
+                await this.UninstallBuildAsync(jobName);
 
-            // Install the packages.
-            this.InstallPackages(packages);
+                // Install the packages.
+                this.InstallPackages(packages);
 
-            // Save the last build installed.
-            var package = await this.AddPackage(jobName, build, packages);
+                // Save the last build installed.
+                var package = await this.AddPackage(jobName, build, packages);
 
-            // Send the notifications.
-            this.Notify(package);
+                // Send the notifications.
+                this.Notify(package);
 
-            // Return the build.
-            return build;
+                // Return the build.
+                return build;
+            }
+            catch (Exception e)
+            {
+                Log.Error(this, e);
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -110,29 +120,36 @@ namespace Chauffeur.Jenkins.Services
         /// <param name="jobName">Name of the job.</param>
         public async Task<Build> UninstallBuildAsync(string jobName)
         {
-            var packages = await this.GetPackagesAsync();
-            var package = packages.FirstOrDefault(o => o.Job.Equals(jobName, StringComparison.OrdinalIgnoreCase));
-            if (package != null)
+            try
             {
-                this.Log("Uninstalling {0} package(s).", package.Build.Artifacts.Count);
-
-                foreach (var artifact in package.Build.Artifacts)
+                var packages = await this.GetPackagesAsync();
+                var package = packages.FirstOrDefault(o => o.Job.Equals(jobName, StringComparison.OrdinalIgnoreCase));
+                if (package != null)
                 {
-                    string pkg = Path.Combine(this.Configuration.DataDirectory, artifact.FileName);
+                    Log.Info(this, "Uninstalling {0} package(s).", package.Build.Artifacts.Count);
 
-                    await this.UninstallPackageAsync(pkg).ContinueWith((task) =>
+                    foreach (var artifact in package.Build.Artifacts)
                     {
-                        File.Delete(pkg);
+                        string pkg = Path.Combine(this.Configuration.ArtifactsDirectory, artifact.FileName);
 
-                        if (packages.Contains(package))
-                            packages.Remove(package);
+                        await this.UninstallPackageAsync(pkg).ContinueWith((task) =>
+                        {
+                            if (task.IsCompleted)
+                            {
+                                this.Serialize(packages.Where(p => p != package));
 
-                        this.UpdatePackages(packages);
-                    });
+                                File.Delete(pkg);
+                            }
+                        });
+                    }
+
+
+                    return package.Build;
                 }
-
-
-                return package.Build;
+            }
+            catch (Exception e)
+            {
+                Log.Error(this, e);
             }
 
             return null;
@@ -147,9 +164,18 @@ namespace Chauffeur.Jenkins.Services
         /// </returns>
         public async Task<Package> GetPackageAsync(string jobName)
         {
-            var packages = await this.GetPackagesAsync();
+            try
+            {
+                var packages = await this.GetPackagesAsync();
 
-            return packages.FirstOrDefault(o => o.Job.Equals(jobName, StringComparison.OrdinalIgnoreCase));
+                return packages.FirstOrDefault(o => o.Job.Equals(jobName, StringComparison.OrdinalIgnoreCase));
+            }
+            catch (Exception e)
+            {
+                Log.Error(this , e);
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -184,7 +210,7 @@ namespace Chauffeur.Jenkins.Services
             {
                 package = new Package
                 {
-                    Url = new Uri(this.Configuration.PackagesJsonFile),
+                    Url = new Uri(this.Configuration.PackagesDataFile),
                     Job = jobName,
                     Build = build,
                     Paths = paths
@@ -199,7 +225,7 @@ namespace Chauffeur.Jenkins.Services
                 package.Date = DateTime.Now.ToShortDateString();
             }
 
-            this.UpdatePackages(packages);
+            this.Serialize(packages);
 
             return package;
         }
@@ -246,9 +272,9 @@ namespace Chauffeur.Jenkins.Services
             {
                 List<Package> packages = null;
 
-                if (File.Exists(base.Configuration.PackagesJsonFile))
+                if (File.Exists(base.Configuration.PackagesDataFile))
                 {
-                    var json = File.ReadAllText(base.Configuration.PackagesJsonFile);
+                    var json = File.ReadAllText(base.Configuration.PackagesDataFile);
                     packages = JsonConvert.DeserializeObject<List<Package>>(json);
                 }
 
@@ -267,10 +293,10 @@ namespace Chauffeur.Jenkins.Services
         {
             return Task.Run(() =>
             {
-                ProcessStartInfo startInfo = new ProcessStartInfo("cmd.exe", string.Format("/c start /MIN /wait msiexec.exe {0} \"{1}\" /quiet {2}", "/i", package, this.Configuration.InstallPropertyReferences));
+                ProcessStartInfo startInfo = new ProcessStartInfo("cmd.exe", string.Format("/c start /MIN /wait msiexec.exe /i \"{0}\" /quiet {1}", package, this.Configuration.InstallPropertyReferences));
                 startInfo.WindowStyle = ProcessWindowStyle.Hidden;
 
-                this.Log(string.Format("\t{0} {1}", startInfo.FileName, startInfo.Arguments));
+                Log.Info(this, string.Format("\t{0} {1}", startInfo.FileName, startInfo.Arguments));
 
                 using (Process process = Process.Start(startInfo))
                     if (process != null) process.WaitForExit();
@@ -283,7 +309,7 @@ namespace Chauffeur.Jenkins.Services
         /// <param name="packages">The packages.</param>
         private async void InstallPackages(string[] packages)
         {
-            this.Log("Installing {0} package(s).", packages.Length);
+            Log.Info(this, "Installing {0} package(s).", packages.Length);
 
             foreach (var pkg in packages)
             {
@@ -298,36 +324,46 @@ namespace Chauffeur.Jenkins.Services
         private async void Notify(Package package)
         {
             NotificationService service = new NotificationService();
-            await service.SendAsync(package).ContinueWith((task) => this.Log("Notification: {0}", task.Result));
-        }
-
-        /// <summary>
-        ///     Uninstalls the package asynchronously.
-        /// </summary>
-        /// <param name="package">The package.</param>
-        /// <returns></returns>
-        private Task UninstallPackageAsync(string package)
-        {
-            return Task.Run(() =>
+            await service.SendAsync(package).ContinueWith((task) =>
             {
-                ProcessStartInfo startInfo = new ProcessStartInfo("cmd.exe", string.Format("/c start /MIN /wait msiexec.exe {0} \"{1}\" /quiet {2}", "/x", package, this.Configuration.UninstallPropertyReferences));
-                startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                if (task.IsFaulted)
+                {
+                    Log.Error(this, task.Exception);
+                }
 
-                this.Log(string.Format("\t{0} {1}", startInfo.FileName, startInfo.Arguments));
-
-                using (Process process = Process.Start(startInfo))
-                    if (process != null) process.WaitForExit();
+                Log.Info(this, "Notification: {0}", task.Result);
             });
         }
 
         /// <summary>
-        ///     Updates the packages.
+        ///     Saves the packages to the packages data file.
         /// </summary>
         /// <param name="packages">The packages.</param>
-        private void UpdatePackages(List<Package> packages)
+        private void Serialize(IEnumerable<Package> packages)
         {
             var json = JsonConvert.SerializeObject(packages, Formatting.Indented);
-            File.WriteAllText(base.Configuration.PackagesJsonFile, json);
+            File.WriteAllText(base.Configuration.PackagesDataFile, json);
+        }
+
+        /// <summary>
+        /// Uninstalls the package asynchronously.
+        /// </summary>
+        /// <param name="package">The package.</param>
+        /// <returns>
+        /// Returns a <see cref="Task" /> representing the operation.
+        /// </returns>
+        private Task UninstallPackageAsync(string package)
+        {
+            return Task.Run(() =>
+            {
+                ProcessStartInfo startInfo = new ProcessStartInfo("cmd.exe", string.Format("/c start /MIN /wait msiexec.exe /x \"{0}\" /quiet {1}", package, this.Configuration.UninstallPropertyReferences));
+                startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+
+                Log.Info(this, string.Format("\t{0} {1}", startInfo.FileName, startInfo.Arguments));
+
+                using (Process process = Process.Start(startInfo))
+                    if (process != null) process.WaitForExit();
+            });
         }
 
         #endregion

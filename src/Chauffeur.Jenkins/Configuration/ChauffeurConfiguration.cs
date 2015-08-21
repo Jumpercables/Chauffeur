@@ -14,15 +14,16 @@ namespace Chauffeur.Jenkins.Configuration
     {
         #region Fields
 
-        private Setting<string> _Body;
+        private Setting<string> _ArtifactsDirectory;
+        private Setting<string> _BodyTemplateFile;
         private Setting<string> _DataDirectory;
         private Setting<string> _From;
         private Setting<string> _Host;
         private Setting<string> _InstallPropertyReferences;
-        private Setting<bool> _IsHtml;
-        private Setting<string> _PackagesJsonFile;
+        private Setting<string> _PackagesDataFile;
         private Setting<string> _Server;
-        private Setting<string> _Subject;
+        private Setting<string> _SubjectTemplateFile;
+        private Setting<string> _TemplateDirectory;
         private Setting<string> _To;
         private Setting<string> _Token;
         private Setting<string> _UninstallPropertyReferences;
@@ -45,14 +46,25 @@ namespace Chauffeur.Jenkins.Configuration
         #region Public Properties
 
         /// <summary>
+        ///     Gets the artifacts directory.
+        /// </summary>
+        /// <value>
+        ///     The artifacts directory.
+        /// </value>
+        public string ArtifactsDirectory
+        {
+            get { return _ArtifactsDirectory.Value; }
+        }
+
+        /// <summary>
         ///     Gets the body.
         /// </summary>
         /// <value>
         ///     The body.
         /// </value>
-        public string Body
+        public string BodyTemplateFile
         {
-            get { return _Body.Value; }
+            get { return _BodyTemplateFile.Value; }
         }
 
         /// <summary>
@@ -100,25 +112,14 @@ namespace Chauffeur.Jenkins.Configuration
         }
 
         /// <summary>
-        ///     Gets a value indicating whether this instance is HTML.
-        /// </summary>
-        /// <value>
-        ///     <c>true</c> if this instance is HTML; otherwise, <c>false</c>.
-        /// </value>
-        public bool IsHtml
-        {
-            get { return _IsHtml.Value; }
-        }
-
-        /// <summary>
         ///     Gets the packages json file.
         /// </summary>
         /// <value>
         ///     The packages json file.
         /// </value>
-        public string PackagesJsonFile
+        public string PackagesDataFile
         {
-            get { return _PackagesJsonFile.Value; }
+            get { return _PackagesDataFile.Value; }
         }
 
         /// <summary>
@@ -138,9 +139,20 @@ namespace Chauffeur.Jenkins.Configuration
         /// <value>
         ///     The subject.
         /// </value>
-        public string Subject
+        public string SubjectTemplateFile
         {
-            get { return _Subject.Value; }
+            get { return _SubjectTemplateFile.Value; }
+        }
+
+        /// <summary>
+        ///     Gets the template directory.
+        /// </summary>
+        /// <value>
+        ///     The template directory.
+        /// </value>
+        public string TemplateDirectory
+        {
+            get { return _TemplateDirectory.Value; }
         }
 
         /// <summary>
@@ -198,10 +210,38 @@ namespace Chauffeur.Jenkins.Configuration
         #region Private Methods
 
         /// <summary>
+        ///     Gets the complete path to the directory.
+        /// </summary>
+        /// <param name="configurationValue">The configuration value.</param>
+        /// <param name="fallbackValue">The fallback value.</param>
+        /// <returns>
+        ///     Returns a <see cref="string" /> representing the path to the directory.
+        /// </returns>
+        private string GetDirectory(string configurationValue, string fallbackValue)
+        {
+            configurationValue = configurationValue ?? string.Empty;
+            fallbackValue = fallbackValue ?? string.Empty;
+
+            if (string.IsNullOrEmpty(configurationValue))
+                configurationValue = fallbackValue;
+
+            if (configurationValue.StartsWith("~"))
+                configurationValue = configurationValue.Replace("~", "..");
+
+            string dir = Path.GetDirectoryName(AppDomain.CurrentDomain.SetupInformation.ConfigurationFile);
+            string path = Path.GetFullPath(Path.Combine(dir, configurationValue));
+            return path;
+        }
+
+        /// <summary>
         ///     Initializes the strongly typed settings.
         /// </summary>
         private void Initialize()
         {
+            _TemplateDirectory = new Setting<string>(this.Settings, "Chauffeur/Resources/Templates", value => this.GetDirectory(value, "~\\Templates"));
+            _DataDirectory = new Setting<string>(this.Settings, "Chauffeur/Resources/Data", value => this.GetDirectory(value, "~\\Data"));
+            _PackagesDataFile = new StringSetting(this.Settings, "Chauffeur/Resources/Packages", Path.Combine(this.DataDirectory, "Packages.json"));
+
             _Server = new StringSetting(this.Settings, "Chauffeur/Jenkins/Server", "http://localhost:8080/");
             _User = new StringSetting(this.Settings, "Chauffeur/Jenkins/User", "");
             _Token = new StringSetting(this.Settings, "Chauffeur/Jenkins/Token", "");
@@ -209,15 +249,12 @@ namespace Chauffeur.Jenkins.Configuration
             _Host = new StringSetting(this.Settings, "Chauffeur/Notifications/Host", "");
             _To = new StringSetting(this.Settings, "Chauffeur/Notifications/To", "");
             _From = new StringSetting(this.Settings, "Chauffeur/Notifications/From", "");
-            _IsHtml = new BooleanSetting(this.Settings, "Chauffeur/Notifications/IsHtml", false);
-            _Subject = new StringSetting(this.Settings, "Chauffeur/Notifications/Subject", "");
-            _Body = new StringSetting(this.Settings, "Chauffeur/Notifications/Body", "");
+            _SubjectTemplateFile = new StringSetting(this.Settings, "Chauffeur/Notifications/Subject", Path.Combine(this.TemplateDirectory, "_Notification-Subject.xslt"));
+            _BodyTemplateFile = new StringSetting(this.Settings, "Chauffeur/Notifications/Body", Path.Combine(this.TemplateDirectory, "_Notification-Body.xslt"));
 
-            _DataDirectory = new StringSetting(this.Settings, "Chauffeur/Packages/DataDirectory", Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Jenkins"));
+            _ArtifactsDirectory = new Setting<string>(this.Settings, "Chauffeur/Packages/Artifacts", value => this.GetDirectory(value, Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Jenkins")));
             _InstallPropertyReferences = new StringSetting(this.Settings, "Chauffeur/Packages/InstallPropertyReferences", "");
             _UninstallPropertyReferences = new StringSetting(this.Settings, "Chauffeur/Packages/UninstallPropertyReferences", "");
-
-            _PackagesJsonFile = new StringSetting(this.Settings, "Chauffeur/Packages/PackagesJsonFile", Path.Combine(this.DataDirectory, "Packages.json"));
         }
 
         /// <summary>
@@ -246,7 +283,7 @@ namespace Chauffeur.Jenkins.Configuration
             #region Constructors
 
             public BooleanSetting(NameValueCollection settings, string name, bool value)
-                : base(settings, name, value)
+                : base(settings, name, s => string.IsNullOrEmpty(s) ? value : bool.Parse(s))
             {
             }
 
@@ -262,7 +299,7 @@ namespace Chauffeur.Jenkins.Configuration
             #region Constructors
 
             public IntegerSetting(NameValueCollection settings, string name, int value)
-                : base(settings, name, value)
+                : base(settings, name, s => string.IsNullOrEmpty(s) ? value : int.Parse(s))
             {
             }
 
@@ -273,19 +310,21 @@ namespace Chauffeur.Jenkins.Configuration
 
         #region Nested Type: Setting
 
-        internal abstract class Setting<TValue>
+        internal class Setting<TValue>
         {
             #region Constructors
 
-            protected Setting(NameValueCollection settings, string name, TValue value)
+            public Setting(NameValueCollection settings, string name, Func<string, TValue> func)
             {
-                this.Value = string.IsNullOrEmpty(settings[name]) ? value : (TValue) Convert.ChangeType(settings[name], typeof (TValue));
+                this.Name = name;
+                this.Value = func(settings[name]);
             }
 
             #endregion
 
             #region Public Properties
 
+            public string Name { get; private set; }
             public TValue Value { get; private set; }
 
             #endregion
@@ -300,7 +339,7 @@ namespace Chauffeur.Jenkins.Configuration
             #region Constructors
 
             public StringSetting(NameValueCollection settings, string name, string value)
-                : base(settings, name, value)
+                : base(settings, name, s => string.IsNullOrEmpty(s) ? value : s)
             {
             }
 

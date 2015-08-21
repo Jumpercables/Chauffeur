@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Runtime.Remoting.Messaging;
 using System.Runtime.Serialization;
 
 using Chauffeur.Jenkins.Client;
@@ -83,21 +81,7 @@ namespace Chauffeur.Jenkins.Services
         /// </value>
         protected ChauffeurConfiguration Configuration { get; set; }
 
-        #endregion
-
-        #region Protected Methods
-
-        /// <summary>
-        ///     Logs the message in the specified format.
-        /// </summary>
-        /// <param name="format">The format.</param>
-        /// <param name="args">The arguments.</param>
-        protected void Log(string format, params object[] args)
-        {
-            Trace.WriteLine(string.Format("{0} - {1}", DateTime.Now, string.Format(format, args)));
-        }
-
-        #endregion
+        #endregion        
     }
 
     /// <summary>

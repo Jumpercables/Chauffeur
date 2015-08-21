@@ -72,9 +72,9 @@
     <Compile Include="Jenkins\Client\MockWebRequest.cs" />
     <Compile Include="Jenkins\Client\MockWebRequestFactory.cs" />
     <Compile Include="Jenkins\Client\MockWebResponse.cs" />
+    <Compile Include="Jenkins\Configurations\ChauffeurConfigurationTest.cs" />
     <Compile Include="Jenkins\Model\BuildTest.cs" />
     <Compile Include="Jenkins\Model\PackageTest.cs" />
-    <Compile Include="Jenkins\Services\NotificationServiceTest.cs" />
     <Compile Include="Jenkins\Client\JenkinsClientTest.cs" />
     <Compile Include="Jenkins\Model\JobTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -93,9 +93,7 @@
     <EmbeddedResource Include="Json\build.valid.json" />
     <EmbeddedResource Include="Json\package.valid.json" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Resources\" />
-  </ItemGroup>
+  <ItemGroup />
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>

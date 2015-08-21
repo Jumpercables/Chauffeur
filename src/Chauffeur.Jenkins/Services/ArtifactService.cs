@@ -77,14 +77,11 @@ namespace Chauffeur.Jenkins.Services
         /// </returns>
         public Task<string[]> DownloadArtifactsAsync(Build build)
         {
-            if (!Directory.Exists(this.Configuration.DataDirectory))
-                Directory.CreateDirectory(this.Configuration.DataDirectory);
-
-            this.Log("Downloading {0} artifact(s) into the {1} directory.", build.Artifacts.Count, this.Configuration.DataDirectory);
+            Log.Info(this, "Downloading {0} artifact(s) into the {1} directory.", build.Artifacts.Count, this.Configuration.ArtifactsDirectory);
 
             return Task.Run(() =>
             {
-                var tasks = build.Artifacts.Select(artifact => this.DownloadArtifactAsync(build, artifact, this.Configuration.DataDirectory));
+                var tasks = build.Artifacts.Select(artifact => this.DownloadArtifactAsync(build, artifact, this.Configuration.ArtifactsDirectory));
                 return tasks.Select(o => o.Result).ToArray();
             });
         }
@@ -168,7 +165,7 @@ namespace Chauffeur.Jenkins.Services
         {
             return Task.Run(() => this.DownloadArtifact(build, artifact, directory)).ContinueWith((task) =>
             {
-                this.Log("\t{0} = {1}.", artifact.FileName, task.Status);
+                Log.Info(this, "\t{0} = {1}.", artifact.FileName, task.Status);
 
                 return task.Result;
             });

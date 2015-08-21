@@ -6,7 +6,7 @@ using Chauffeur.Jenkins.Client;
 
 namespace Chauffeur.Jenkins.Model
 {
-    [DataContract]
+    [DataContract(Name = "view", Namespace = "")]
     public class View : IUrl
     {
         #region Public Properties

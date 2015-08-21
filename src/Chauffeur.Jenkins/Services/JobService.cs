@@ -153,7 +153,7 @@ namespace Chauffeur.Jenkins.Services
         {
             return Task.Run(() =>
             {
-                this.Log("Job: {0}", jobName);
+                Log.Info(this,"Job: {0}", jobName);
 
                 var job = this.Client.GetResource<Job>(base.BaseUri, "job", jobName);
 
@@ -271,11 +271,11 @@ namespace Chauffeur.Jenkins.Services
         {
             return Task.Run(() =>
             {
-                this.Log("Job: {0}", jobName);
+                Log.Info(this,"Job: {0}", jobName);
 
                 var build = this.Client.GetResource<Build>(base.BaseUri, "job", jobName, buildType);
 
-                this.Log("Build: {0}", build.Number);
+                Log.Info(this,"Build: {0}", build.Number);
 
                 return build;
             });

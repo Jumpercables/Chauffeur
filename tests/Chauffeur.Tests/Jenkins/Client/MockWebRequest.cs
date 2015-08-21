@@ -63,10 +63,12 @@ namespace Chauffeur.Tests.Jenkins.Client
         public override string Method { get; set; }
 
         /// <summary>
-        /// When overridden in a descendant class, gets the URI of the Internet resource associated with the request.
+        ///     When overridden in a descendant class, gets the URI of the Internet resource associated with the request.
         /// </summary>
         /// <PermissionSet>
-        ///   <IPermission class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" version="1" Flags="UnmanagedCode, ControlEvidence" />
+        ///     <IPermission
+        ///         class="System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.3600.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+        ///         version="1" Flags="UnmanagedCode, ControlEvidence" />
         /// </PermissionSet>
         public override Uri RequestUri
         {

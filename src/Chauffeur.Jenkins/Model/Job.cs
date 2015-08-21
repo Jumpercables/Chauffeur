@@ -6,7 +6,7 @@ using Chauffeur.Jenkins.Client;
 
 namespace Chauffeur.Jenkins.Model
 {
-    [DataContract]
+    [DataContract(Name = "job", Namespace = "")]
     public class Job : IUrl
     {
         #region Constructors
@@ -216,6 +216,12 @@ namespace Chauffeur.Jenkins.Model
 
         #region IUrl Members
 
+        /// <summary>
+        /// Gets or sets the URL.
+        /// </summary>
+        /// <value>
+        /// The URL.
+        /// </value>
         [DataMember(Name = "url")]
         public Uri Url { get; set; }
 
@@ -237,7 +243,7 @@ namespace Chauffeur.Jenkins.Model
         #endregion
     }
 
-    [DataContract]
+    [DataContract(Name = "healthReport", Namespace = "")]
     public class HealthReport
     {
         #region Public Properties
