@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.ServiceModel;
 using System.ServiceModel.Web;
 using System.Threading.Tasks;
@@ -82,26 +83,35 @@ namespace Chauffeur.Jenkins.Services
         /// </returns>
         public async Task<Build> InstallBuildAsync(string jobName, string buildNumber)
         {
-            // Query jenkins for the build information.
-            var build = await this.GetBuildAsync(jobName, buildNumber);
+            try
+            {
+                // Query jenkins for the build information.
+                var build = await this.GetBuildAsync(jobName, buildNumber);
 
-            // Download the packages.
-            var packages = await this.DownloadPackagesAsync(build);
+                // Download the packages.
+                var packages = await this.DownloadPackagesAsync(build);
 
-            // Uninstall previous packages.
-            await this.UninstallBuildAsync(jobName);
+                // Uninstall previous packages.
+                await this.UninstallBuildAsync(jobName);
 
-            // Install the packages.
-            this.InstallPackages(packages);
+                // Install the packages.
+                this.InstallPackages(packages);
 
-            // Save the last build installed.
-            var package = await this.AddPackage(jobName, build, packages);
+                // Save the last build installed.
+                var package = await this.AddPackage(jobName, build, packages);
 
-            // Send the notifications.
-            this.Notify(package);
+                // Send the notifications.
+                this.Notify(package);
 
-            // Return the build.
-            return build;
+                // Return the build.
+                return build;
+            }
+            catch (Exception e)
+            {
+                Log.Error(this, e);
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -114,7 +124,7 @@ namespace Chauffeur.Jenkins.Services
             var package = packages.FirstOrDefault(o => o.Job.Equals(jobName, StringComparison.OrdinalIgnoreCase));
             if (package != null)
             {
-                Log.Debug(this, "Uninstalling {0} package(s).", package.Build.Artifacts.Count);
+                Log.Info(this, "Uninstalling {0} package(s).", package.Build.Artifacts.Count);
 
                 foreach (var artifact in package.Build.Artifacts)
                 {
@@ -246,6 +256,8 @@ namespace Chauffeur.Jenkins.Services
         {
             return Task.Run(() =>
             {
+                Log.Info(this, "Loading packages data: {0}", base.Configuration.PackagesDataFile);
+
                 List<Package> packages = null;
 
                 if (File.Exists(base.Configuration.PackagesDataFile))
@@ -272,7 +284,7 @@ namespace Chauffeur.Jenkins.Services
                 ProcessStartInfo startInfo = new ProcessStartInfo("cmd.exe", string.Format("/c start /MIN /wait msiexec.exe {0} \"{1}\" /quiet {2}", "/i", package, this.Configuration.InstallPropertyReferences));
                 startInfo.WindowStyle = ProcessWindowStyle.Hidden;
 
-                Log.Debug(this, string.Format("\t{0} {1}", startInfo.FileName, startInfo.Arguments));
+                Log.Info(this, string.Format("\t{0} {1}", startInfo.FileName, startInfo.Arguments));
 
                 using (Process process = Process.Start(startInfo))
                     if (process != null) process.WaitForExit();
@@ -285,7 +297,7 @@ namespace Chauffeur.Jenkins.Services
         /// <param name="packages">The packages.</param>
         private async void InstallPackages(string[] packages)
         {
-            Log.Debug(this, "Installing {0} package(s).", packages.Length);
+            Log.Info(this, "Installing {0} package(s).", packages.Length);
 
             foreach (var pkg in packages)
             {
@@ -300,7 +312,10 @@ namespace Chauffeur.Jenkins.Services
         private async void Notify(Package package)
         {
             NotificationService service = new NotificationService();
-            await service.SendAsync(package).ContinueWith((task) => Log.Debug(this, "Notification: {0}", task.Result));
+            await service.SendAsync(package).ContinueWith((task) =>
+            {
+                Log.Info(this, "Notification: {0}", task.Result);
+            });
         }
 
         /// <summary>
@@ -325,7 +340,7 @@ namespace Chauffeur.Jenkins.Services
                 ProcessStartInfo startInfo = new ProcessStartInfo("cmd.exe", string.Format("/c start /MIN /wait msiexec.exe {0} \"{1}\" /quiet {2}", "/x", package, this.Configuration.UninstallPropertyReferences));
                 startInfo.WindowStyle = ProcessWindowStyle.Hidden;
 
-                Log.Debug(this, string.Format("\t{0} {1}", startInfo.FileName, startInfo.Arguments));
+                Log.Info(this, string.Format("\t{0} {1}", startInfo.FileName, startInfo.Arguments));
 
                 using (Process process = Process.Start(startInfo))
                     if (process != null) process.WaitForExit();
