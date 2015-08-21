@@ -8,14 +8,15 @@ using System.Linq;
 namespace Chauffeur.Jenkins.Configuration
 {
     /// <summary>
-    /// Provides access to the configurations provided in the configuration file.
+    ///     Provides access to the configurations provided in the configuration file.
     /// </summary>
     public class ChauffeurConfiguration
     {
         #region Fields
 
-        private Setting<string> _BodyTemplateFile;
         private Setting<string> _ArtifactsDirectory;
+        private Setting<string> _BodyTemplateFile;
+        private Setting<string> _DataDirectory;
         private Setting<string> _From;
         private Setting<string> _Host;
         private Setting<string> _InstallPropertyReferences;
@@ -27,8 +28,7 @@ namespace Chauffeur.Jenkins.Configuration
         private Setting<string> _Token;
         private Setting<string> _UninstallPropertyReferences;
         private Setting<string> _User;
-        private Setting<string> _DataDirectory;
- 
+
         #endregion
 
         #region Constructors
@@ -46,6 +46,17 @@ namespace Chauffeur.Jenkins.Configuration
         #region Public Properties
 
         /// <summary>
+        ///     Gets the artifacts directory.
+        /// </summary>
+        /// <value>
+        ///     The artifacts directory.
+        /// </value>
+        public string ArtifactsDirectory
+        {
+            get { return _ArtifactsDirectory.Value; }
+        }
+
+        /// <summary>
         ///     Gets the body.
         /// </summary>
         /// <value>
@@ -56,16 +67,15 @@ namespace Chauffeur.Jenkins.Configuration
             get { return _BodyTemplateFile.Value; }
         }
 
-
         /// <summary>
-        /// Gets the artifacts directory.
+        ///     Gets the data directory.
         /// </summary>
         /// <value>
-        /// The artifacts directory.
+        ///     The data directory.
         /// </value>
-        public string ArtifactsDirectory
+        public string DataDirectory
         {
-            get { return _ArtifactsDirectory.Value; }
+            get { return _DataDirectory.Value; }
         }
 
         /// <summary>
@@ -189,16 +199,6 @@ namespace Chauffeur.Jenkins.Configuration
             get { return _User.Value; }
         }
 
-        /// <summary>
-        /// Gets the data directory.
-        /// </summary>
-        /// <value>
-        /// The data directory.
-        /// </value>
-        public string DataDirectory
-        {
-            get { return _DataDirectory.Value; }
-        }
         #endregion
 
         #region Private Properties
@@ -208,16 +208,16 @@ namespace Chauffeur.Jenkins.Configuration
         #endregion
 
         #region Private Methods
-        
+
         /// <summary>
-        ///     Creates the directory when it doesn't exist.
+        ///     Gets the complete path to the directory.
         /// </summary>
         /// <param name="configurationValue">The configuration value.</param>
         /// <param name="fallbackValue">The fallback value.</param>
         /// <returns>
         ///     Returns a <see cref="string" /> representing the path to the directory.
         /// </returns>
-        private string CreateDirectory(string configurationValue, string fallbackValue)
+        private string GetDirectory(string configurationValue, string fallbackValue)
         {
             configurationValue = configurationValue ?? string.Empty;
             fallbackValue = fallbackValue ?? string.Empty;
@@ -226,17 +226,11 @@ namespace Chauffeur.Jenkins.Configuration
                 configurationValue = fallbackValue;
 
             if (configurationValue.StartsWith("~"))
-            {
-                configurationValue = configurationValue.Replace("~", "..");                
-            }
+                configurationValue = configurationValue.Replace("~", "..");
 
-            string dir = Directory.GetCurrentDirectory();
-            string path = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(dir), configurationValue));
-
-            DirectoryInfo directoryInfo = new DirectoryInfo(path);
-            if (!directoryInfo.Exists) directoryInfo.Create();
-
-            return directoryInfo.FullName;
+            string dir = Path.GetDirectoryName(AppDomain.CurrentDomain.SetupInformation.ConfigurationFile);
+            string path = Path.GetFullPath(Path.Combine(dir, configurationValue));
+            return path;
         }
 
         /// <summary>
@@ -244,9 +238,9 @@ namespace Chauffeur.Jenkins.Configuration
         /// </summary>
         private void Initialize()
         {
-            _TemplateDirectory = new Setting<string>(this.Settings, "Chauffeur/Resources/Templates", value => this.CreateDirectory(value, "~\\Templates"));
-            _DataDirectory = new Setting<string>(this.Settings, "Chauffeur/Resources/Data", value => this.CreateDirectory(value, "~\\Data"));
-            _PackagesDataFile = new StringSetting(this.Settings, "Chauffeur/Resources/Packages", Path.Combine(this.DataDirectory, "Packages.json")); 
+            _TemplateDirectory = new Setting<string>(this.Settings, "Chauffeur/Resources/Templates", value => this.GetDirectory(value, "~\\Templates"));
+            _DataDirectory = new Setting<string>(this.Settings, "Chauffeur/Resources/Data", value => this.GetDirectory(value, "~\\Data"));
+            _PackagesDataFile = new StringSetting(this.Settings, "Chauffeur/Resources/Packages", Path.Combine(this.DataDirectory, "Packages.json"));
 
             _Server = new StringSetting(this.Settings, "Chauffeur/Jenkins/Server", "http://localhost:8080/");
             _User = new StringSetting(this.Settings, "Chauffeur/Jenkins/User", "");
@@ -258,9 +252,9 @@ namespace Chauffeur.Jenkins.Configuration
             _SubjectTemplateFile = new StringSetting(this.Settings, "Chauffeur/Notifications/Subject", Path.Combine(this.TemplateDirectory, "_Notification-Subject.xslt"));
             _BodyTemplateFile = new StringSetting(this.Settings, "Chauffeur/Notifications/Body", Path.Combine(this.TemplateDirectory, "_Notification-Body.xslt"));
 
-            _ArtifactsDirectory = new Setting<string>(this.Settings, "Chauffeur/Packages/Artifacts", value => this.CreateDirectory(value, Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Jenkins")));
+            _ArtifactsDirectory = new Setting<string>(this.Settings, "Chauffeur/Packages/Artifacts", value => this.GetDirectory(value, Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Jenkins")));
             _InstallPropertyReferences = new StringSetting(this.Settings, "Chauffeur/Packages/InstallPropertyReferences", "");
-            _UninstallPropertyReferences = new StringSetting(this.Settings, "Chauffeur/Packages/UninstallPropertyReferences", "");                       
+            _UninstallPropertyReferences = new StringSetting(this.Settings, "Chauffeur/Packages/UninstallPropertyReferences", "");
         }
 
         /// <summary>
@@ -322,6 +316,7 @@ namespace Chauffeur.Jenkins.Configuration
 
             public Setting(NameValueCollection settings, string name, Func<string, TValue> func)
             {
+                this.Name = name;
                 this.Value = func(settings[name]);
             }
 
@@ -329,6 +324,7 @@ namespace Chauffeur.Jenkins.Configuration
 
             #region Public Properties
 
+            public string Name { get; private set; }
             public TValue Value { get; private set; }
 
             #endregion
