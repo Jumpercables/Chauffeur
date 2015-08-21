@@ -120,29 +120,36 @@ namespace Chauffeur.Jenkins.Services
         /// <param name="jobName">Name of the job.</param>
         public async Task<Build> UninstallBuildAsync(string jobName)
         {
-            var packages = await this.GetPackagesAsync();
-            var package = packages.FirstOrDefault(o => o.Job.Equals(jobName, StringComparison.OrdinalIgnoreCase));
-            if (package != null)
+            try
             {
-                Log.Info(this, "Uninstalling {0} package(s).", package.Build.Artifacts.Count);
-
-                foreach (var artifact in package.Build.Artifacts)
+                var packages = await this.GetPackagesAsync();
+                var package = packages.FirstOrDefault(o => o.Job.Equals(jobName, StringComparison.OrdinalIgnoreCase));
+                if (package != null)
                 {
-                    string pkg = Path.Combine(this.Configuration.ArtifactsDirectory, artifact.FileName);
+                    Log.Info(this, "Uninstalling {0} package(s).", package.Build.Artifacts.Count);
 
-                    await this.UninstallPackageAsync(pkg).ContinueWith((task) =>
+                    foreach (var artifact in package.Build.Artifacts)
                     {
-                        File.Delete(pkg);
+                        string pkg = Path.Combine(this.Configuration.ArtifactsDirectory, artifact.FileName);
 
-                        if (packages.Contains(package))
-                            packages.Remove(package);
+                        await this.UninstallPackageAsync(pkg).ContinueWith((task) =>
+                        {
+                            if (task.IsCompleted)
+                            {
+                                this.Serialize(packages.Where(p => p != package));
 
-                        this.SavePackages(packages);
-                    });
+                                File.Delete(pkg);
+                            }
+                        });
+                    }
+
+
+                    return package.Build;
                 }
-
-
-                return package.Build;
+            }
+            catch (Exception e)
+            {
+                Log.Error(this, e);
             }
 
             return null;
@@ -157,9 +164,18 @@ namespace Chauffeur.Jenkins.Services
         /// </returns>
         public async Task<Package> GetPackageAsync(string jobName)
         {
-            var packages = await this.GetPackagesAsync();
+            try
+            {
+                var packages = await this.GetPackagesAsync();
 
-            return packages.FirstOrDefault(o => o.Job.Equals(jobName, StringComparison.OrdinalIgnoreCase));
+                return packages.FirstOrDefault(o => o.Job.Equals(jobName, StringComparison.OrdinalIgnoreCase));
+            }
+            catch (Exception e)
+            {
+                Log.Error(this , e);
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -211,7 +227,7 @@ namespace Chauffeur.Jenkins.Services
                 package.Date = DateTime.Now.ToShortDateString();
             }
 
-            this.SavePackages(packages);
+            this.Serialize(packages);
 
             return package;
         }
@@ -314,16 +330,23 @@ namespace Chauffeur.Jenkins.Services
             NotificationService service = new NotificationService();
             await service.SendAsync(package).ContinueWith((task) =>
             {
+                if (task.IsFaulted)
+                {
+                    Log.Error(this, task.Exception);
+                }
+
                 Log.Info(this, "Notification: {0}", task.Result);
             });
         }
 
         /// <summary>
-        ///     Saves the packages.
+        ///     Saves the packages to the packages data file.
         /// </summary>
         /// <param name="packages">The packages.</param>
-        private void SavePackages(List<Package> packages)
+        private void Serialize(IEnumerable<Package> packages)
         {
+            Log.Info(this, "Saving packages data: {0}", base.Configuration.PackagesDataFile);
+
             var json = JsonConvert.SerializeObject(packages, Formatting.Indented);
             File.WriteAllText(base.Configuration.PackagesDataFile, json);
         }
