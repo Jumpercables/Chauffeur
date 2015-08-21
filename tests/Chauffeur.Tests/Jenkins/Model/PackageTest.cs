@@ -2,7 +2,7 @@
 using System.Linq;
 
 using Chauffeur.Jenkins.Model;
-using Chauffeur.Jenkins.Templates;
+using Chauffeur.Jenkins.Services.Templates;
 using Chauffeur.Tests.Jenkins.Client;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;

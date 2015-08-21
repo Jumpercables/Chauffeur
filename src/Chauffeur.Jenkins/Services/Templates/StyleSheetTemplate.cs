@@ -1,5 +1,4 @@
-﻿using System;
-using System.Globalization;
+﻿using System.Globalization;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Text;
@@ -7,7 +6,7 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Xsl;
 
-namespace Chauffeur.Jenkins.Templates
+namespace Chauffeur.Jenkins.Services.Templates
 {
     /// <summary>
     /// </summary>

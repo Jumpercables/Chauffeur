@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 using Chauffeur.Jenkins.Configuration;
 using Chauffeur.Jenkins.Model;
-using Chauffeur.Jenkins.Templates;
+using Chauffeur.Jenkins.Services.Templates;
 
 namespace Chauffeur.Jenkins.Services
 {

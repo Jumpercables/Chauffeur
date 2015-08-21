@@ -106,7 +106,7 @@
     <Compile Include="Services\Abstract\JenkinsService.cs" />
     <Compile Include="Services\JobService.cs" />
     <Compile Include="Services\NotificationService.cs" />
-    <Compile Include="Templates\StyleSheetTemplate.cs" />
+    <Compile Include="Services\Templates\StyleSheetTemplate.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">
