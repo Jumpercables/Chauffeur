@@ -47,16 +47,7 @@ namespace Chauffeur.Jenkins.Model
         ///     The job.
         /// </value>
         [DataMember(Name = "job", Order = 1)]
-        public string Job { get; set; }
-
-        /// <summary>
-        ///     Gets or sets the name of the machine.
-        /// </summary>
-        /// <value>
-        ///     The name of the machine.
-        /// </value>
-        [DataMember(Name = "machineName")]
-        public string MachineName { get; set; }
+        public string Job { get; set; }        
 
         /// <summary>
         ///     Gets or sets the paths.

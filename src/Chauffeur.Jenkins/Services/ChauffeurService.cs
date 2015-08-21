@@ -213,15 +213,13 @@ namespace Chauffeur.Jenkins.Services
                     Url = new Uri(this.Configuration.PackagesDataFile),
                     Job = jobName,
                     Build = build,
-                    Paths = paths,
-                    MachineName = Environment.MachineName
+                    Paths = paths
                 };
 
                 packages.Add(package);
             }
             else
             {
-                package.MachineName = Environment.MachineName;
                 package.Build = build;
                 package.Paths = paths;
                 package.Date = DateTime.Now.ToShortDateString();
@@ -272,8 +270,6 @@ namespace Chauffeur.Jenkins.Services
         {
             return Task.Run(() =>
             {
-                Log.Info(this, "Loading packages data: {0}", base.Configuration.PackagesDataFile);
-
                 List<Package> packages = null;
 
                 if (File.Exists(base.Configuration.PackagesDataFile))
@@ -297,7 +293,7 @@ namespace Chauffeur.Jenkins.Services
         {
             return Task.Run(() =>
             {
-                ProcessStartInfo startInfo = new ProcessStartInfo("cmd.exe", string.Format("/c start /MIN /wait msiexec.exe {0} \"{1}\" /quiet {2}", "/i", package, this.Configuration.InstallPropertyReferences));
+                ProcessStartInfo startInfo = new ProcessStartInfo("cmd.exe", string.Format("/c start /MIN /wait msiexec.exe /i \"{0}\" /quiet {1}", package, this.Configuration.InstallPropertyReferences));
                 startInfo.WindowStyle = ProcessWindowStyle.Hidden;
 
                 Log.Info(this, string.Format("\t{0} {1}", startInfo.FileName, startInfo.Arguments));
@@ -345,22 +341,22 @@ namespace Chauffeur.Jenkins.Services
         /// <param name="packages">The packages.</param>
         private void Serialize(IEnumerable<Package> packages)
         {
-            Log.Info(this, "Saving packages data: {0}", base.Configuration.PackagesDataFile);
-
             var json = JsonConvert.SerializeObject(packages, Formatting.Indented);
             File.WriteAllText(base.Configuration.PackagesDataFile, json);
         }
 
         /// <summary>
-        ///     Uninstalls the package asynchronously.
+        /// Uninstalls the package asynchronously.
         /// </summary>
         /// <param name="package">The package.</param>
-        /// <returns></returns>
+        /// <returns>
+        /// Returns a <see cref="Task" /> representing the operation.
+        /// </returns>
         private Task UninstallPackageAsync(string package)
         {
             return Task.Run(() =>
             {
-                ProcessStartInfo startInfo = new ProcessStartInfo("cmd.exe", string.Format("/c start /MIN /wait msiexec.exe {0} \"{1}\" /quiet {2}", "/x", package, this.Configuration.UninstallPropertyReferences));
+                ProcessStartInfo startInfo = new ProcessStartInfo("cmd.exe", string.Format("/c start /MIN /wait msiexec.exe /x \"{0}\" /quiet {1}", package, this.Configuration.UninstallPropertyReferences));
                 startInfo.WindowStyle = ProcessWindowStyle.Hidden;
 
                 Log.Info(this, string.Format("\t{0} {1}", startInfo.FileName, startInfo.Arguments));

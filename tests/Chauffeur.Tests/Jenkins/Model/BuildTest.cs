@@ -13,7 +13,7 @@ namespace Chauffeur.Tests.Jenkins.Model
         #region Public Methods
 
         [TestMethod]
-        public void BuildValidJson()
+        public void Build_Json()
         {
             var build = this.GetResource<Build>("build.valid.json");
 

@@ -15,7 +15,7 @@ namespace Chauffeur.Tests.Jenkins.Model
         #region Public Methods
 
         [TestMethod]
-        public void PackageApplyBodyXslt()
+        public void Package_ApplyBodyTemplate()
         {
             var package = this.GetResource<Package>("package.valid.json");
             Assert.IsNotNull(package);
@@ -25,7 +25,7 @@ namespace Chauffeur.Tests.Jenkins.Model
         }
 
         [TestMethod]
-        public void PackageApplySubjectXslt()
+        public void Package_ApplySubjectTemplate()
         {
             var package = this.GetResource<Package>("package.valid.json");
             Assert.IsNotNull(package);
@@ -37,7 +37,7 @@ namespace Chauffeur.Tests.Jenkins.Model
 
 
         [TestMethod]
-        public void PackageValidJson()
+        public void Package_Json()
         {
             var package = this.GetResource<Package>("package.valid.json");
             Assert.IsNotNull(package);
