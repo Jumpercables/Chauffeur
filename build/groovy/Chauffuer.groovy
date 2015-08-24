@@ -11,6 +11,9 @@
         Chauffeur.groovy
  */
 
+// The port that the WCF service is hosted on.
+def PORT = 8080
+
 // The name of the job in the build environment.
 def JOB_NAME = ""
 
@@ -31,7 +34,7 @@ if (MACHINE_NAMES == null || MACHINE_NAMES.size() == 0) {
 
 try {
     MACHINE_NAMES.eachWithIndex { String s, int i ->
-        def url = new URL('http://' + s + ':8080/Chauffeur.Jenkins.Services/ChauffeurService/rest/InstallLastSuccessfulBuild/' + JOB_NAME)
+        def url = new URL('http://' + s + ':' + PORT + '/Chauffeur.Jenkins.Services/ChauffeurService/rest/InstallLastSuccessfulBuild/' + JOB_NAME)
         def text = url.getText()
         println(text)
     }
