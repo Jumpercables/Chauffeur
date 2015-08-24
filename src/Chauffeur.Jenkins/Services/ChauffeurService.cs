@@ -222,7 +222,7 @@ namespace Chauffeur.Jenkins.Services
             {
                 package.Build = build;
                 package.Paths = paths;
-                package.Date = DateTime.Now.ToShortDateString();
+                package.Date = DateTime.Now.ToString("f");
             }
 
             this.Serialize(packages);

@@ -18,7 +18,7 @@
           <p>
             Build <span>
               <xsl:value-of select="build/number"/>
-            </span> of the Sempra Desktop Installer has been installed on the {SERVER_NAME}.
+            </span> of the Sempra Desktop Installer has been installed on the <xsl:value-of select="machine"/>
           </p>
 
           <div class="changesets">

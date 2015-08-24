@@ -15,7 +15,8 @@ namespace Chauffeur.Jenkins.Model
         /// </summary>
         public Package()
         {
-            this.Date = DateTime.Now.ToShortDateString();
+            this.Date = DateTime.Now.ToString("f");
+            this.Machine = Environment.MachineName;
         }
 
         #endregion
@@ -39,6 +40,15 @@ namespace Chauffeur.Jenkins.Model
         /// </value>
         [DataMember(Name = "date", Order = 2)]
         public string Date { get; set; }
+
+        /// <summary>
+        /// Gets or sets the machine.
+        /// </summary>
+        /// <value>
+        /// The machine.
+        /// </value>
+        [DataMember(Name = "machine", Order = 1)]
+        public string Machine { get; set; }  
 
         /// <summary>
         ///     Gets or sets the job.
