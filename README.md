@@ -37,11 +37,13 @@ A groovy script that can be configured in a "post-build" event that will notify 
     - `Chauffeur/Jenkins/Token` - The API token for the user.
 
     #### The PACKAGES installation and de-installation configurations ####
+
     - `Chauffeur/Packages/Artifacts` - The path to the directory that will contain the downloaded artifacts for the builds.
     - `Chauffeur/Packages/InstallPropertyReferences` - The property references that are passed to the MSI during install.
     - `Chauffeur/Packages/UninstallPropertyReferences` - The property references that are passed to the MSI during uninstall.
 
     ####   The NOTIFICATION configurations ####
+
     - `Chauffeur/Notification/Host` - The STMP server.
     - `Chauffeur/Notification/To` - The group alias or individual e-mail addresses separated by commas.
     - `Chauffeur/Notification/From` - The group alias or e-mail address.    
@@ -50,9 +52,9 @@ A groovy script that can be configured in a "post-build" event that will notify 
 
 3. Start and stop the service to allow the latest configuration changes to take affect.
 4. Download and install the `Groovy Postbuild` plugin on the Jenkins server.
-5. Copy and past the contents of the `Chauffeur.groovy` script into the contents window of the `Groovy Postbuild` plugin on the build configuration (that is the highest in build chain that generates an MSI).
+5. Copy and past the contents of the `Chauffeur.groovy` script into the contents window of the `Groovy Postbuild` plugin on the build configuration (that is the highest in build chain that generates an MSI).    
 
-    ```
+    ```groovy
     /*
     .SYNOPSIS
         The script is designed to act as a client proxy that will notify the
@@ -88,3 +90,4 @@ A groovy script that can be configured in a "post-build" event that will notify 
         println(e.printStackTrace())
     }
     ```
+    > The script assumes that the WCF configurations for the service in the `Chauffeur.exe.config` have not been modified. 
