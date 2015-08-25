@@ -4,11 +4,11 @@
 # Chauffeur #
 An extension to the Jenkins CI that allows for automatically updating test machines with the latest build.
 
-## Jenkins Chauffeur Service ##
+## Windows Service ##
 A windows service (that hosts a WCF Service) that allows communication between the Jenkins build server and the machine that hosts the window service to automatically
 install the last successful build on the machine.
 
-## Jenkins Chauffeur Groovy ##
+## Groovy Script ##
 A groovy script that can be configured in a "post-build" event that will notify the specified servers that a new build needs to be installed.
 
 ### Requirements ###
