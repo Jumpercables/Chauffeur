@@ -18,11 +18,21 @@ namespace Chauffeur.Jenkins.Model
         public Build()
         {
             this.Culprits = new List<User>();
+            this.Actions = new List<Action>();
         }
 
         #endregion
 
         #region Public Properties
+
+        /// <summary>
+        ///     Gets or sets the actions.
+        /// </summary>
+        /// <value>
+        ///     The actions.
+        /// </value>
+        [DataMember(Name = "actions")]
+        public IList<Action> Actions { get; set; }
 
         /// <summary>
         ///     Gets or sets the artifacts.
@@ -171,6 +181,50 @@ namespace Chauffeur.Jenkins.Model
 
         #endregion
     }
+   
+    [DataContract(Name = "cause", Namespace = "")]
+    public class Cause
+    {
+        #region Public Properties
+
+        [DataMember(Name = "shortDescription")]
+        public string ShortDescription { get; set; }
+
+        [DataMember(Name = "upstreamBuild")]
+        public string UpstreamBuild { get; set; }
+
+        [DataMember(Name = "upstreamProject")]
+        public string UpstreamProject { get; set; }
+
+        [DataMember(Name = "upstreamUrl")]
+        public Uri UpstreamUrl { get; set; }
+
+        #endregion
+    }
+
+    [DataContract(Name = "action", Namespace = "")]
+    public class Action
+    {
+        #region Constructors
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="Action" /> class.
+        /// </summary>
+        public Action()
+        {
+            this.Causes = new List<Cause>();
+        }
+
+        #endregion
+
+        #region Public Properties
+
+        [DataMember(Name = "causes")]
+        public IList<Cause> Causes { get; set; }
+
+              
+        #endregion
+    }
 
     [DataContract(Name = "artifact", Namespace = "")]
     public class Artifact
@@ -299,15 +353,6 @@ namespace Chauffeur.Jenkins.Model
         public string Id { get; set; }
 
         /// <summary>
-        /// Gets or sets the version.
-        /// </summary>
-        /// <value>
-        /// The version.
-        /// </value>
-        [DataMember(Name = "version")]
-        public string Version { get; set; }
-
-        /// <summary>
         ///     Gets or sets the message.
         /// </summary>
         /// <value>
@@ -333,6 +378,15 @@ namespace Chauffeur.Jenkins.Model
         /// </value>
         [DataMember(Name = "user")]
         public string User { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the version.
+        /// </summary>
+        /// <value>
+        ///     The version.
+        /// </value>
+        [DataMember(Name = "version")]
+        public string Version { get; set; }
 
         #endregion
     }

@@ -29,8 +29,17 @@ namespace Chauffeur.Jenkins.Model
         /// <value>
         ///     The build.
         /// </value>
-        [DataMember(Name = "build", Order = 4)]
-        public Build Build { get; set; }
+        [DataMember(Name = "buildNumber")]
+        public int BuildNumber { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the change set.
+        /// </summary>
+        /// <value>
+        ///     The change set.
+        /// </value>
+        [DataMember(Name = "changeSet")]
+        public ChangeSet ChangeSet { get; set; }
 
         /// <summary>
         ///     Gets or sets the date.
@@ -38,26 +47,26 @@ namespace Chauffeur.Jenkins.Model
         /// <value>
         ///     The date.
         /// </value>
-        [DataMember(Name = "date", Order = 2)]
+        [DataMember(Name = "date")]
         public string Date { get; set; }
-
-        /// <summary>
-        /// Gets or sets the machine.
-        /// </summary>
-        /// <value>
-        /// The machine.
-        /// </value>
-        [DataMember(Name = "machine", Order = 1)]
-        public string Machine { get; set; }  
-
+       
         /// <summary>
         ///     Gets or sets the job.
         /// </summary>
         /// <value>
         ///     The job.
         /// </value>
-        [DataMember(Name = "job", Order = 1)]
-        public string Job { get; set; }        
+        [DataMember(Name = "job")]
+        public string Job { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the machine.
+        /// </summary>
+        /// <value>
+        ///     The machine.
+        /// </value>
+        [DataMember(Name = "machine")]
+        public string Machine { get; set; }
 
         /// <summary>
         ///     Gets or sets the paths.
@@ -65,7 +74,7 @@ namespace Chauffeur.Jenkins.Model
         /// <value>
         ///     The paths.
         /// </value>
-        [DataMember(Name = "paths", Order = 3)]
+        [DataMember(Name = "paths")]
         public string[] Paths { get; set; }
 
         #endregion

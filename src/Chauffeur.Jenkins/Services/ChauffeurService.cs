@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.ServiceModel;
 using System.ServiceModel.Web;
 using System.Threading.Tasks;
@@ -58,9 +57,12 @@ namespace Chauffeur.Jenkins.Services
         ///     Uninstalls the build the was installed for the job on the host machine.
         /// </summary>
         /// <param name="jobName">Name of the job.</param>
+        /// <returns>
+        ///     Returns a <see cref="bool" /> representing <c>true</c> when the build was uninstalled.
+        /// </returns>
         [OperationContract]
         [WebGet(UriTemplate = "Uninstall/{jobName}", ResponseFormat = WebMessageFormat.Json)]
-        Task<Build> UninstallBuildAsync(string jobName);
+        Task<bool> UninstallBuildAsync(string jobName);
 
         #endregion
     }
@@ -118,7 +120,10 @@ namespace Chauffeur.Jenkins.Services
         ///     Uninstalls the build the was installed for the job on the host machine.
         /// </summary>
         /// <param name="jobName">Name of the job.</param>
-        public async Task<Build> UninstallBuildAsync(string jobName)
+        /// <returns>
+        ///     Returns a <see cref="bool" /> representing <c>true</c> when the build was uninstalled.
+        /// </returns>
+        public async Task<bool> UninstallBuildAsync(string jobName)
         {
             try
             {
@@ -126,11 +131,11 @@ namespace Chauffeur.Jenkins.Services
                 var package = packages.FirstOrDefault(o => o.Job.Equals(jobName, StringComparison.OrdinalIgnoreCase));
                 if (package != null)
                 {
-                    Log.Info(this, "Uninstalling {0} package(s).", package.Build.Artifacts.Count);
+                    Log.Info(this, "Uninstalling {0} package(s).", package.Paths.Length);
 
-                    foreach (var artifact in package.Build.Artifacts)
+                    foreach (var pkg in package.Paths)
                     {
-                        string pkg = Path.Combine(this.Configuration.ArtifactsDirectory, artifact.FileName);
+                        string fileName = pkg;
 
                         await this.UninstallPackageAsync(pkg).ContinueWith((task) =>
                         {
@@ -138,13 +143,13 @@ namespace Chauffeur.Jenkins.Services
                             {
                                 this.Serialize(packages.Where(p => p != package));
 
-                                File.Delete(pkg);
+                                File.Delete(fileName);
                             }
                         });
                     }
 
 
-                    return package.Build;
+                    return true;
                 }
             }
             catch (Exception e)
@@ -152,7 +157,7 @@ namespace Chauffeur.Jenkins.Services
                 Log.Error(this, e);
             }
 
-            return null;
+            return false;
         }
 
         /// <summary>
@@ -172,7 +177,7 @@ namespace Chauffeur.Jenkins.Services
             }
             catch (Exception e)
             {
-                Log.Error(this , e);
+                Log.Error(this, e);
             }
 
             return null;
@@ -203,6 +208,7 @@ namespace Chauffeur.Jenkins.Services
         /// <returns>Returns a <see cref="Package" /> representigng the new package.</returns>
         private async Task<Package> AddPackage(string jobName, Build build, string[] paths)
         {
+            var changeSet = await this.GetChangeSetAsync(build);
             var packages = await this.GetPackagesAsync();
 
             var package = packages.FirstOrDefault(o => o.Job.Equals(jobName, StringComparison.OrdinalIgnoreCase));
@@ -211,8 +217,9 @@ namespace Chauffeur.Jenkins.Services
                 package = new Package
                 {
                     Url = new Uri(this.Configuration.PackagesDataFile),
+                    BuildNumber = build.Number,
                     Job = jobName,
-                    Build = build,
+                    ChangeSet = changeSet,
                     Paths = paths
                 };
 
@@ -220,10 +227,12 @@ namespace Chauffeur.Jenkins.Services
             }
             else
             {
-                package.Build = build;
+                package.BuildNumber = build.Number;
+                package.ChangeSet = changeSet;
                 package.Paths = paths;
                 package.Date = DateTime.Now.ToString("f");
             }
+
 
             this.Serialize(packages);
 
@@ -258,6 +267,33 @@ namespace Chauffeur.Jenkins.Services
             }
 
             return await service.GetBuildAsync(jobName, buildNumber);
+        }
+
+        /// <summary>
+        ///     Gets the change set that caused the build to be triggered.
+        /// </summary>
+        /// <param name="build">The build.</param>
+        /// <returns>
+        ///     Returns a <see cref="ChangeSet" /> representing the changes.
+        /// </returns>
+        private async Task<ChangeSet> GetChangeSetAsync(Build build)
+        {
+            var causes = build.Actions.Select(o => o.Causes).FirstOrDefault(o => o.Any());
+            if (causes != null)
+            {
+                var up = causes.FirstOrDefault(o => !string.IsNullOrEmpty(o.UpstreamBuild));
+                if (up != null)
+                {
+                    JobService service = new JobService(base.BaseUri, base.Client, base.Configuration);
+                    var upstreamBuild = await service.GetBuildAsync(up.UpstreamProject, up.UpstreamBuild);
+                    if (upstreamBuild != null)
+                    {
+                        return upstreamBuild.ChangeSet;
+                    }
+                }
+            }
+
+            return build.ChangeSet;
         }
 
         /// <summary>
@@ -346,11 +382,11 @@ namespace Chauffeur.Jenkins.Services
         }
 
         /// <summary>
-        /// Uninstalls the package asynchronously.
+        ///     Uninstalls the package asynchronously.
         /// </summary>
         /// <param name="package">The package.</param>
         /// <returns>
-        /// Returns a <see cref="Task" /> representing the operation.
+        ///     Returns a <see cref="Task" /> representing the operation.
         /// </returns>
         private Task UninstallPackageAsync(string package)
         {

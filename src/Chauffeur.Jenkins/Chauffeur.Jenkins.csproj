@@ -121,6 +121,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Templates\CSS\foundation.css" />
+    <Content Include="Templates\CSS\foundation.min.css" />
+    <Content Include="Templates\CSS\normalize.css" />
     <Content Include="Templates\_Notification-Body.xslt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <SubType>Designer</SubType>
