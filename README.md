@@ -33,29 +33,25 @@ A groovy script that can be configured in a "post-build" event that will notify 
     - `Chauffeur/Packages/Artifacts` - The path to the directory that will contain the downloaded artifacts for the builds.
     - `Chauffeur/Packages/InstallPropertyReferences` - The property references that are passed to the MSI during install.
     - `Chauffeur/Packages/UninstallPropertyReferences` - The property references that are passed to the MSI during uninstall.
-    - `Chauffeur/Notification/Host` - The STMP server.
-    - `Chauffeur/Notification/To` - The group alias or individual e-mail addresses separated by commas.
-    - `Chauffeur/Notification/From` - The group alias or e-mail address.    
-    - `Chauffeur/Notification/Subject` - The path to the XSLT used to transform the `package.xml` into readable format.
-    - `Chauffeur/Notification/Body` - The path to the XSLT used to transform the `package.xml` into readable format.
+    - `Chauffeur/Notifications/Host` - The STMP server.
+    - `Chauffeur/Notifications/To` - The group alias or individual e-mail addresses separated by commas.
+    - `Chauffeur/Notifications/From` - The group alias or e-mail address.    
+    - `Chauffeur/Notifications/Subject` - The path to the XSLT used to transform the `package.xml` into readable format.
+    - `Chauffeur/Notifications/Body` - The path to the XSLT used to transform the `package.xml` into readable format.
 
 3. Start and stop the service to allow the latest configuration changes to take affect.
 4. Download and install the `Groovy Postbuild` plugin on the Jenkins server.
 5. Copy and past the contents of the `Chauffeur.groovy` script into the contents window of the `Groovy Postbuild` plugin on the build configuration (that is the highest in build chain that generates an MSI).    
 
     ```groovy
-    /*
-    .SYNOPSIS
-        The script is designed to act as a client proxy that will notify the
-        machines (that are hosting the Jenkins Chauffeur Service) that a new
-        build should be installed.    
-     */
+    // The port that the WCF service is hosted on.
+    def PORT = 8080
 
     // The name of the job in the build environment.
     def JOB_NAME = ""
 
     // The name of the computers that host the Chauffeur service.
-    def MACHINE_NAMES = [""]
+    def MACHINE_NAMES = []
 
     // The name of the job in the build.
     if (JOB_NAME == "" || JOB_NAME == null) {
@@ -71,7 +67,7 @@ A groovy script that can be configured in a "post-build" event that will notify 
 
     try {
         MACHINE_NAMES.eachWithIndex { String s, int i ->
-            def url = new URL('http://' + s + ':8080/Chauffeur.Jenkins.Services/ChauffeurService/rest/InstallLastSuccessfulBuild/' + JOB_NAME)
+            def url = new URL('http://' + s + ':' + PORT + '/Chauffeur.Jenkins.Services/ChauffeurService/rest/InstallLastSuccessfulBuild/' + JOB_NAME)
             def text = url.getText()
             println(text)
         }

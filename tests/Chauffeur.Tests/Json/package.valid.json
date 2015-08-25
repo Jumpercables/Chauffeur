@@ -5,60 +5,52 @@
     "paths": [
         "C:\\ProgramData\\Jenkins\\Chauffer-Nightly-Build.34.msi"
     ],
-    "build": {
-        "artifacts": [
+    "buildNumber": "34",
+    "url": "http://localhost:8080/job/Chauffer-Nightly-Build/34/",
+    "changeSet": {
+        "items": [
             {
-                "displayPath": "Chauffer-Nightly-Build.34.msi",
-                "fileName": "Chauffer-Nightly-Build.34.msi",
-                "relativePath": "BuildIntegration/Installers/Output/Assemblies/Chauffer-Nightly-Build.34.msi"
-            }
-        ],
-        "building": false,
-        "builtOn": "",
-        "changeSet": {
-            "items": [
-                {
-                    "affectedPaths": [
-                        "$/TFS/Chauffer/SCM/Configurations/BooleanSettings.cs",
-                        "$/TFS/Chauffer/SCM/Configurations/StringSettings.cs"
-                    ],
-                    "author": {
-                        "absoluteUrl": "http://localhost:8080/user/corp_jsmith",
-                        "fullName": "Smith, John"
-                    },
-                    "comment": "Fixed: The fallback was always being called for empty strings.",
-                    "date": "1439382033000",
-                    "id": null,
-                    "items": [
-                        {
-                            "editType": "edit",
-                            "path": "$/TFS/Chauffer/SCM/Configurations/BooleanSettings.cs"
-                        },
-                        {
-                            "editType": "edit",
-                            "path": "$/TFS/Chauffer/SCM/Configurations/StringSettings.cs"
-                        }
-                    ],
-                    "msg": "Fixed: The fallback was always being called for empty strings.",
-                    "user": "corp_jsmith",
-                    "version": "13467"
-                }
-            ]
-        },
-        "culprits": [
+                "affectedPaths": [
+                    "$/TFS/Chauffer/SCM/Configurations/BooleanSettings.cs"
+                ],
+                "author": {
+                    "absoluteUrl": "http://localhost:8080/user/corp_jsmith",
+                    "fullName": "Smith, John"
+                },
+                "comment": "Fixed: The fallback was always being called for empty strings.",
+                "date": "1439382033000",
+                "id": null,
+                "items": [
+                    {
+                        "editType": "edit",
+                        "path": "$/TFS/Chauffer/SCM/Configurations/BooleanSettings.cs"
+                    }
+                ],
+                "msg": "Fixed: The fallback was always being called for empty strings.",
+                "user": "corp_jsmith",
+                "version": "13467"
+            },
             {
-                "absoluteUrl": "http://localhost:8080/user/corp_jsmith",
-                "fullName": "Smith, John"
+                "affectedPaths": [
+                    "$/TFS/Chauffer/SCM/Configurations/Settings.cs"                   
+                ],
+                "author": {
+                    "absoluteUrl": "http://localhost:8080/user/corp_jsmith",
+                    "fullName": "Smith, John"
+                },
+                "comment": "Changed the fallback to be a function delegate for more flexibility.",
+                "date": "1439382033000",
+                "id": null,
+                "items": [
+                    {
+                        "editType": "edit",
+                        "path": "$/TFS/Chauffer/SCM/Configurations/Settings.cs"
+                    }
+                ],
+                "msg": "Changed the fallback to be a function delegate for more flexibility.",
+                "user": "corp_jsmith",
+                "version": "13468"
             }
-        ],
-        "description": null,
-        "displayName": "#34",
-        "duration": 368737,
-        "fullDisplayName": "Chauffer-Nightly-Build #34",
-        "id": "34",
-        "keepLog": false,
-        "number": 34,
-        "result": "SUCCESS",
-        "url": "http://localhost:8080/job/Chauffer-Nightly-Build/34/"
+        ]
     }
 }

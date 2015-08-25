@@ -209,8 +209,8 @@ namespace Chauffeur.Jenkins.Services
         private async Task<Package> AddPackage(string jobName, Build build, string[] paths)
         {
             var changeSet = await this.GetChangeSetAsync(build);
-            var packages = await this.GetPackagesAsync();
 
+            var packages = await this.GetPackagesAsync();
             var package = packages.FirstOrDefault(o => o.Job.Equals(jobName, StringComparison.OrdinalIgnoreCase));
             if (package == null)
             {
@@ -284,7 +284,7 @@ namespace Chauffeur.Jenkins.Services
                 var up = causes.FirstOrDefault(o => !string.IsNullOrEmpty(o.UpstreamBuild));
                 if (up != null)
                 {
-                    JobService service = new JobService(base.BaseUri, base.Client, base.Configuration);
+                    var service = new JobService(base.BaseUri, base.Client, base.Configuration);
                     var upstreamBuild = await service.GetBuildAsync(up.UpstreamProject, up.UpstreamBuild);
                     if (upstreamBuild != null)
                     {

@@ -181,23 +181,65 @@ namespace Chauffeur.Jenkins.Model
 
         #endregion
     }
-   
+
     [DataContract(Name = "cause", Namespace = "")]
     public class Cause
     {
         #region Public Properties
 
+        /// <summary>
+        ///     Gets or sets the short description.
+        /// </summary>
+        /// <value>
+        ///     The short description.
+        /// </value>
         [DataMember(Name = "shortDescription")]
         public string ShortDescription { get; set; }
 
+        /// <summary>
+        ///     Gets or sets the upstream build.
+        /// </summary>
+        /// <value>
+        ///     The upstream build.
+        /// </value>
         [DataMember(Name = "upstreamBuild")]
         public string UpstreamBuild { get; set; }
 
+        /// <summary>
+        ///     Gets or sets the upstream project.
+        /// </summary>
+        /// <value>
+        ///     The upstream project.
+        /// </value>
         [DataMember(Name = "upstreamProject")]
         public string UpstreamProject { get; set; }
 
+        /// <summary>
+        ///     Gets or sets the upstream URL.
+        /// </summary>
+        /// <value>
+        ///     The upstream URL.
+        /// </value>
         [DataMember(Name = "upstreamUrl")]
         public Uri UpstreamUrl { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the user identifier.
+        /// </summary>
+        /// <value>
+        ///     The user identifier.
+        /// </value>
+        [DataMember(Name = "userId")]
+        public string UserId { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the name of the user.
+        /// </summary>
+        /// <value>
+        ///     The name of the user.
+        /// </value>
+        [DataMember(Name = "userName")]
+        public string UserName { get; set; }
 
         #endregion
     }
@@ -219,10 +261,15 @@ namespace Chauffeur.Jenkins.Model
 
         #region Public Properties
 
+        /// <summary>
+        ///     Gets or sets the causes.
+        /// </summary>
+        /// <value>
+        ///     The causes.
+        /// </value>
         [DataMember(Name = "causes")]
         public IList<Cause> Causes { get; set; }
 
-              
         #endregion
     }
 

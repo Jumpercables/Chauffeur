@@ -47,8 +47,6 @@ namespace Chauffeur.Tests.Jenkins.Model
             Assert.AreEqual("Chauffer-Nightly-Build", package.Job);
             Assert.AreEqual(1, package.Paths.Length);
             Assert.AreEqual(@"C:\ProgramData\Jenkins\Chauffer-Nightly-Build.34.msi", package.Paths.First());
-
-            BuildTest.ValidateBuild(package.Build);
         }
 
         #endregion
