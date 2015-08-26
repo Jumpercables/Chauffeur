@@ -21,7 +21,7 @@ try {
     def buildNumber = manager.envVars['BUILD_NUMBER']
 
     MACHINE_NAMES.eachWithIndex { String s, int i ->
-        def url = new URL('http://' + s + ':' + PORT + '/Chauffeur.Jenkins.Services/ChauffeurService/rest/InstallBuild/' + jobName + '/' + buildNumber)
+        def url = new URL('http://' + s + ':' + PORT + '/Chauffeur.Jenkins.Services/ChauffeurService/rest/Install/' + jobName + '/' + buildNumber)
         manager.listener.logger.println('Chauffeur.groovy: ' + url)
 
         def text = url.getText()
