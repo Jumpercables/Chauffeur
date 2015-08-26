@@ -7,37 +7,26 @@
         File Name      : Chauffeur.groovy
         Author         : Kyle Baesler
         Prerequisite   : Groovy 1.8.9
-    .EXAMPLE
-        Chauffeur.groovy
+                       : Groovy Postbuild Plugin (https://wiki.jenkins-ci.org/display/JENKINS/Groovy+Postbuild+Plugin)
  */
-
-// The port that the WCF service is hosted on.
-def PORT = 8080
-
-// The name of the job in the build environment.
-def JOB_NAME = ""
 
 // The name of the computers that host the Chauffeur service.
 def MACHINE_NAMES = []
 
-// The name of the job in the build.
-if (JOB_NAME == "" || JOB_NAME == null) {
-    println("The <JOB_NAME> must be specified.")
-    return
-}
-
-// The name of the machines that should be notified.
-if (MACHINE_NAMES == null || MACHINE_NAMES.size() == 0) {
-    println("The <MACHINE_NAMES> must be specified.")
-    return
-}
+// The port that the WCF service is hosted on.
+def PORT = 8080
 
 try {
+    def jobName = manager.envVars['JOB_NAME']
+    def buildNumber = manager.envVars['BUILD_NUMBER']
+
     MACHINE_NAMES.eachWithIndex { String s, int i ->
-        def url = new URL('http://' + s + ':' + PORT + '/Chauffeur.Jenkins.Services/ChauffeurService/rest/InstallLastSuccessfulBuild/' + JOB_NAME)
+        def url = new URL('http://' + s + ':' + PORT + '/Chauffeur.Jenkins.Services/ChauffeurService/rest/InstallBuild/' + jobName + '/' + buildNumber)
+        manager.listener.logger.println('Chauffeur.groovy: ' + url)
+
         def text = url.getText()
-        println(text)
+        manager.listener.logger.println('Chauffeur.groovy: ' + text)
     }
 } catch (Exception e) {
-    println(e.printStackTrace())
+    manager.listener.logger.println('Chauffeur.groovy: ' + e.printStackTrace())
 }
