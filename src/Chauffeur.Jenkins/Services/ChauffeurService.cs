@@ -40,18 +40,7 @@ namespace Chauffeur.Jenkins.Services
         /// </returns>
         [OperationContract]
         [WebGet(UriTemplate = "Install/{jobName}/{buildNumber}", ResponseFormat = WebMessageFormat.Json)]
-        Task<Build> InstallBuildAsync(string jobName, string buildNumber);
-
-        /// <summary>
-        ///     Installs the last successful build for the specific job.
-        /// </summary>
-        /// <param name="jobName">Name of the job.</param>
-        /// <returns>
-        ///     Returns the <see cref="Build" /> that was installed on the machine.
-        /// </returns>
-        [OperationContract]
-        [WebGet(UriTemplate = "InstallLastSuccessfulBuild/{jobName}", ResponseFormat = WebMessageFormat.Json)]
-        Task<Build> InstallLastSuccessfulBuildAsync(string jobName);
+        Task<Build> InstallBuildAsync(string jobName, string buildNumber);        
 
         /// <summary>
         ///     Uninstalls the build the was installed for the job on the host machine.
@@ -182,19 +171,7 @@ namespace Chauffeur.Jenkins.Services
 
             return null;
         }
-
-        /// <summary>
-        ///     Installs the last successful build for the specific job.
-        /// </summary>
-        /// <param name="jobName">Name of the job.</param>
-        /// <returns>
-        ///     Returns the <see cref="Build" /> that was installed on the machine.
-        /// </returns>
-        public async Task<Build> InstallLastSuccessfulBuildAsync(string jobName)
-        {
-            return await this.InstallBuildAsync(jobName, null);
-        }
-
+        
         #endregion
 
         #region Private Methods
@@ -249,15 +226,9 @@ namespace Chauffeur.Jenkins.Services
         /// <returns>
         ///     Returns a <see cref="Build" /> representing the build.
         /// </returns>
-        private async Task<Build> GetBuildAsync(string jobName, string buildNumber = null)
+        private async Task<Build> GetBuildAsync(string jobName, string buildNumber)
         {
             var service = new JobService(base.BaseUri, base.Client, base.Configuration);
-
-            if (string.IsNullOrEmpty(buildNumber))
-            {
-                return await service.GetLastSuccessfulBuildAsync(jobName);
-            }
-
             return await service.GetBuildAsync(jobName, buildNumber);
         }
 
