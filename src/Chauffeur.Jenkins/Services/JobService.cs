@@ -194,7 +194,16 @@ namespace Chauffeur.Jenkins.Services
         /// </returns>
         public Task<Build> GetBuildAsync(string jobName, string buildNumber)
         {
-            return Task.Run(() => this.Client.GetResource<Build>(base.BaseUri, "job", jobName, buildNumber));
+            return Task.Run(() =>
+            {
+                Log.Info(this,"Job: {0}", jobName);
+
+                var build = this.Client.GetResource<Build>(base.BaseUri, "job", jobName, buildNumber);
+
+                Log.Info(this, "Build: {0}", build.Number);
+
+                return build;
+            });
         }
 
         /// <summary>
