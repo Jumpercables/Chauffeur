@@ -14,40 +14,43 @@
       </head>
       <body>
         <div class="row">
+          <br/>
           <p>
             Team,
-          </p>
-          <p>
+            <br/>
             The latest build <b>#<xsl:value-of select="buildNumber"/>
             </b> of the Desktop installer has been installed on the <b><xsl:value-of select="machine"/>
             </b> Citrix servers that are used for AFES GIS testing. 
             You'll need to log-out and log-in to see the latest changes <i>(keeping in mind that not all of the changes may be listed).</i>
           </p>
-          <table>
-            <thead>
-              <tr>
-                <th id="task">
-                  Task
-                </th>
-                <th id="developer">
-                  Developer
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <xsl:for-each select="changeSet/items/changeSetItem">
-                <xsl:sort select="user" data-type="text"/>
+          <br/>
+          <xsl:if test="count(changeSet/items/changeSetItem) > 0">
+            <table>
+              <thead>
                 <tr>
-                    <td>
-                      <xsl:value-of select="comment"/>
-                    </td>
-                    <td>
-                      <xsl:value-of select="author/fullName"/>
-                    </td>
-                  </tr>
-              </xsl:for-each>
-            </tbody>
-          </table>
+                  <th id="task">
+                    Task
+                  </th>
+                  <th id="developer">
+                    Developer
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <xsl:for-each select="changeSet/items/changeSetItem">
+                  <xsl:sort select="user" data-type="text"/>
+                  <tr>
+                      <td>
+                        <xsl:value-of select="comment"/>
+                      </td>
+                      <td>
+                        <xsl:value-of select="author/fullName"/>
+                      </td>
+                    </tr>
+                </xsl:for-each>
+              </tbody>
+            </table>
+          </xsl:if>
         </div>
       </body>
     </html>
