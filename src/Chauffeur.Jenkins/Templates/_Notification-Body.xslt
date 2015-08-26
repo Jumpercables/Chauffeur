@@ -37,8 +37,7 @@
             <tbody>
               <xsl:for-each select="changeSet/items/changeSetItem">
                 <xsl:sort select="user" data-type="text"/>
-                <xsl:if test="comment != ''">
-                  <tr>
+                <tr>
                     <td>
                       <xsl:value-of select="comment"/>
                     </td>
@@ -46,7 +45,6 @@
                       <xsl:value-of select="author/fullName"/>
                     </td>
                   </tr>
-                </xsl:if>
               </xsl:for-each>
             </tbody>
           </table>
