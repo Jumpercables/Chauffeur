@@ -208,8 +208,6 @@ namespace Chauffeur.Jenkins.Services
         /// <returns>Returns a <see cref="Package" /> representigng the new package.</returns>
         private async Task<Package> AddPackage(string jobName, Build build, string[] paths)
         {
-            var changeSet = await this.GetChangeSetAsync(build);
-
             var packages = await this.GetPackagesAsync();
             var package = packages.FirstOrDefault(o => o.Job.Equals(jobName, StringComparison.OrdinalIgnoreCase));
             if (package == null)
@@ -217,22 +215,16 @@ namespace Chauffeur.Jenkins.Services
                 package = new Package
                 {
                     Url = new Uri(this.Configuration.PackagesDataFile),
-                    BuildNumber = build.Number,
                     Job = jobName,
-                    ChangeSet = changeSet,
-                    Paths = paths
                 };
 
                 packages.Add(package);
             }
-            else
-            {
-                package.BuildNumber = build.Number;
-                package.ChangeSet = changeSet;
-                package.Paths = paths;
-                package.Date = DateTime.Now.ToString("f");
-            }
 
+            package.BuildNumber = build.Number;
+            package.Paths = paths;
+            package.Date = DateTime.Now.ToString("f");
+            package.ChangeSet = await this.GetChangeSetAsync(build);
 
             this.Serialize(packages);
 
