@@ -19,8 +19,8 @@
             Team,
             <br/>
             The latest build <b>#<xsl:value-of select="buildNumber"/>
-            </b> of the Desktop installer has been installed on the <b><xsl:value-of select="machine"/>
-            </b> Citrix servers that are used for AFES GIS testing. 
+            </b> of the installer has been installed on the <b><xsl:value-of select="machine"/>
+            </b> servers that are used for testing. 
             You'll need to log-out and log-in to see the latest changes <i>(keeping in mind that not all of the changes may be listed).</i>
           </p>
           <br/>
