@@ -201,7 +201,9 @@ namespace Chauffeur.Jenkins.Services
             package.BuildNumber = build.Number;
             package.Paths = paths;
             package.Date = DateTime.Now.ToString("f");
-            package.ChangeSet = await this.GetChangeSetAsync(build);
+
+            var service = new ChangeSetService(base.BaseUri, base.Client, base.Configuration);
+            package.ChangeSet = await service.GetChangesAsync(build);
 
             this.Serialize(packages);
 
@@ -231,34 +233,7 @@ namespace Chauffeur.Jenkins.Services
             var service = new JobService(base.BaseUri, base.Client, base.Configuration);
             return await service.GetBuildAsync(jobName, buildNumber);
         }
-
-        /// <summary>
-        ///     Gets the change set that caused the build to be triggered.
-        /// </summary>
-        /// <param name="build">The build.</param>
-        /// <returns>
-        ///     Returns a <see cref="ChangeSet" /> representing the changes.
-        /// </returns>
-        private async Task<ChangeSet> GetChangeSetAsync(Build build)
-        {
-            var causes = build.Actions.Select(o => o.Causes).FirstOrDefault(o => o.Any());
-            if (causes != null)
-            {
-                var up = causes.FirstOrDefault(o => !string.IsNullOrEmpty(o.UpstreamBuild));
-                if (up != null)
-                {
-                    var service = new JobService(base.BaseUri, base.Client, base.Configuration);
-                    var upstreamBuild = await service.GetBuildAsync(up.UpstreamProject, up.UpstreamBuild);
-                    if (upstreamBuild != null)
-                    {
-                        return upstreamBuild.ChangeSet;
-                    }
-                }
-            }
-
-            return build.ChangeSet;
-        }
-
+        
         /// <summary>
         ///     Gets the all of the packages that have been installed on the machine.
         /// </summary>

@@ -196,12 +196,10 @@ namespace Chauffeur.Jenkins.Services
         {
             return Task.Run(() =>
             {
-                Log.Info(this,"Job: {0}", jobName);
+                Log.Info(this, "Job: {0}", jobName);
+                Log.Info(this, "Build: {0}", buildNumber);
 
                 var build = this.Client.GetResource<Build>(base.BaseUri, "job", jobName, buildNumber);
-
-                Log.Info(this, "Build: {0}", build.Number);
-
                 return build;
             });
         }

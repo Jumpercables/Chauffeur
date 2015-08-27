@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Net;
-using System.Security.Cryptography;
 using System.Text;
 
 namespace Chauffeur.Jenkins.Client
@@ -48,7 +47,7 @@ namespace Chauffeur.Jenkins.Client
             _ApiToken = apiToken;
         }
 
-        #endregion       
+        #endregion
 
         #region Protected Properties
 
@@ -97,31 +96,6 @@ namespace Chauffeur.Jenkins.Client
         }
 
         /// <summary>
-        /// Posts the request to the specified absolute URI.
-        /// </summary>
-        /// <param name="absoluteUri">The absolute URI.</param>
-        /// <returns>
-        /// Returns a <see cref="WebRequest" /> representing the reponse.
-        /// </returns>
-        public virtual WebRequest Post(Uri absoluteUri)
-        {
-            var request = WebRequest.Create(absoluteUri);
-            request.Method = "POST";
-
-            if (!string.IsNullOrEmpty(_UserName))
-            {
-                request.PreAuthenticate = true;
-
-                var authInfo = _UserName + ":" + _ApiToken;
-                authInfo = Convert.ToBase64String(Encoding.Default.GetBytes(authInfo));
-
-                request.Headers["Authorization"] = "Basic " + authInfo;
-            }
-
-            return request;
-        }
-
-        /// <summary>
         ///     Gets the request.
         /// </summary>
         /// <param name="absoluteUri">The absolute URI.</param>
@@ -130,6 +104,11 @@ namespace Chauffeur.Jenkins.Client
         /// </returns>
         public virtual WebRequest GetRequest(Uri absoluteUri)
         {
+            if (absoluteUri == null)
+                throw new ArgumentNullException("absoluteUri");
+
+            Log.Debug(this, "GET: {0}", absoluteUri.ToString());
+
             var request = WebRequest.Create(absoluteUri);
             request.Method = "GET";
 
@@ -147,13 +126,13 @@ namespace Chauffeur.Jenkins.Client
         }
 
         /// <summary>
-        /// Gets the resource by requesting it from the server.
+        ///     Gets the resource by requesting it from the server.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="resourceUri">The resource URI.</param>
         /// <param name="queries">The query string.</param>
         /// <returns>
-        /// Returns a <see cref="T" /> representing the resource.
+        ///     Returns a <see cref="T" /> representing the resource.
         /// </returns>
         public T GetResource<T>(Uri resourceUri, params string[] queries) where T : class, IUrl
         {
@@ -194,6 +173,36 @@ namespace Chauffeur.Jenkins.Client
             var absoluteUri = this.GetAbsoluteUri(resourceUri, depth);
             var request = this.GetRequest(absoluteUri);
             return this.GetResource<T>(request);
+        }
+
+        /// <summary>
+        ///     Posts the request to the specified absolute URI.
+        /// </summary>
+        /// <param name="absoluteUri">The absolute URI.</param>
+        /// <returns>
+        ///     Returns a <see cref="WebRequest" /> representing the reponse.
+        /// </returns>
+        public virtual WebRequest Post(Uri absoluteUri)
+        {
+            if (absoluteUri == null)
+                throw new ArgumentNullException("absoluteUri");
+
+            Log.Debug(this, "POST: {0}", absoluteUri.ToString());
+
+            var request = WebRequest.Create(absoluteUri);
+            request.Method = "POST";
+
+            if (!string.IsNullOrEmpty(_UserName))
+            {
+                request.PreAuthenticate = true;
+
+                var authInfo = _UserName + ":" + _ApiToken;
+                authInfo = Convert.ToBase64String(Encoding.Default.GetBytes(authInfo));
+
+                request.Headers["Authorization"] = "Basic " + authInfo;
+            }
+
+            return request;
         }
 
         #endregion

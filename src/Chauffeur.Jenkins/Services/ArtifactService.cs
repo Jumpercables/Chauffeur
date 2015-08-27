@@ -27,8 +27,7 @@ namespace Chauffeur.Jenkins.Services
         /// <param name="build">The build.</param>
         /// <returns>
         ///     Returns a <see cref="IEnumerable{T}" /> that representing the paths to the local artifacts.
-        /// </returns>
-        [OperationContract]
+        /// </returns>        
         Task<string[]> DownloadArtifactsAsync(Build build);
 
         #endregion
