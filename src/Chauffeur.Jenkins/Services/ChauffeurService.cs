@@ -81,18 +81,20 @@ namespace Chauffeur.Jenkins.Services
 
                 // Download the packages.
                 var packages = await this.DownloadPackagesAsync(build);
+                if (packages.Any())
+                {
+                    // Uninstall previous packages.
+                    await this.UninstallBuildAsync(jobName);
 
-                // Uninstall previous packages.
-                await this.UninstallBuildAsync(jobName);
+                    // Install the packages.
+                    this.InstallPackages(packages);
 
-                // Install the packages.
-                this.InstallPackages(packages);
+                    // Save the last build installed.
+                    var package = await this.AddPackage(jobName, build, packages);
 
-                // Save the last build installed.
-                var package = await this.AddPackage(jobName, build, packages);
-
-                // Send the notifications.
-                this.Notify(package);
+                    // Send the notifications.
+                    this.Notify(package);
+                }
 
                 // Return the build.
                 return build;

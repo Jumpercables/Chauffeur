@@ -107,7 +107,7 @@ namespace Chauffeur.Jenkins.Client
             if (absoluteUri == null)
                 throw new ArgumentNullException("absoluteUri");
 
-            Log.Debug(this, "GET: {0}", absoluteUri.ToString());
+            Log.Info(this, "GET: {0}", absoluteUri.ToString());
 
             var request = WebRequest.Create(absoluteUri);
             request.Method = "GET";
@@ -187,7 +187,7 @@ namespace Chauffeur.Jenkins.Client
             if (absoluteUri == null)
                 throw new ArgumentNullException("absoluteUri");
 
-            Log.Debug(this, "POST: {0}", absoluteUri.ToString());
+            Log.Info(this, "POST: {0}", absoluteUri.ToString());
 
             var request = WebRequest.Create(absoluteUri);
             request.Method = "POST";

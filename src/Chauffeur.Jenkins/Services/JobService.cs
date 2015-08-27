@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Globalization;
 using System.ServiceModel;
 using System.ServiceModel.Web;
 using System.Threading.Tasks;
@@ -125,14 +124,16 @@ namespace Chauffeur.Jenkins.Services
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="JobService" /> class.
+        ///     Initializes a new instance of the <see cref="JobService" /> class.
         /// </summary>
         /// <param name="baseUri">The base URI.</param>
         /// <param name="client">The client.</param>
         /// <param name="configuration">The configuration.</param>
-        /// <exception cref="System.ArgumentNullException">baseUri
-        /// or
-        /// client</exception>
+        /// <exception cref="System.ArgumentNullException">
+        ///     baseUri
+        ///     or
+        ///     client
+        /// </exception>
         internal JobService(Uri baseUri, JenkinsClient client, ChauffeurConfiguration configuration)
             : base(baseUri, client, configuration)
         {
@@ -153,10 +154,7 @@ namespace Chauffeur.Jenkins.Services
         {
             return Task.Run(() =>
             {
-                Log.Info(this,"Job: {0}", jobName);
-
                 var job = this.Client.GetResource<Job>(base.BaseUri, "job", jobName);
-
                 return job;
             });
         }
@@ -196,9 +194,6 @@ namespace Chauffeur.Jenkins.Services
         {
             return Task.Run(() =>
             {
-                Log.Info(this, "Job: {0}", jobName);
-                Log.Info(this, "Build: {0}", buildNumber);
-
                 var build = this.Client.GetResource<Build>(base.BaseUri, "job", jobName, buildNumber);
                 return build;
             });
@@ -278,12 +273,7 @@ namespace Chauffeur.Jenkins.Services
         {
             return Task.Run(() =>
             {
-                Log.Info(this,"Job: {0}", jobName);
-
                 var build = this.Client.GetResource<Build>(base.BaseUri, "job", jobName, buildType);
-
-                Log.Info(this,"Build: {0}", build.Number);
-
                 return build;
             });
         }
