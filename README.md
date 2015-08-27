@@ -44,35 +44,25 @@ A groovy script that can be configured in a "post-build" event that will notify 
 5. Copy and past the contents of the `Chauffeur.groovy` script into the contents window of the `Groovy Postbuild` plugin on the build configuration (that is the highest in build chain that generates an MSI).    
 
     ```groovy
-    // The port that the WCF service is hosted on.
-    def PORT = 8080
-
-    // The name of the job in the build environment.
-    def JOB_NAME = ""
-
     // The name of the computers that host the Chauffeur service.
-    def MACHINE_NAMES = []
+	def MACHINE_NAMES = []
 
-    // The name of the job in the build.
-    if (JOB_NAME == "" || JOB_NAME == null) {
-        println("The <JOB_NAME> must be specified.")
-        return
-    }
+	// The port that the WCF service is hosted on.
+	def PORT = 8080
 
-    // The name of the machines that should be notified.
-    if (MACHINE_NAMES == null || MACHINE_NAMES.size() == 0) {
-        println("The <MACHINE_NAMES> must be specified.")
-        return
-    }
+	try {
+		def jobName = manager.envVars['JOB_NAME']
+		def buildNumber = manager.envVars['BUILD_NUMBER']
 
-    try {
-        MACHINE_NAMES.eachWithIndex { String s, int i ->
-            def url = new URL('http://' + s + ':' + PORT + '/Chauffeur.Jenkins.Services/ChauffeurService/rest/InstallLastSuccessfulBuild/' + JOB_NAME)
-            def text = url.getText()
-            println(text)
-        }
-    } catch (Exception e) {
-        println(e.printStackTrace())
-    }
+		MACHINE_NAMES.eachWithIndex { String s, int i ->
+			def url = new URL('http://' + s + ':' + PORT + '/Chauffeur.Jenkins.Services/ChauffeurService/rest/Install/' + jobName + '/' + buildNumber)
+			manager.listener.logger.println('Chauffeur.groovy: ' + url)
+
+			def text = url.getText()
+			manager.listener.logger.println('Chauffeur.groovy: ' + text)
+		}
+	} catch (Exception e) {
+		manager.listener.logger.println('Chauffeur.groovy: ' + e.printStackTrace())
+	}
     ```
     > The script assumes that the WCF configurations for the service in the `Chauffeur.exe.config` have not been modified. 
