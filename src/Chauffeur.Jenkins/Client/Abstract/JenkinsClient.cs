@@ -61,69 +61,7 @@ namespace Chauffeur.Jenkins.Client
 
         #endregion
 
-        #region Public Methods
-
-        /// <summary>
-        ///     Expands a partially retrieved resource, with an optional tree parameter.
-        /// </summary>
-        /// <remarks>
-        ///     It's important to notice this method returns a new instance of the resource, and doesn't
-        ///     change the passed in instance.
-        /// </remarks>
-        /// <param name="resource">A previously retrieved instance of this resource.</param>
-        /// <param name="tree">
-        ///     A tree parameter, which will filter what properties are selected. See the Jenkins API documentation for details.
-        /// </param>
-        public T Expand<T>(T resource, string tree = null) where T : class, IUrl
-        {
-            return resource == null ? null : this.GetResource<T>(resource.Url, tree);
-        }
-
-        /// <summary>
-        ///     Expands a partially retrieved resource, with an optional tree parameter.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="resource">A previously retrieved instance of this resource.</param>
-        /// <param name="depth">The number of levels to select.  See the Jenkins API documentation for details.</param>
-        /// <returns></returns>
-        /// <remarks>
-        ///     It's important to notice this method returns a new instance of the resource, and doesn't
-        ///     change the passed in instance.
-        /// </remarks>
-        public T Expand<T>(T resource, int depth) where T : class, IUrl
-        {
-            return resource == null ? null : this.GetResource<T>(resource.Url, depth);
-        }
-
-        /// <summary>
-        ///     Gets the request.
-        /// </summary>
-        /// <param name="absoluteUri">The absolute URI.</param>
-        /// <returns>
-        ///     Returns the <see cref="WebRequest" /> for the URI.
-        /// </returns>
-        public virtual WebRequest GetRequest(Uri absoluteUri)
-        {
-            if (absoluteUri == null)
-                throw new ArgumentNullException("absoluteUri");
-
-            Log.Info(this, "GET: {0}", absoluteUri.ToString());
-
-            var request = WebRequest.Create(absoluteUri);
-            request.Method = "GET";
-
-            if (!string.IsNullOrEmpty(_UserName))
-            {
-                request.PreAuthenticate = true;
-
-                var authInfo = _UserName + ":" + _ApiToken;
-                authInfo = Convert.ToBase64String(Encoding.Default.GetBytes(authInfo));
-
-                request.Headers["Authorization"] = "Basic " + authInfo;
-            }
-
-            return request;
-        }
+        #region Public Methods       
 
         /// <summary>
         ///     Gets the resource by requesting it from the server.
@@ -141,9 +79,22 @@ namespace Chauffeur.Jenkins.Client
         }
 
         /// <summary>
+        ///     Retrieves a jpenkins resources given it's URI.
+        /// </summary>
+        /// <typeparam name="T">The resource type.</typeparam>
+        /// <param name="resourceUri">The resource URI.</param>
+        /// <param name="func">The function delegate that converts the response into the type..</param>
+        /// <returns>Returns a <see cref="T" /> representing the resource converted to the type.</returns>
+        public T GetResource<T>(Uri resourceUri, Func<WebResponse, T> func)
+        {
+            var request = this.Create(resourceUri, WebRequestMethods.Http.Get);
+            return func(request.GetResponse());
+        }
+
+        /// <summary>
         ///     Retrieves a jenkins resource given it's URI and optional tree parameter.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="T">The resource type.</typeparam>
         /// <param name="resourceUri">The absolute URI of that resource (not including the api suffix).</param>
         /// <param name="tree">
         ///     A tree parameter, which will filter what properties are selected. See the Jenkins API documentation
@@ -155,14 +106,13 @@ namespace Chauffeur.Jenkins.Client
         public T GetResource<T>(Uri resourceUri, string tree) where T : class, IUrl
         {
             var absoluteUri = this.GetAbsoluteUri(resourceUri, tree);
-            var request = this.GetRequest(absoluteUri);
-            return this.GetResource<T>(request);
+            return this.GetResource<T>(absoluteUri, this.GetResource<T>);
         }
 
         /// <summary>
         ///     Retrieves a jenkins resource given it's URI and optional tree parameter.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="T">The resource type.</typeparam>
         /// <param name="resourceUri">The absolute URI of that resource (not including the api suffix).</param>
         /// <param name="depth">The number of levels to select.  See the Jenkins API documentation for details.</param>
         /// <returns>
@@ -171,26 +121,41 @@ namespace Chauffeur.Jenkins.Client
         public T GetResource<T>(Uri resourceUri, int depth) where T : class, IUrl
         {
             var absoluteUri = this.GetAbsoluteUri(resourceUri, depth);
-            var request = this.GetRequest(absoluteUri);
-            return this.GetResource<T>(request);
+            return this.GetResource<T>(absoluteUri, this.GetResource<T>);
         }
 
+        #endregion
+
+        #region Protected Methods
+
         /// <summary>
-        ///     Posts the request to the specified absolute URI.
+        ///     Gets the resource that has been converted to the proper format for the client.
         /// </summary>
-        /// <param name="absoluteUri">The absolute URI.</param>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="response">The response.</param>
         /// <returns>
-        ///     Returns a <see cref="WebRequest" /> representing the reponse.
+        ///     Returns <see cref="T" /> representing the format for the client.
         /// </returns>
-        public virtual WebRequest Post(Uri absoluteUri)
+        protected abstract T GetResource<T>(WebResponse response);
+
+        #endregion
+
+        #region Private Methods
+
+        /// <summary>
+        ///     Creates the request.
+        /// </summary>
+        /// <param name="requestUri">The request URI.</param>
+        /// <param name="method">The method.</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">requestUri</exception>
+        private WebRequest Create(Uri requestUri, string method)
         {
-            if (absoluteUri == null)
-                throw new ArgumentNullException("absoluteUri");
+            if (requestUri == null)
+                throw new ArgumentNullException("requestUri");
 
-            Log.Info(this, "POST: {0}", absoluteUri.ToString());
-
-            var request = WebRequest.Create(absoluteUri);
-            request.Method = "POST";
+            var request = WebRequest.Create(requestUri);
+            request.Method = method;
 
             if (!string.IsNullOrEmpty(_UserName))
             {
@@ -202,26 +167,10 @@ namespace Chauffeur.Jenkins.Client
                 request.Headers["Authorization"] = "Basic " + authInfo;
             }
 
+            Log.Info(this, "{1}: {0}", requestUri.ToString(), request.Method);
+
             return request;
         }
-
-        #endregion
-
-        #region Protected Methods
-
-        /// <summary>
-        ///     Gets the resource that has been converted to the proper format for the client.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="request">The request.</param>
-        /// <returns>
-        ///     Returns <see cref="T" /> representing the format for the client.
-        /// </returns>
-        protected abstract T GetResource<T>(WebRequest request);
-
-        #endregion
-
-        #region Private Methods
 
         /// <summary>
         ///     Gets the absolute URI.

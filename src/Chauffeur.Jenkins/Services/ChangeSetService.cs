@@ -85,14 +85,14 @@ namespace Chauffeur.Jenkins.Services
         /// </returns>
         public async Task<ChangeSet> GetChangesAsync(Build build)
         {
+            Log.Info(this, "Loading the change sets for the build: {0}", build);
+
             var causes = build.Actions.Select(o => o.Causes).FirstOrDefault(o => o.Any());
             if (causes != null)
             {
                 var up = causes.FirstOrDefault(o => !string.IsNullOrEmpty(o.UpstreamBuild));
                 if (up != null)
                 {
-                    Log.Info(this, "Loading changes from the upstream project: {0}", up.UpstreamProject);
-
                     var service = new JobService(base.BaseUri, base.Client, base.Configuration);
                     var upstreamBuild = await service.GetBuildAsync(up.UpstreamProject, up.UpstreamBuild);
                     if (upstreamBuild != null)

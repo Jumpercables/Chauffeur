@@ -2,7 +2,7 @@
 [![Stories in Ready](https://badge.waffle.io/Jumpercables/Chauffeur.svg?label=ready&title=Ready)](http://waffle.io/Jumpercables/Chauffeur)
 
 # Chauffeur #
-An extension to the Jenkins CI that allows for automatically updating test machines with the latest build.
+A service that communicates with the Jenkins Continious Integration Service to download and install artifacts on the host servers. 
 
 ## Windows Service ##
 A windows service (that hosts a WCF Service) that allows communication between the Jenkins build server and the machine that hosts the window service to automatically

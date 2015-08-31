@@ -52,24 +52,21 @@ namespace Chauffeur.Jenkins.Client
         /// <summary>
         ///     Gets the resource that has been converted to the proper format for the client.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="request">The request.</param>
+        /// <typeparam name="T">The resource type.</typeparam>
+        /// <param name="response">The response.</param>
         /// <returns>
         ///     Returns <see cref="T" /> representing the format for the client.
         /// </returns>
-        protected override T GetResource<T>(WebRequest request)
+        protected override T GetResource<T>(WebResponse response)
         {
-            using (var response = request.GetResponse())
+            using (var stream = response.GetResponseStream())
             {
-                using (var stream = response.GetResponseStream())
-                {
-                    if (stream == null) return default(T);
+                if (stream == null) return default(T);
 
-                    using (JsonTextReader reader = new JsonTextReader(new StreamReader(stream)))
-                    {
-                        JsonSerializer serializer = new JsonSerializer();
-                        return serializer.Deserialize<T>(reader);
-                    }
+                using (JsonTextReader reader = new JsonTextReader(new StreamReader(stream)))
+                {
+                    JsonSerializer serializer = new JsonSerializer();
+                    return serializer.Deserialize<T>(reader);
                 }
             }
         }

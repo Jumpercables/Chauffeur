@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.ServiceModel;
-using System.ServiceModel.Web;
 using System.Threading.Tasks;
 
 using Chauffeur.Jenkins.Client;
@@ -27,7 +25,7 @@ namespace Chauffeur.Jenkins.Services
         /// <param name="build">The build.</param>
         /// <returns>
         ///     Returns a <see cref="IEnumerable{T}" /> that representing the paths to the local artifacts.
-        /// </returns>        
+        /// </returns>
         Task<string[]> DownloadArtifactsAsync(Build build);
 
         #endregion
@@ -90,27 +88,6 @@ namespace Chauffeur.Jenkins.Services
         #region Private Methods
 
         /// <summary>
-        ///     Creates the request.
-        /// </summary>
-        /// <param name="build">The build.</param>
-        /// <param name="artifact">The artifact.</param>
-        /// <returns>
-        ///     Returns a <see cref="WebRequest" /> representing the request to the server.
-        /// </returns>
-        private WebRequest CreateRequest(Build build, Artifact artifact)
-        {
-            try
-            {
-                Uri absoluteUri = new Uri(build.Url, @"artifact/" + artifact.RelativePath);
-                return base.Client.GetRequest(absoluteUri);
-            }
-            catch (WebException)
-            {
-                throw new WebFaultException<ErrorData>(new ErrorData("The artifact was not found.", "The build artifact: {0} " + artifact.RelativePath + " was not found on the server."), HttpStatusCode.NotFound);
-            }
-        }
-
-        /// <summary>
         ///     Downloads the artifact into the directory.
         /// </summary>
         /// <param name="build">The build.</param>
@@ -122,9 +99,9 @@ namespace Chauffeur.Jenkins.Services
         private string DownloadArtifact(Build build, Artifact artifact, string directory)
         {
             string fileName = Path.Combine(directory, artifact.FileName);
-            WebRequest request = this.CreateRequest(build, artifact);
+            Uri absoluteUri = new Uri(build.Url, @"artifact/" + artifact.RelativePath);
 
-            using (var response = request.GetResponse())
+            return base.Client.GetResource(absoluteUri, response =>
             {
                 using (var stream = response.GetResponseStream())
                 {
@@ -148,9 +125,9 @@ namespace Chauffeur.Jenkins.Services
                         }
                     }
                 }
-            }
 
-            return fileName;
+                return fileName;
+            });
         }
 
         /// <summary>
