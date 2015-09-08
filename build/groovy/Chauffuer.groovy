@@ -17,6 +17,13 @@ def MACHINE_NAMES = []
 def PORT = 8080
 
 try {
+
+    def result = manager.getResult()
+    if (result != "SUCCESS") {
+        manager.listener.logger.println('Chauffeur.groovy: ' + result)
+        return;
+    }
+
     def jobName = manager.envVars['JOB_NAME']
     def buildNumber = manager.envVars['BUILD_NUMBER']
 
@@ -27,6 +34,9 @@ try {
         def text = url.getText()
         manager.listener.logger.println('Chauffeur.groovy: ' + text)
     }
+
+    manager.addInfoBadge(MACHINE_NAMES)
+
 } catch (Exception e) {
     manager.listener.logger.println('Chauffeur.groovy: ' + e.printStackTrace())
 }
