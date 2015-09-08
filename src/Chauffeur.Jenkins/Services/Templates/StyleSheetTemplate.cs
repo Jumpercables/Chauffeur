@@ -8,46 +8,26 @@ using System.Xml.Xsl;
 
 namespace Chauffeur.Jenkins.Services.Templates
 {
-    /// <summary>
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public class StyleSheetTemplate<T>
+    public static class StyleSheetTemplate
     {
-        #region Fields
-
-        private readonly string _FileName;
-
-        #endregion
-
-        #region Constructors
-
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="StyleSheetTemplate{T}" /> class.
-        /// </summary>
-        /// <param name="fileName">Name of the file.</param>
-        public StyleSheetTemplate(string fileName)
-        {
-            _FileName = fileName;
-        }
-
-        #endregion
-
         #region Public Methods
 
         /// <summary>
         ///     Applies the template of the contents with the package to return an HTML output.
         /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="fileName">Name of the file.</param>
         /// <param name="data">The data.</param>
         /// <returns>
         ///     Returns a <see cref="string" /> representing the HTML contents.
         /// </returns>
-        public string ApplyTemplate(T data)
+        public static string ApplyTemplate<T>(string fileName, T data)
         {
-            var contents = this.Serialize(data);
+            var contents = Serialize<T>(data);
             var doc = XDocument.Load(new StringReader(contents));
 
-            using (Stream stream = new FileStream(_FileName, FileMode.Open))
-                return this.Transform(doc, stream);
+            using (Stream stream = new FileStream(fileName, FileMode.Open))
+                return Transform(doc, stream);
         }
 
         #endregion
@@ -59,7 +39,7 @@ namespace Chauffeur.Jenkins.Services.Templates
         /// </summary>
         /// <param name="data">The data.</param>
         /// <returns>Returns a <see cref="string" /> representing the data in XML format.</returns>
-        protected virtual string Serialize(T data)
+        private static string Serialize<T>(T data)
         {
             XmlWriterSettings settings = new XmlWriterSettings();
 
@@ -81,7 +61,7 @@ namespace Chauffeur.Jenkins.Services.Templates
         /// <returns>
         ///     Returns a <see cref="string" /> representing the transformed output.
         /// </returns>
-        protected string Transform(XDocument source, Stream stream)
+        private static string Transform(XDocument source, Stream stream)
         {
             XmlWriterSettings settings = new XmlWriterSettings();
             settings.ConformanceLevel = ConformanceLevel.Fragment;

@@ -1,4 +1,5 @@
-﻿using System.ServiceModel;
+﻿using System;
+using System.ServiceModel;
 using System.ServiceProcess;
 
 using Chauffeur.Jenkins.Services;
@@ -38,16 +39,7 @@ namespace Chauffeur.WindowsService
         /// <param name="args">Data passed by the start command.</param>
         protected override void OnStart(string[] args)
         {
-            if (_ServiceHost != null)
-            {
-                _ServiceHost.Close();
-            }
-
-            // Create a ServiceHost for the ChauffeurService type and provide the base address.
-            _ServiceHost = new ServiceHost(typeof (ChauffeurService));
-
-            // Open the ServiceHostBase to create listeners and start listening for messages.
-            _ServiceHost.Open();
+            this.CreateServiceHost();
         }
 
         /// <summary>
@@ -61,6 +53,29 @@ namespace Chauffeur.WindowsService
                 _ServiceHost.Close();
                 _ServiceHost = null;
             }
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        /// <summary>
+        ///     Creates the service host.
+        /// </summary>
+        private void CreateServiceHost()
+        {
+            if (_ServiceHost != null)
+            {
+                _ServiceHost.Close();
+                _ServiceHost = null;
+            }
+
+            // Create a ServiceHost for the ChauffeurService type and provide the base address.
+            _ServiceHost = new ServiceHost(typeof (ChauffeurService));
+
+            // Open the ServiceHostBase to create listeners and start listening for messages.
+            _ServiceHost.Open();
+            _ServiceHost.Faulted += (sender, args) => this.CreateServiceHost();
         }
 
         #endregion

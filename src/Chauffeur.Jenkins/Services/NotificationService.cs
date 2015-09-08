@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Net.Mail;
 using System.ServiceModel;
 using System.ServiceModel.Web;
@@ -84,10 +85,13 @@ namespace Chauffeur.Jenkins.Services
 
                 using (MailMessage message = new MailMessage())
                 {
-                    message.To.Add(this.Configuration.To);
+                    var addresses = this.Configuration.To.Split(new[] { ",", ";" }, StringSplitOptions.RemoveEmptyEntries);
+                    foreach (var address in addresses)
+                        message.To.Add(new MailAddress(address.Trim()));
+
                     message.From = new MailAddress(this.Configuration.From);
-                    message.Subject = new StyleSheetTemplate<Package>(this.Configuration.SubjectTemplateFile).ApplyTemplate(package);
-                    message.Body = new StyleSheetTemplate<Package>(this.Configuration.BodyTemplateFile).ApplyTemplate(package);
+                    message.Subject = StyleSheetTemplate.ApplyTemplate(this.Configuration.SubjectTemplateFile, package);
+                    message.Body = StyleSheetTemplate.ApplyTemplate(this.Configuration.BodyTemplateFile, package);
                     message.IsBodyHtml = true;
 
                     using (SmtpClient client = new SmtpClient(this.Configuration.Host))
