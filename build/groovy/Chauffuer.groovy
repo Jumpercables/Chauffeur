@@ -27,16 +27,24 @@ try {
 
     def jobName = manager.envVars['JOB_NAME']
     def buildNumber = manager.envVars['BUILD_NUMBER']
+    def machineNames = new ArrayList<String>()
 
     MACHINE_NAMES.eachWithIndex { String s, int i ->
-        def url = new URL('http://' + s + ':' + PORT + '/Chauffeur.Jenkins.Services/ChauffeurService/rest/Install/' + jobName + '/' + buildNumber)
-        manager.listener.logger.println('Chauffeur.groovy: ' + url)
+        try {
 
-        def text = url.getText()
-        manager.listener.logger.println('Chauffeur.groovy: ' + text)
+            def url = new URL('http://' + s + ':' + PORT + '/Chauffeur.Jenkins.Services/ChauffeurService/rest/Install/' + jobName + '/' + buildNumber)
+            manager.listener.logger.println('Chauffeur.groovy: ' + url)
+
+            def text = url.getText()
+            manager.listener.logger.println('Chauffeur.groovy: ' + text)
+            machineNames.add(s)
+
+        } catch (Exception e) {
+            manager.listener.logger.println('Chauffeur.groovy: ' + e.message)
+        }
     }
 
-    manager.addInfoBadge(MACHINE_NAMES)
+    manager.addInfoBadge(machineNames)
 
 } catch (Exception e) {
     manager.listener.logger.println('Chauffeur.groovy: ' + e.printStackTrace())
