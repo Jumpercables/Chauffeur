@@ -18,6 +18,13 @@ def PORT = 8080
 
 try {
 
+    def result = manager.getResult()
+    manager.listener.logger.println('Chauffeur.groovy: ' + result)
+
+    if (result != "SUCCESS") {
+        return;
+    }
+
     def jobName = manager.envVars['JOB_NAME']
     def buildNumber = manager.envVars['BUILD_NUMBER']
 
