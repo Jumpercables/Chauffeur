@@ -10,23 +10,23 @@
       Defines & Variables
    -->
   <?ifndef $(var.BuildArtifactDir)?>
-  <?define BuildArtifactDir = ..\..\src\bin\Debug?>  
-  <?endif?>    
-  
+  <?define BuildArtifactDir = ..\..\src\bin\Debug?>
+  <?endif?>
+
   <?ifndef $(var.Version)?>
   <?define Version = 1.0.0.0?>
   <?endif?>
-  
+
   <?define TemplateDir = $(var.BuildArtifactDir)\Templates?>
   <?define DataDir = $(var.BuildArtifactDir)\Data?>
   <!--
       ====================================================================================
       Package start
    -->
-  <Product Id="7BD9DB27-0ABD-40D3-BB56-C466EAE6E0A8" 
-           Name="Jenkins Chauffeur Service" 
-           Language="1033" 
-           Version="$(var.Version)" 
+  <Product Id="7BD9DB27-0ABD-40D3-BB56-C466EAE6E0A8"
+           Name="Jenkins Chauffeur Service"
+           Language="1033"
+           Version="$(var.Version)"
            Manufacturer="Metis LLC"
            UpgradeCode="7BD9DB27-0ABD-40D3-BB56-C466EAE6E0A8">
 
@@ -41,27 +41,20 @@
     <Property Id="PRODUCTNAME" Value="Chauffeur"/>
     <Property Id="PRODUCTVERSION" Value="$(var.Version)"/>
     <Property Id="ARPNOREPAIR" Value="yes" Secure="yes" />
-    <Property Id="ARPNOMODIFY" Value="yes" Secure="yes" />
+    <Property Id="ARPNOMODIFY" Value="1" Secure="yes" />
 
     <Icon Id="icon.ico" SourceFile="jenkins.ico"/>
     <Property Id="ARPPRODUCTICON" Value="icon.ico" />
-    
+
     <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." AllowDowngrades="no"  Schedule="afterInstallValidate"/>
     <MediaTemplate EmbedCab="yes" />
 
-    <Feature Id="ProductFeature" Title="Jenkins Chauffeur Service" Level="1">
+    <Feature Id="ProductFeature" Title="Jenkins Chauffeur Service" 
+             Level="1" ConfigurableDirectory="APPLICATIONFOLDER">
       <ComponentGroupRef Id="ProductComponents" />
     </Feature>
 
-    <!-- Properties used by the WixUI_Advanced -->
-    <Property Id="ApplicationFolderName" Value="Jenkins" />
-    <Property Id="WixAppFolder" Value="WixPerMachineFolder" />
-    
-    <UIRef Id="WixUI_Advanced"/>
-  </Product>
-
-  <Fragment>
-    <Directory Id="TARGETDIR" Name="SourceDir">
+     <Directory Id="TARGETDIR" Name="SourceDir">
       <Directory Id="ProgramFilesFolder">
         <Directory Id="APPLICATIONFOLDER" Name="Jenkins">
           <Directory Id="CHAUFFEURFOLDER" Name="Chauffeur">
@@ -72,30 +65,88 @@
         </Directory>
       </Directory>
     </Directory>
-  </Fragment>
+        
+    <Property Id="WIXUI_INSTALLDIR" Value="APPLICATIONFOLDER" />
+      
+    <UI Id="WixUI_InstallDir">
+      <TextStyle Id="WixUI_Font_Normal" FaceName="Tahoma" Size="8" />
+      <TextStyle Id="WixUI_Font_Bigger" FaceName="Tahoma" Size="12" />
+      <TextStyle Id="WixUI_Font_Title" FaceName="Tahoma" Size="9" Bold="yes" />
+
+      <Property Id="DefaultUIFont" Value="WixUI_Font_Normal" />
+      <Property Id="WixUI_Mode" Value="InstallDir" />
+
+      <DialogRef Id="BrowseDlg" />
+      <DialogRef Id="DiskCostDlg" />
+      <DialogRef Id="ErrorDlg" />
+      <DialogRef Id="FatalError" />
+      <DialogRef Id="FilesInUse" />
+      <DialogRef Id="MsiRMFilesInUse" />
+      <DialogRef Id="PrepareDlg" />
+      <DialogRef Id="ProgressDlg" />
+      <DialogRef Id="ResumeDlg" />
+      <DialogRef Id="UserExit" />
+
+      <Publish Dialog="BrowseDlg" Control="OK" Event="DoAction" Value="WixUIValidatePath" Order="3">1</Publish>
+      <Publish Dialog="BrowseDlg" Control="OK" Event="SpawnDialog" Value="InvalidDirDlg" Order="4"><![CDATA[WIXUI_INSTALLDIR_VALID<>"1"]]></Publish>
+
+      <Publish Dialog="ExitDialog" Control="Finish" Event="EndDialog" Value="Return" Order="999">1</Publish>
+
+      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="LicenseAgreementDlg">NOT Installed</Publish>
+      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg">Installed AND PATCH</Publish>
+
+      <Publish Dialog="LicenseAgreementDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg">1</Publish>
+      <Publish Dialog="LicenseAgreementDlg" Control="Next" Event="NewDialog" Value="InstallDirDlg">LicenseAccepted = "1"</Publish>      
+      
+      <Publish Dialog="InstallDirDlg" Control="Back" Event="NewDialog" Value="LicenseAgreementDlg">1</Publish>
+      <Publish Dialog="InstallDirDlg" Control="Next" Event="SetTargetPath" Value="[WIXUI_INSTALLDIR]" Order="1">1</Publish>
+      <Publish Dialog="InstallDirDlg" Control="Next" Event="DoAction" Value="WixUIValidatePath" Order="2">NOT WIXUI_DONTVALIDATEPATH</Publish>
+      <Publish Dialog="InstallDirDlg" Control="Next" Event="SpawnDialog" Value="InvalidDirDlg" Order="3"><![CDATA[NOT WIXUI_DONTVALIDATEPATH AND WIXUI_INSTALLDIR_VALID<>"1"]]></Publish>
+      <Publish Dialog="InstallDirDlg" Control="Next" Event="NewDialog" Value="ServiceAccountDlg" Order="4">WIXUI_DONTVALIDATEPATH OR WIXUI_INSTALLDIR_VALID="1"</Publish>
+      <Publish Dialog="InstallDirDlg" Control="ChangeFolder" Property="_BrowseProperty" Value="[WIXUI_INSTALLDIR]" Order="1">1</Publish>
+      <Publish Dialog="InstallDirDlg" Control="ChangeFolder" Event="SpawnDialog" Value="BrowseDlg" Order="2">1</Publish>
+      
+      <Publish Dialog="ServiceAccountDlg" Control="Back" Event="NewDialog" Value="InstallDirDlg">1</Publish>
+      <Publish Dialog="ServiceAccountDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
+      
+      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="ServiceAccountDlg" Order="1">NOT Installed</Publish>
+      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="MaintenanceTypeDlg" Order="2">Installed AND NOT PATCH</Publish>
+      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="2">Installed AND PATCH</Publish>
+
+      <Publish Dialog="MaintenanceWelcomeDlg" Control="Next" Event="NewDialog" Value="MaintenanceTypeDlg">1</Publish>
+
+      <Publish Dialog="MaintenanceTypeDlg" Control="RepairButton" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
+      <Publish Dialog="MaintenanceTypeDlg" Control="RemoveButton" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
+      <Publish Dialog="MaintenanceTypeDlg" Control="Back" Event="NewDialog" Value="MaintenanceWelcomeDlg">1</Publish>      
+    </UI>
+
+    <UIRef Id="WixUI_Common" />
+  </Product>
 
   <Fragment>
     <ComponentGroup Id="ProductComponents">
       <Component Id="Service" Guid="34B2A0C2-EC50-4BC8-9BD6-6D0A5CB37802" Directory="BINFOLDER">
-        
+
         <File Id="Chauffeur.exe" Source="$(var.BuildArtifactDir)\Chauffeur.exe"/>
         <File Id="Chauffeur.exe.config"  Source="$(var.BuildArtifactDir)\Chauffeur.exe.config" />
-                
+
         <ServiceInstall Id="ServiceInstaller"
                         Type="ownProcess"
                         Vital="yes"
                         Name="ChauffeurService"
                         DisplayName="Jenkins Chauffeur Service"
-                        Description="Jenkins Chauffeur Service used to install and de-install builds hosted in a Jenkins Continious Integration Service."                        
+                        Description="Jenkins Chauffeur Service used to install and de-install builds hosted in a Jenkins Continious Integration Service."
                         Start="auto"                       
-                        Account="LocalSystem"                        
-                        ErrorControl="ignore"                       
-                        Interactive="no"
-                        Arguments=" /stop ChauffeurService"/>
-        
-        <ServiceControl Id="StartService"                        
+                        Account="[ACCOUNT]"
+                        Password="[PASSWORD]"
+                        ErrorControl="ignore"                        
+                        Interactive="no">
+
+        </ServiceInstall>
+
+        <ServiceControl Id="StartService"
                         Stop="both"
-                        Remove="uninstall"                        
+                        Remove="uninstall"
                         Name="ChauffeurService"
                         Wait="yes" />
 
@@ -103,17 +154,17 @@
         <File Id="log4net.config" Source="$(var.BuildArtifactDir)\log4net.config" />
         <File Id="Newtonsoft.Json" Source="$(var.BuildArtifactDir)\Newtonsoft.Json.dll"/>
         <File Id="Chauffeur.Jenkins.dll" Source="$(var.BuildArtifactDir)\Chauffeur.Jenkins.dll" />
-               
+
         <RemoveFile Id="DeleteService" Name="*.*" On="uninstall" />
-      </Component>     
-    
+      </Component>
+
       <Component Id="Templates" Guid="BC16FDCA-4EE5-48A4-8807-B26860CA658C" Directory="TEMPLATESFOLDER">
         <File Id="_Notification_Body.xslt" Source="$(var.TemplateDir)\_Notification-Body.xslt"/>
         <File Id="_Notification_Subject.xslt"  Source="$(var.TemplateDir)\_Notification-Subject.xslt" />
 
         <RemoveFile Id="DeleteTemplates" Name="*.*" On="uninstall" />
       </Component>
-    
+
       <Component Id="Data" Guid="79C3F26D-1BB0-4732-B69F-30D7359D2791" Directory="DATAFOLDER">
         <File Id="Packages.json" Source="$(var.DataDir)\Packages.json"/>
 

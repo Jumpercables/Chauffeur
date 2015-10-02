@@ -23,6 +23,7 @@
     <DefineConstants>ProductVersion=1.0.0</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Dialogs\ServiceAccountDlg.wxs" />
     <Compile Include="Product.wxs" />
   </ItemGroup>
   <ItemGroup>
@@ -59,6 +60,9 @@
       <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
       <RefTargetDir>BINFOLDER</RefTargetDir>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Dialogs\" />
   </ItemGroup>
   <Import Project="$(WixTargetsPath)" />
   <!--
