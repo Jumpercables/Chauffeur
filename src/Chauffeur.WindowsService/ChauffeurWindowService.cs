@@ -2,6 +2,7 @@
 using System.ServiceModel;
 using System.ServiceProcess;
 
+using Chauffeur.Jenkins;
 using Chauffeur.Jenkins.Services;
 
 namespace Chauffeur.WindowsService
@@ -64,18 +65,26 @@ namespace Chauffeur.WindowsService
         /// </summary>
         private void CreateServiceHost()
         {
-            if (_ServiceHost != null)
+            try
             {
-                _ServiceHost.Close();
-                _ServiceHost = null;
+                if (_ServiceHost != null)
+                {
+                    _ServiceHost.Close();
+                    _ServiceHost = null;
+                }
+
+                // Create a ServiceHost for the ChauffeurService type and provide the base address.
+                _ServiceHost = new ServiceHost(typeof (ChauffeurService));
+
+                // Open the ServiceHostBase to create listeners and start listening for messages.
+                _ServiceHost.Open();
+                _ServiceHost.Faulted += (sender, args) => this.CreateServiceHost();
             }
-
-            // Create a ServiceHost for the ChauffeurService type and provide the base address.
-            _ServiceHost = new ServiceHost(typeof (ChauffeurService));
-
-            // Open the ServiceHostBase to create listeners and start listening for messages.
-            _ServiceHost.Open();
-            _ServiceHost.Faulted += (sender, args) => this.CreateServiceHost();
+            catch (Exception e)
+            {
+                Log.Error(this, e);
+                throw;
+            }
         }
 
         #endregion
