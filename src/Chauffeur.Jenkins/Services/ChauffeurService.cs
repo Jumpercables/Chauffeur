@@ -28,7 +28,27 @@ namespace Chauffeur.Jenkins.Services
         /// <returns>Returns a <see cref="Package" /> representing the installed package.</returns>
         [OperationContract]
         [WebGet(UriTemplate = "Package/{jobName}", ResponseFormat = WebMessageFormat.Json)]
-        Task<Package> GetPackageAsync(string jobName);
+        Package GetPackage(string jobName);
+
+        /// <summary>
+        ///     Gets the package that has been installed for the job.
+        /// </summary>
+        /// <returns>
+        ///     Returns a <see cref="Package" /> representing the installed package.
+        /// </returns>
+        [OperationContract]
+        [WebGet(UriTemplate = "Packages", ResponseFormat = WebMessageFormat.Json)]
+        List<Package> GetPackages();
+
+        /// <summary>
+        ///     Gets the URI templates that are availabe for the service.
+        /// </summary>
+        /// <returns>
+        ///     Returns a <see cref="List{T}" /> representing the methods available.
+        /// </returns>
+        [OperationContract]
+        [WebGet(UriTemplate = "?", ResponseFormat = WebMessageFormat.Xml)]
+        List<string> GetUriTemplates();
 
         /// <summary>
         ///     Installs the build with the number for the specific job.
@@ -40,7 +60,7 @@ namespace Chauffeur.Jenkins.Services
         /// </returns>
         [OperationContract]
         [WebGet(UriTemplate = "Install/{jobName}/{buildNumber}", ResponseFormat = WebMessageFormat.Json)]
-        Task<Build> InstallBuildAsync(string jobName, string buildNumber);        
+        Task<Build> InstallBuildAsync(string jobName, string buildNumber);
 
         /// <summary>
         ///     Uninstalls the build the was installed for the job on the host machine.
@@ -51,7 +71,7 @@ namespace Chauffeur.Jenkins.Services
         /// </returns>
         [OperationContract]
         [WebGet(UriTemplate = "Uninstall/{jobName}", ResponseFormat = WebMessageFormat.Json)]
-        Task<bool> UninstallBuildAsync(string jobName);
+        bool UninstallBuild(string jobName);
 
         #endregion
     }
@@ -84,7 +104,7 @@ namespace Chauffeur.Jenkins.Services
                 if (packages.Any())
                 {
                     // Uninstall previous packages.
-                    await this.UninstallBuildAsync(jobName);
+                    this.UninstallBuild(jobName);
 
                     // Install the packages.
                     this.InstallPackages(packages);
@@ -114,11 +134,13 @@ namespace Chauffeur.Jenkins.Services
         /// <returns>
         ///     Returns a <see cref="bool" /> representing <c>true</c> when the build was uninstalled.
         /// </returns>
-        public async Task<bool> UninstallBuildAsync(string jobName)
+        public bool UninstallBuild(string jobName)
         {
             try
             {
-                var packages = await this.GetPackagesAsync();
+                Log.Info(this, "Uninstalling the {0} packages.", jobName);
+
+                var packages = this.GetPackages();
                 var package = packages.FirstOrDefault(o => o.Job.Equals(jobName, StringComparison.OrdinalIgnoreCase));
                 if (package != null)
                 {
@@ -126,19 +148,12 @@ namespace Chauffeur.Jenkins.Services
 
                     foreach (var pkg in package.Paths)
                     {
-                        string fileName = pkg;
+                        this.UninstallPackage(pkg);
 
-                        await this.UninstallPackageAsync(pkg).ContinueWith((task) =>
-                        {
-                            if (task.IsCompleted)
-                            {
-                                this.Serialize(packages.Where(p => p != package));
-
-                                File.Delete(fileName);
-                            }
-                        });
+                        if(File.Exists(pkg)) File.Delete(pkg);
                     }
 
+                    this.Serialize(packages.Where(p => p != package));
 
                     return true;
                 }
@@ -158,12 +173,11 @@ namespace Chauffeur.Jenkins.Services
         /// <returns>
         ///     Returns a <see cref="Build" /> representing the build that was installed for the job.
         /// </returns>
-        public async Task<Package> GetPackageAsync(string jobName)
+        public Package GetPackage(string jobName)
         {
             try
             {
-                var packages = await this.GetPackagesAsync();
-
+                var packages = this.GetPackages();
                 return packages.FirstOrDefault(o => o.Job.Equals(jobName, StringComparison.OrdinalIgnoreCase));
             }
             catch (Exception e)
@@ -173,7 +187,37 @@ namespace Chauffeur.Jenkins.Services
 
             return null;
         }
-        
+
+        /// <summary>
+        ///     Gets the all of the packages that have been installed on the machine.
+        /// </summary>
+        /// <returns>
+        ///     Return <see cref="List{Package}" /> representing the installed packages.
+        /// </returns>
+        public List<Package> GetPackages()
+        {
+            List<Package> packages = null;
+
+            if (File.Exists(base.Configuration.PackagesDataFile))
+            {
+                var json = File.ReadAllText(base.Configuration.PackagesDataFile);
+                packages = JsonConvert.DeserializeObject<List<Package>>(json);
+            }
+
+            return packages ?? new List<Package>();
+        }
+
+        /// <summary>
+        ///     Gets the URI templates that are availabe for the service.
+        /// </summary>
+        /// <returns>
+        ///     Returns a <see cref="List{T}" /> representing the methods available.
+        /// </returns>
+        public List<string> GetUriTemplates()
+        {
+            return this.GetUriTemplates(typeof (ChauffeurService));
+        }
+
         #endregion
 
         #region Private Methods
@@ -187,7 +231,7 @@ namespace Chauffeur.Jenkins.Services
         /// <returns>Returns a <see cref="Package" /> representigng the new package.</returns>
         private async Task<Package> AddPackage(string jobName, Build build, string[] paths)
         {
-            var packages = await this.GetPackagesAsync();
+            var packages = this.GetPackages();
             var package = packages.FirstOrDefault(o => o.Job.Equals(jobName, StringComparison.OrdinalIgnoreCase));
             if (package == null)
             {
@@ -235,28 +279,6 @@ namespace Chauffeur.Jenkins.Services
             var service = new JobService(base.BaseUri, base.Client, base.Configuration);
             return await service.GetBuildAsync(jobName, buildNumber);
         }
-        
-        /// <summary>
-        ///     Gets the all of the packages that have been installed on the machine.
-        /// </summary>
-        /// <returns>
-        ///     Return <see cref="List{Package}" /> representing the installed packages.
-        /// </returns>
-        private Task<List<Package>> GetPackagesAsync()
-        {
-            return Task.Run(() =>
-            {
-                List<Package> packages = null;
-
-                if (File.Exists(base.Configuration.PackagesDataFile))
-                {
-                    var json = File.ReadAllText(base.Configuration.PackagesDataFile);
-                    packages = JsonConvert.DeserializeObject<List<Package>>(json);
-                }
-
-                return packages ?? new List<Package>();
-            });
-        }
 
         /// <summary>
         ///     Installs the package asynchronously.
@@ -265,31 +287,28 @@ namespace Chauffeur.Jenkins.Services
         /// <returns>
         ///     Returns the <see cref="Task" /> representing the operation.
         /// </returns>
-        private Task InstallPackageAsync(string package)
+        private void InstallPackage(string package)
         {
-            return Task.Run(() =>
-            {
-                ProcessStartInfo startInfo = new ProcessStartInfo("cmd.exe", string.Format("/c start /MIN /wait msiexec.exe /i \"{0}\" /quiet {1}", package, this.Configuration.InstallPropertyReferences));
-                startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            ProcessStartInfo startInfo = new ProcessStartInfo("cmd.exe", string.Format("/c start /MIN /wait msiexec.exe /i \"{0}\" /quiet {1}", package, this.Configuration.InstallPropertyReferences));
+            startInfo.WindowStyle = ProcessWindowStyle.Hidden;
 
-                Log.Info(this, string.Format("\t{0} {1}", startInfo.FileName, startInfo.Arguments));
+            Log.Info(this, string.Format("\t{0} {1}", startInfo.FileName, startInfo.Arguments));
 
-                using (Process process = Process.Start(startInfo))
-                    if (process != null) process.WaitForExit();
-            });
+            using (Process process = Process.Start(startInfo))
+                if (process != null) process.WaitForExit();
         }
 
         /// <summary>
         ///     Installs the build MSI packages using the "msiexec.exe" utility on the windows machine.
         /// </summary>
         /// <param name="packages">The packages.</param>
-        private async void InstallPackages(string[] packages)
+        private void InstallPackages(string[] packages)
         {
             Log.Info(this, "Installing {0} package(s).", packages.Length);
 
             foreach (var pkg in packages)
             {
-                await this.InstallPackageAsync(pkg);
+                this.InstallPackage(pkg);
             }
         }
 
@@ -328,18 +347,15 @@ namespace Chauffeur.Jenkins.Services
         /// <returns>
         ///     Returns a <see cref="Task" /> representing the operation.
         /// </returns>
-        private Task UninstallPackageAsync(string package)
+        private void UninstallPackage(string package)
         {
-            return Task.Run(() =>
-            {
-                ProcessStartInfo startInfo = new ProcessStartInfo("cmd.exe", string.Format("/c start /MIN /wait msiexec.exe /x \"{0}\" /quiet {1}", package, this.Configuration.UninstallPropertyReferences));
-                startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            ProcessStartInfo startInfo = new ProcessStartInfo("cmd.exe", string.Format("/c start /MIN /wait msiexec.exe /x \"{0}\" /quiet {1}", package, this.Configuration.UninstallPropertyReferences));
+            startInfo.WindowStyle = ProcessWindowStyle.Hidden;
 
-                Log.Info(this, string.Format("\t{0} {1}", startInfo.FileName, startInfo.Arguments));
+            Log.Info(this, string.Format("\t{0} {1}", startInfo.FileName, startInfo.Arguments));
 
-                using (Process process = Process.Start(startInfo))
-                    if (process != null) process.WaitForExit();
-            });
+            using (Process process = Process.Start(startInfo))
+                if (process != null) process.WaitForExit();
         }
 
         #endregion

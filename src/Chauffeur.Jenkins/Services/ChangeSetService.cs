@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.ServiceModel;
 using System.ServiceModel.Web;
@@ -38,6 +39,16 @@ namespace Chauffeur.Jenkins.Services
         [OperationContract]
         [WebGet(UriTemplate = "Changes/{jobName}/{buildNumber}", ResponseFormat = WebMessageFormat.Json)]
         Task<ChangeSet> GetChangesAsync(string jobName, string buildNumber);
+
+        /// <summary>
+        ///     Gets the URI templates that are availabe for the service.
+        /// </summary>
+        /// <returns>
+        ///     Returns a <see cref="List{T}" /> representing the methods available.
+        /// </returns>
+        [OperationContract]
+        [WebGet(UriTemplate = "?", ResponseFormat = WebMessageFormat.Json)]
+        List<string> GetUriTemplates();
 
         #endregion
     }
@@ -93,12 +104,8 @@ namespace Chauffeur.Jenkins.Services
                 var up = causes.FirstOrDefault(o => !string.IsNullOrEmpty(o.UpstreamBuild));
                 if (up != null)
                 {
-                    var service = new JobService(base.BaseUri, base.Client, base.Configuration);
-                    var upstreamBuild = await service.GetBuildAsync(up.UpstreamProject, up.UpstreamBuild);
-                    if (upstreamBuild != null)
-                    {
-                        return await this.GetChangesAsync(upstreamBuild);
-                    }
+                    var changeSet = await this.GetChangesAsync(up.UpstreamProject, up.UpstreamBuild);
+                    return changeSet;
                 }
             }
 
@@ -117,7 +124,33 @@ namespace Chauffeur.Jenkins.Services
         {
             var service = new JobService(base.BaseUri, base.Client, base.Configuration);
             var build = await service.GetBuildAsync(jobName, buildNumber);
-            return await this.GetChangesAsync(build);
+            return await this.GetChangesAsync(jobName, build);
+        }
+
+        /// <summary>
+        ///     Gets the URI templates that are availabe for the service.
+        /// </summary>
+        /// <returns>
+        ///     Returns a <see cref="List{T}" /> representing the methods available.
+        /// </returns>
+        public List<string> GetUriTemplates()
+        {
+            return this.GetUriTemplates(typeof (ChangeSetService));
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private async Task<ChangeSet> GetChangesAsync(string jobName, Build build)
+        {
+            var service = new JobService(base.BaseUri, base.Client, base.Configuration);
+            var lastFailedBuild = await service.GetLastFailedBuildAsync(jobName);
+            if (lastFailedBuild.Number == build.Number)
+            {
+            }
+
+            return null;
         }
 
         #endregion

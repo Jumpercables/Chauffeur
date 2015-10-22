@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ServiceModel;
 using System.ServiceModel.Web;
 using System.Threading.Tasks;
@@ -38,7 +39,7 @@ namespace Chauffeur.Jenkins.Services
         /// </returns>
         [OperationContract]
         [WebGet(UriTemplate = "Job/{jobName}/FirstBuild", ResponseFormat = WebMessageFormat.Json)]
-        Task<Build> GetFirstBuild(string jobName);
+        Task<Build> GetFirstBuildAsync(string jobName);
 
         /// <summary>
         ///     Gets the job from server with the specified name.
@@ -60,7 +61,7 @@ namespace Chauffeur.Jenkins.Services
         /// </returns>
         [OperationContract]
         [WebGet(UriTemplate = "Job/{jobName}/LastBuild", ResponseFormat = WebMessageFormat.Json)]
-        Task<Build> GetLastBuild(string jobName);
+        Task<Build> GetLastBuildAsync(string jobName);
 
         /// <summary>
         ///     Gets the last completed build.
@@ -71,7 +72,7 @@ namespace Chauffeur.Jenkins.Services
         /// </returns>
         [OperationContract]
         [WebGet(UriTemplate = "Job/{jobName}/LastCompletedBuild", ResponseFormat = WebMessageFormat.Json)]
-        Task<Build> GetLastCompletedBuild(string jobName);
+        Task<Build> GetLastCompletedBuildAsync(string jobName);
 
         /// <summary>
         ///     Gets the last failed build.
@@ -82,7 +83,7 @@ namespace Chauffeur.Jenkins.Services
         /// </returns>
         [OperationContract]
         [WebGet(UriTemplate = "Job/{jobName}/LastFailedBuild", ResponseFormat = WebMessageFormat.Json)]
-        Task<Build> GetLastFailedBuild(string jobName);
+        Task<Build> GetLastFailedBuildAsync(string jobName);
 
         /// <summary>
         ///     Gets the last stable build.
@@ -93,7 +94,7 @@ namespace Chauffeur.Jenkins.Services
         /// </returns>
         [OperationContract]
         [WebGet(UriTemplate = "Job/{jobName}/LastStableBuild", ResponseFormat = WebMessageFormat.Json)]
-        Task<Build> GetLastStableBuild(string jobName);
+        Task<Build> GetLastStableBuildAsync(string jobName);
 
         /// <summary>
         ///     Gets the last successful build for the job.
@@ -105,6 +106,16 @@ namespace Chauffeur.Jenkins.Services
         [OperationContract]
         [WebGet(UriTemplate = "Job/{jobName}/LastSuccessfulBuild", ResponseFormat = WebMessageFormat.Json)]
         Task<Build> GetLastSuccessfulBuildAsync(string jobName);
+
+        /// <summary>
+        ///     Gets the URI templates that are availabe for the service.
+        /// </summary>
+        /// <returns>
+        ///     Returns a <see cref="List{T}" /> representing the methods available.
+        /// </returns>
+        [OperationContract]
+        [WebGet(UriTemplate = "?", ResponseFormat = WebMessageFormat.Json)]
+        List<string> GetUriTemplates();
 
         #endregion
     }
@@ -206,7 +217,7 @@ namespace Chauffeur.Jenkins.Services
         /// <returns>
         ///     Returns a <see cref="Build" /> representing the last stable build.
         /// </returns>
-        public Task<Build> GetLastStableBuild(string jobName)
+        public Task<Build> GetLastStableBuildAsync(string jobName)
         {
             return this.GetBuild(jobName, "lastStableBuild");
         }
@@ -218,7 +229,7 @@ namespace Chauffeur.Jenkins.Services
         /// <returns>
         ///     Returns a <see cref="Build" /> representing the last build.
         /// </returns>
-        public Task<Build> GetLastBuild(string jobName)
+        public Task<Build> GetLastBuildAsync(string jobName)
         {
             return this.GetBuild(jobName, "lastBuild");
         }
@@ -230,7 +241,7 @@ namespace Chauffeur.Jenkins.Services
         /// <returns>
         ///     Returns a <see cref="Build" /> representing the last completed build.
         /// </returns>
-        public Task<Build> GetLastCompletedBuild(string jobName)
+        public Task<Build> GetLastCompletedBuildAsync(string jobName)
         {
             return this.GetBuild(jobName, "lastCompletedBuild");
         }
@@ -242,7 +253,7 @@ namespace Chauffeur.Jenkins.Services
         /// <returns>
         ///     Returns a <see cref="Build" /> representing the first build.
         /// </returns>
-        public Task<Build> GetFirstBuild(string jobName)
+        public Task<Build> GetFirstBuildAsync(string jobName)
         {
             return this.GetBuild(jobName, "firstBuild");
         }
@@ -254,9 +265,20 @@ namespace Chauffeur.Jenkins.Services
         /// <returns>
         ///     Returns a <see cref="Build" /> representing the last failed build.
         /// </returns>
-        public Task<Build> GetLastFailedBuild(string jobName)
+        public Task<Build> GetLastFailedBuildAsync(string jobName)
         {
             return this.GetBuild(jobName, "lastFailedBuild");
+        }
+
+        /// <summary>
+        ///     Gets the URI templates that are availabe for the service.
+        /// </summary>
+        /// <returns>
+        ///     Returns a <see cref="List{T}" /> representing the methods available.
+        /// </returns>
+        public List<string> GetUriTemplates()
+        {
+            return this.GetUriTemplates(typeof (JobService));
         }
 
         #endregion

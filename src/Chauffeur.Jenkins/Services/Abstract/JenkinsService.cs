@@ -1,5 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Reflection;
 using System.Runtime.Serialization;
+using System.ServiceModel;
+using System.ServiceModel.Web;
 
 using Chauffeur.Jenkins.Client;
 using Chauffeur.Jenkins.Configuration;
@@ -22,24 +28,25 @@ namespace Chauffeur.Jenkins.Services
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="JenkinsService"/> class.
+        ///     Initializes a new instance of the <see cref="JenkinsService" /> class.
         /// </summary>
         /// <param name="configuration">The configuration.</param>
         protected JenkinsService(ChauffeurConfiguration configuration)
             : this(new Uri(configuration.Server), new JsonJenkinsClient(configuration.User, configuration.Token), configuration)
         {
-            
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="JenkinsService" /> class.
+        ///     Initializes a new instance of the <see cref="JenkinsService" /> class.
         /// </summary>
         /// <param name="baseUri">The base URI.</param>
         /// <param name="client">The client.</param>
         /// <param name="configuration">The configuration.</param>
-        /// <exception cref="System.ArgumentNullException">baseUri
-        /// or
-        /// client</exception>
+        /// <exception cref="System.ArgumentNullException">
+        ///     baseUri
+        ///     or
+        ///     client
+        /// </exception>
         protected JenkinsService(Uri baseUri, JenkinsClient client, ChauffeurConfiguration configuration)
         {
             if (baseUri == null)
@@ -81,7 +88,37 @@ namespace Chauffeur.Jenkins.Services
         /// </value>
         protected ChauffeurConfiguration Configuration { get; set; }
 
-        #endregion        
+        #endregion
+
+        #region Protected Methods
+
+        /// <summary>
+        ///     Gets the URI templates that are availabe for the service.
+        /// </summary>
+        /// <returns>
+        ///     Returns a <see cref="List{T}" /> representing the methods available.
+        /// </returns>
+        protected List<string> GetUriTemplates(Type service)
+        {
+            StackTrace stackTrace = new StackTrace();
+            MethodBase methodBase = stackTrace.GetFrame(1).GetMethod();
+
+            List<string> list = new List<string>();
+
+            foreach (var contract in service.GetInterfaces())
+            {
+                var methods = contract.GetMethods().Where(method => method.GetCustomAttributes(typeof (OperationContractAttribute), false).Any() && method.Name != methodBase.Name);
+
+                foreach (var attribute in methods.Select(method => method.GetCustomAttribute<WebGetAttribute>()))
+                {
+                    list.Add(attribute.UriTemplate);
+                }
+            }
+
+            return list;
+        }
+
+        #endregion
     }
 
     /// <summary>
