@@ -124,7 +124,7 @@ namespace Chauffeur.Jenkins.Services
         {
             var service = new JobService(base.BaseUri, base.Client, base.Configuration);
             var build = await service.GetBuildAsync(jobName, buildNumber);
-            return await this.GetChangesAsync(jobName, build);
+            return await this.GetChangesAsync(build);
         }
 
         /// <summary>
@@ -136,21 +136,6 @@ namespace Chauffeur.Jenkins.Services
         public List<string> GetUriTemplates()
         {
             return this.GetUriTemplates(typeof (ChangeSetService));
-        }
-
-        #endregion
-
-        #region Private Methods
-
-        private async Task<ChangeSet> GetChangesAsync(string jobName, Build build)
-        {
-            var service = new JobService(base.BaseUri, base.Client, base.Configuration);
-            var lastFailedBuild = await service.GetLastFailedBuildAsync(jobName);
-            if (lastFailedBuild.Number == build.Number)
-            {
-            }
-
-            return null;
         }
 
         #endregion
