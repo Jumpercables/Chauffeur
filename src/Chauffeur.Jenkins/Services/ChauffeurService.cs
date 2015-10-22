@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.ServiceModel;
@@ -96,33 +95,24 @@ namespace Chauffeur.Jenkins.Services
         public async Task<Build> InstallBuildAsync(string jobName, string buildNumber)
         {
             try
-            {               
+            {
                 // Query jenkins for the build information.
                 var build = await this.GetBuildAsync(jobName, buildNumber);
 
-                // Terminate when the build is already installed.
-                if (this.IsBuildInstalled(jobName, buildNumber))
-                {
-                    Log.Info(this, "The build is already installed {0} #{1}.", jobName, buildNumber);
-                    return build;
-                }
-
                 // Download the packages.
                 var packages = await this.DownloadPackagesAsync(build);
-                if (packages.Any())
-                {
-                    // Uninstall previous packages.
-                    this.UninstallBuild(jobName);
 
-                    // Install the packages.
-                    this.InstallPackages(packages);
+                // Uninstall previous packages.
+                this.UninstallBuild(jobName);
 
-                    // Save the last build installed.
-                    var package = await this.AddPackage(jobName, build, packages);
+                // Install the packages.
+                this.InstallPackages(packages);
 
-                    // Send the notifications.
-                    this.Notify(package);
-                }
+                // Save the last build installed.
+                var package = await this.AddPackage(jobName, build, packages);
+
+                // Send the notifications.
+                this.Notify(package);
 
                 // Return the build.
                 return build;
@@ -146,8 +136,6 @@ namespace Chauffeur.Jenkins.Services
         {
             try
             {
-                Log.Info(this, "Uninstalling the {0} packages.", jobName);
-
                 var packages = this.GetPackages();
                 var package = packages.FirstOrDefault(o => o.Job.Equals(jobName, StringComparison.OrdinalIgnoreCase));
                 if (package != null)
@@ -157,8 +145,6 @@ namespace Chauffeur.Jenkins.Services
                     foreach (var pkg in package.Paths)
                     {
                         this.UninstallPackage(pkg);
-
-                        if(File.Exists(pkg)) File.Delete(pkg);
                     }
 
                     this.Serialize(packages.Where(p => p != package));
@@ -229,25 +215,6 @@ namespace Chauffeur.Jenkins.Services
         #endregion
 
         #region Private Methods
-
-        /// <summary>
-        /// Determines whether the build is installed for the specific job.
-        /// </summary>
-        /// <param name="jobName">Name of the job.</param>
-        /// <param name="buildNumber">The build number.</param>
-        /// <returns>
-        /// Returns <see cref="bool" /> representing <c>true</c> if the build is installed.
-        /// </returns>
-        private bool IsBuildInstalled(string jobName, string buildNumber)
-        {
-            var package = this.GetPackage(jobName);
-            if (package != null)
-            {
-                return (package.BuildNumber.ToString(CultureInfo.InvariantCulture) == buildNumber);
-            }
-
-            return false;
-        }
 
         /// <summary>
         ///     Adds the build that was installed to the chauffuer file.
