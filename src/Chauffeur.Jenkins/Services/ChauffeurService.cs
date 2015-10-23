@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.ServiceModel;
@@ -71,7 +72,7 @@ namespace Chauffeur.Jenkins.Services
         /// </returns>
         [OperationContract]
         [WebGet(UriTemplate = "Uninstall/{jobName}", ResponseFormat = WebMessageFormat.Json)]
-        bool UninstallBuild(string jobName);
+        Task<bool> UninstallBuildAsync(string jobName);
 
         #endregion
     }
@@ -103,7 +104,7 @@ namespace Chauffeur.Jenkins.Services
                 var packages = await this.DownloadPackagesAsync(build);
 
                 // Uninstall previous packages.
-                this.UninstallBuild(jobName);
+                await this.UninstallBuildAsync(jobName);
 
                 // Install the packages.
                 this.InstallPackages(packages);
@@ -132,7 +133,7 @@ namespace Chauffeur.Jenkins.Services
         /// <returns>
         ///     Returns a <see cref="bool" /> representing <c>true</c> when the build was uninstalled.
         /// </returns>
-        public bool UninstallBuild(string jobName)
+        public async Task<bool> UninstallBuildAsync(string jobName)
         {
             try
             {
@@ -141,6 +142,12 @@ namespace Chauffeur.Jenkins.Services
                 if (package != null)
                 {
                     Log.Info(this, "Uninstalling {0} package(s).", package.Paths.Length);
+                   
+                    if (package.Paths.Any(o => !File.Exists(o)))
+                    {
+                        var build = await this.GetBuildAsync(package.Job, package.BuildNumber.ToString(CultureInfo.InvariantCulture));
+                        await this.DownloadPackagesAsync(build);
+                    }
 
                     foreach (var pkg in package.Paths)
                     {
