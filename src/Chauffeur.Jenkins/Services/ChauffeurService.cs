@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.ServiceModel;
@@ -71,7 +72,7 @@ namespace Chauffeur.Jenkins.Services
         /// </returns>
         [OperationContract]
         [WebGet(UriTemplate = "Uninstall/{jobName}", ResponseFormat = WebMessageFormat.Json)]
-        bool UninstallBuild(string jobName);
+        Task<bool> UninstallBuildAsync(string jobName);
 
         #endregion
     }
@@ -103,7 +104,7 @@ namespace Chauffeur.Jenkins.Services
                 var packages = await this.DownloadPackagesAsync(build);
 
                 // Uninstall previous packages.
-                this.UninstallBuild(jobName);
+                await this.UninstallBuildAsync(jobName);
 
                 // Install the packages.
                 this.InstallPackages(packages);
@@ -132,7 +133,7 @@ namespace Chauffeur.Jenkins.Services
         /// <returns>
         ///     Returns a <see cref="bool" /> representing <c>true</c> when the build was uninstalled.
         /// </returns>
-        public bool UninstallBuild(string jobName)
+        public async Task<bool> UninstallBuildAsync(string jobName)
         {
             try
             {
@@ -140,9 +141,17 @@ namespace Chauffeur.Jenkins.Services
                 var package = packages.FirstOrDefault(o => o.Job.Equals(jobName, StringComparison.OrdinalIgnoreCase));
                 if (package != null)
                 {
-                    Log.Info(this, "Uninstalling {0} package(s).", package.Paths.Length);
+                    string[] paths = package.Paths;
 
-                    foreach (var pkg in package.Paths)
+                    if (paths.Any(o => !File.Exists(o)))
+                    {
+                        var build = await this.GetBuildAsync(package.Job, package.BuildNumber.ToString(CultureInfo.InvariantCulture));
+                        paths = await this.DownloadPackagesAsync(build);
+                    }
+
+                    Log.Info(this, "Uninstalling {0} package(s).", paths.Length);
+
+                    foreach (var pkg in paths)
                     {
                         this.UninstallPackage(pkg);
                     }
@@ -283,13 +292,7 @@ namespace Chauffeur.Jenkins.Services
         /// </returns>
         private void InstallPackage(string package)
         {
-            ProcessStartInfo startInfo = new ProcessStartInfo("cmd.exe", string.Format("/c start /MIN /wait msiexec.exe /i \"{0}\" /quiet {1}", package, this.Configuration.InstallPropertyReferences));
-            startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-
-            Log.Info(this, string.Format("\t{0} {1}", startInfo.FileName, startInfo.Arguments));
-
-            using (Process process = Process.Start(startInfo))
-                if (process != null) process.WaitForExit();
+            MsiExecPackage(string.Format("/c start /MIN /wait msiexec.exe /i \"{0}\" /quiet {1}", package, this.Configuration.InstallPropertyReferences));
         }
 
         /// <summary>
@@ -303,6 +306,40 @@ namespace Chauffeur.Jenkins.Services
             foreach (var pkg in packages)
             {
                 this.InstallPackage(pkg);
+            }
+        }
+
+        /// <summary>
+        ///     Runs the msiexec executable that is used to install and uninstall the packages.
+        /// </summary>
+        /// <param name="arguments">The arguments.</param>
+        private void MsiExecPackage(string arguments)
+        {
+            ProcessStartInfo startInfo = new ProcessStartInfo("cmd.exe", arguments);
+            startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            startInfo.RedirectStandardError = true;
+            startInfo.RedirectStandardOutput = true;
+
+            Log.Info(this, string.Format("\t{0} {1}", startInfo.FileName, startInfo.Arguments));
+
+            using (Process process = Process.Start(startInfo))
+            {
+                if (process != null)
+                {
+                    using (StreamReader reader = process.StandardOutput)
+                    {
+                        string result = reader.ReadToEnd();
+                        Log.Info(this, string.Format("\t{0}", result));
+                    }
+
+                    using (StreamReader reader = process.StandardError)
+                    {
+                        string result = reader.ReadToEnd();
+                        Log.Error(this, string.Format("\t{0}", result));
+                    }
+
+                    process.WaitForExit();
+                }
             }
         }
 
@@ -343,13 +380,7 @@ namespace Chauffeur.Jenkins.Services
         /// </returns>
         private void UninstallPackage(string package)
         {
-            ProcessStartInfo startInfo = new ProcessStartInfo("cmd.exe", string.Format("/c start /MIN /wait msiexec.exe /x \"{0}\" /quiet {1}", package, this.Configuration.UninstallPropertyReferences));
-            startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-
-            Log.Info(this, string.Format("\t{0} {1}", startInfo.FileName, startInfo.Arguments));
-
-            using (Process process = Process.Start(startInfo))
-                if (process != null) process.WaitForExit();
+            MsiExecPackage(string.Format("/c start /MIN /wait msiexec.exe /x \"{0}\" /quiet {1}", package, this.Configuration.UninstallPropertyReferences));
         }
 
         #endregion
