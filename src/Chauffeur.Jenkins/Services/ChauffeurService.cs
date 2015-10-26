@@ -8,6 +8,7 @@ using System.ServiceModel;
 using System.ServiceModel.Web;
 using System.Threading.Tasks;
 
+using Chauffeur.Jenkins.Configuration;
 using Chauffeur.Jenkins.Model;
 
 using Newtonsoft.Json;
@@ -21,6 +22,16 @@ namespace Chauffeur.Jenkins.Services
     public interface IChauffeurService
     {
         #region Public Methods
+
+        /// <summary>
+        ///     Gets the configurations.
+        /// </summary>
+        /// <returns>
+        ///     Returns a <see cref="ChauffeurConfiguration" /> representing the configuratons.
+        /// </returns>
+        [OperationContract]
+        [WebGet(UriTemplate = "Configurations", ResponseFormat = WebMessageFormat.Json)]
+        Dictionary<string, string> GetConfigurations();
 
         /// <summary>
         ///     Gets the package that has been installed for the job.
@@ -137,6 +148,8 @@ namespace Chauffeur.Jenkins.Services
         {
             try
             {
+                Log.Info(this, "Uninstalling {0} package(s).", jobName);
+
                 var packages = this.GetPackages();
                 var package = packages.FirstOrDefault(o => o.Job.Equals(jobName, StringComparison.OrdinalIgnoreCase));
                 if (package != null)
@@ -153,13 +166,15 @@ namespace Chauffeur.Jenkins.Services
 
                     foreach (var pkg in paths)
                     {
-                        this.UninstallPackage(pkg);
+                        this.RunMsi(string.Format("/c start /MIN /wait msiexec.exe /x \"{0}\" /quiet {1}", pkg, this.Configuration.UninstallPropertyReferences));
                     }
 
                     this.Serialize(packages.Where(p => p != package));
 
                     return true;
                 }
+
+                Log.Info(this, "The {0} is not installed.", jobName);
             }
             catch (Exception e)
             {
@@ -219,6 +234,17 @@ namespace Chauffeur.Jenkins.Services
         public List<string> GetUriTemplates()
         {
             return this.GetUriTemplates(typeof (ChauffeurService));
+        }
+
+        /// <summary>
+        ///     Gets the configurations.
+        /// </summary>
+        /// <returns>
+        ///     Returns a <see cref="ChauffeurConfiguration" /> representing the configuratons.
+        /// </returns>
+        public Dictionary<string, string> GetConfigurations()
+        {
+            return this.Configuration.ToDictionary();
         }
 
         #endregion
@@ -284,18 +310,6 @@ namespace Chauffeur.Jenkins.Services
         }
 
         /// <summary>
-        ///     Installs the package asynchronously.
-        /// </summary>
-        /// <param name="package">The package.</param>
-        /// <returns>
-        ///     Returns the <see cref="Task" /> representing the operation.
-        /// </returns>
-        private void InstallPackage(string package)
-        {
-            MsiExecPackage(string.Format("/c start /MIN /wait msiexec.exe /i \"{0}\" /quiet {1}", package, this.Configuration.InstallPropertyReferences));
-        }
-
-        /// <summary>
         ///     Installs the build MSI packages using the "msiexec.exe" utility on the windows machine.
         /// </summary>
         /// <param name="packages">The packages.</param>
@@ -305,41 +319,7 @@ namespace Chauffeur.Jenkins.Services
 
             foreach (var pkg in packages)
             {
-                this.InstallPackage(pkg);
-            }
-        }
-
-        /// <summary>
-        ///     Runs the msiexec executable that is used to install and uninstall the packages.
-        /// </summary>
-        /// <param name="arguments">The arguments.</param>
-        private void MsiExecPackage(string arguments)
-        {
-            ProcessStartInfo startInfo = new ProcessStartInfo("cmd.exe", arguments);
-            startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-            startInfo.RedirectStandardError = true;
-            startInfo.RedirectStandardOutput = true;
-
-            Log.Info(this, string.Format("\t{0} {1}", startInfo.FileName, startInfo.Arguments));
-
-            using (Process process = Process.Start(startInfo))
-            {
-                if (process != null)
-                {
-                    using (StreamReader reader = process.StandardOutput)
-                    {
-                        string result = reader.ReadToEnd();
-                        Log.Info(this, string.Format("\t{0}", result));
-                    }
-
-                    using (StreamReader reader = process.StandardError)
-                    {
-                        string result = reader.ReadToEnd();
-                        Log.Error(this, string.Format("\t{0}", result));
-                    }
-
-                    process.WaitForExit();
-                }
+                this.RunMsi(string.Format("/c start /MIN /wait msiexec.exe /i \"{0}\" /quiet {1}", pkg, this.Configuration.InstallPropertyReferences));
             }
         }
 
@@ -362,6 +342,23 @@ namespace Chauffeur.Jenkins.Services
         }
 
         /// <summary>
+        ///     Runs the msiexec executable that is used to install and uninstall the packages.
+        /// </summary>
+        /// <param name="arguments">The arguments.</param>
+        private void RunMsi(string arguments)
+        {
+            ProcessStartInfo startInfo = new ProcessStartInfo("cmd.exe", arguments);
+            startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+
+            Log.Info(this, string.Format("\t{0} {1}", startInfo.FileName, startInfo.Arguments));
+
+            using (Process process = Process.Start(startInfo))
+            {
+                process.WaitForExit();
+            }
+        }
+
+        /// <summary>
         ///     Saves the packages to the packages data file.
         /// </summary>
         /// <param name="packages">The packages.</param>
@@ -369,18 +366,6 @@ namespace Chauffeur.Jenkins.Services
         {
             var json = JsonConvert.SerializeObject(packages, Formatting.Indented);
             File.WriteAllText(base.Configuration.PackagesDataFile, json);
-        }
-
-        /// <summary>
-        ///     Uninstalls the package asynchronously.
-        /// </summary>
-        /// <param name="package">The package.</param>
-        /// <returns>
-        ///     Returns a <see cref="Task" /> representing the operation.
-        /// </returns>
-        private void UninstallPackage(string package)
-        {
-            MsiExecPackage(string.Format("/c start /MIN /wait msiexec.exe /x \"{0}\" /quiet {1}", package, this.Configuration.UninstallPropertyReferences));
         }
 
         #endregion

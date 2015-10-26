@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Configuration;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Web.UI.WebControls;
 
 namespace Chauffeur.Jenkins.Configuration
 {
@@ -207,6 +209,15 @@ namespace Chauffeur.Jenkins.Configuration
 
         #endregion
 
+        /// <summary>
+        /// Returns the configurations as-a dictionary.
+        /// </summary>
+        /// <returns>Returns a <see cref="Dictionary{String, String}"/> representing the configurations.</returns>
+        public Dictionary<string, string> ToDictionary()
+        {
+            return this.Settings.AllKeys.ToDictionary(key => key, key => this.Settings[key]);
+        }
+
         #region Private Methods
 
         /// <summary>
@@ -314,10 +325,18 @@ namespace Chauffeur.Jenkins.Configuration
         {
             #region Constructors
 
-            public Setting(NameValueCollection settings, string name, Func<string, TValue> func)
+            public Setting(NameValueCollection settings, string name, Func<string, TValue> func, Action<NameValueCollection, TValue> action)
             {
                 this.Name = name;
                 this.Value = func(settings[name]);
+
+                action(settings, this.Value);
+            }
+
+            public Setting(NameValueCollection settings, string name, Func<string, TValue> func)
+                : this(settings, name, func, (collection, value) => collection[name] = value.ToString())
+            {
+                
             }
 
             #endregion
@@ -340,7 +359,7 @@ namespace Chauffeur.Jenkins.Configuration
 
             public StringSetting(NameValueCollection settings, string name, string value)
                 : base(settings, name, s => string.IsNullOrEmpty(s) ? value : s)
-            {
+            {                
             }
 
             #endregion
