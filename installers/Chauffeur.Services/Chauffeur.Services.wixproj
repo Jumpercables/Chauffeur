@@ -6,7 +6,7 @@
     <ProductVersion>3.9</ProductVersion>
     <ProjectGuid>ef570f84-9b8f-4a81-8c8d-b4984ed9e4fa</ProjectGuid>
     <SchemaVersion>2.0</SchemaVersion>
-    <OutputName>Jenkins Chauffeur Service</OutputName>
+    <OutputName><![CDATA[Jenkins Chauffeur Service v$(Version)]]></OutputName>
     <OutputType>Package</OutputType>
     <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' AND '$(MSBuildExtensionsPath32)' != '' ">$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
     <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' ">$(MSBuildExtensionsPath)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
@@ -14,13 +14,17 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <OutputPath>bin\$(Configuration)\</OutputPath>
+    <OutputName>Jenkins Chauffeur Service</OutputName>
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
     <DefineConstants>Debug;</DefineConstants>
+    <WixVariables>
+    </WixVariables>
+    <SuppressPdbOutput>True</SuppressPdbOutput>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <OutputPath>bin\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
-    <DefineConstants>ProductVersion=1.0.0</DefineConstants>
+    <DefineConstants>Version=$(Version)</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Dialogs\ServiceAccountDlg.wxs" />
@@ -73,4 +77,11 @@
 	<Target Name="AfterBuild">
 	</Target>
 	-->
+  <Target Name="AfterBuild">
+    <GetAssemblyIdentity AssemblyFiles="..\..\src\bin\$(Configuration)\Chauffeur.Jenkins.dll">
+      <Output TaskParameter="Assemblies" ItemName="AssemblyVersion" />
+    </GetAssemblyIdentity>
+    <Copy SourceFiles=".\bin\$(Configuration)\$(OutputName).msi" DestinationFiles=".\bin\$(Configuration)\Jenkins Chauffeur Service v.%(AssemblyVersion.Version).msi" />
+    <Delete Files=".\bin\$(Configuration)\$(OutputName).msi" />
+  </Target>
 </Project>

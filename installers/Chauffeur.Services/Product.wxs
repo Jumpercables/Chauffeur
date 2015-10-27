@@ -14,9 +14,9 @@
   <?endif?>
 
   <?ifndef $(var.Version)?>
-  <?define Version = 1.0.0.0?>
+  <?define Version = !(bind.FileVersion.Chauffeur.Jenkins.dll)?>
   <?endif?>
-
+  
   <?define TemplateDir = $(var.BuildArtifactDir)\Templates?>
   <?define DataDir = $(var.BuildArtifactDir)\Data?>
   <!--
