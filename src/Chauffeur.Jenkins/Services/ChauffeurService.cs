@@ -317,7 +317,10 @@ namespace Chauffeur.Jenkins.Services
             if (string.IsNullOrEmpty(this.Configuration.PackageCacheName))
                 return null;
 
-            ManagementObjectSearcher mos = new ManagementObjectSearcher(string.Format("SELECT * FROM Win32_Product WHERE Name LIKE '{0}%'", this.Configuration.PackageCacheName));
+            string queryString = string.Format("SELECT * FROM Win32_Product WHERE Name LIKE '{0}%'", this.Configuration.PackageCacheName);
+            Log.Info(this, "Loading the installed programs '{0}'", queryString);
+
+            ManagementObjectSearcher mos = new ManagementObjectSearcher(queryString);
             foreach (var mo in mos.Get())
             {
                 foreach (var prop in mo.Properties)
