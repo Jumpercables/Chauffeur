@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Management;
 using System.ServiceModel;
 using System.ServiceModel.Web;
 using System.Threading.Tasks;
@@ -112,16 +113,16 @@ namespace Chauffeur.Jenkins.Services
                 var build = await this.GetBuildAsync(jobName, buildNumber);
 
                 // Download the packages.
-                var packages = await this.DownloadPackagesAsync(build);
+                var paths = await this.DownloadPackagesAsync(build);
 
-                // Uninstall previous packages.
+                // Uninstall old packages.
                 await this.UninstallBuildAsync(jobName);
 
                 // Install the packages.
-                this.InstallPackages(packages);
+                this.Install(paths);
 
                 // Save the last build installed.
-                var package = await this.AddPackage(jobName, build, packages);
+                var package = await this.AddPackage(jobName, build, paths);
 
                 // Send the notifications.
                 this.Notify(package);
@@ -155,26 +156,24 @@ namespace Chauffeur.Jenkins.Services
                 if (package != null)
                 {
                     string[] paths = package.Paths;
-
                     if (paths.Any(o => !File.Exists(o)))
                     {
                         var build = await this.GetBuildAsync(package.Job, package.BuildNumber.ToString(CultureInfo.InvariantCulture));
                         paths = await this.DownloadPackagesAsync(build);
                     }
 
-                    Log.Info(this, "Uninstalling {0} package(s).", paths.Length);
-
-                    foreach (var pkg in paths)
-                    {
-                        this.RunMsi(string.Format("/c start /MIN /wait msiexec.exe /x \"{0}\" /quiet {1}", pkg, this.Configuration.UninstallPropertyReferences));
-                    }
-
-                    this.Serialize(packages.Where(p => p != package));
+                    this.Serialize(packages.Where(pkg => pkg != package));
+                    this.Uninstall(paths);
 
                     return true;
                 }
 
-                Log.Info(this, "The {0} is not installed.", jobName);
+                string path = await this.GetPackageCacheAsync();
+                if (path != null)
+                {
+                    this.Uninstall(path);
+                    return true;
+                }
             }
             catch (Exception e)
             {
@@ -310,16 +309,53 @@ namespace Chauffeur.Jenkins.Services
         }
 
         /// <summary>
+        ///     Gets the uninstall files from the package cache.
+        /// </summary>
+        /// <returns>Returns a <see cref="string" /> representing the file from the package cache.</returns>
+        private string GetPackageCache()
+        {
+            if (string.IsNullOrEmpty(this.Configuration.PackageCacheName))
+                return null;
+
+            ManagementObjectSearcher mos = new ManagementObjectSearcher(string.Format("SELECT * FROM Win32_Product WHERE Name LIKE '{0}%'", this.Configuration.PackageCacheName));
+            foreach (var mo in mos.Get())
+            {
+                foreach (var prop in mo.Properties)
+                {
+                    if (prop.Name == "PackageCache")
+                    {
+                        string packageCache = (string) prop.Value;
+                        if (packageCache != null && File.Exists(packageCache))
+                            return packageCache;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        ///     Gets the uninstall files from the package cache.
+        /// </summary>
+        /// <returns>Returns a <see cref="string" /> representing the file from the package cache.</returns>
+        private Task<string> GetPackageCacheAsync()
+        {
+            return Task.Run(() => this.GetPackageCache());
+        }
+
+        /// <summary>
         ///     Installs the build MSI packages using the "msiexec.exe" utility on the windows machine.
         /// </summary>
-        /// <param name="packages">The packages.</param>
-        private void InstallPackages(string[] packages)
+        /// <param name="paths">The packages.</param>
+        private void Install(params string[] paths)
         {
-            Log.Info(this, "Installing {0} package(s).", packages.Length);
+            if (paths == null || paths.All(o => o == null)) return;
 
-            foreach (var pkg in packages)
+            Log.Info(this, "Installing {0} package(s).", paths.Length);
+
+            foreach (var pkg in paths)
             {
-                this.RunMsi(string.Format("/c start /MIN /wait msiexec.exe /i \"{0}\" /quiet {1}", pkg, this.Configuration.InstallPropertyReferences));
+                this.WaitForExit(string.Format("/c start /MIN /wait msiexec.exe /i \"{0}\" /quiet {1}", pkg, this.Configuration.InstallPropertyReferences));
             }
         }
 
@@ -342,10 +378,36 @@ namespace Chauffeur.Jenkins.Services
         }
 
         /// <summary>
-        ///     Runs the msiexec executable that is used to install and uninstall the packages.
+        ///     Saves the packages to the packages data file.
+        /// </summary>
+        /// <param name="packages">The packages.</param>
+        private void Serialize(IEnumerable<Package> packages)
+        {
+            var json = JsonConvert.SerializeObject(packages, Formatting.Indented);
+            File.WriteAllText(base.Configuration.PackagesDataFile, json);
+        }
+
+        /// <summary>
+        ///     Uninstalls the specified paths.
+        /// </summary>
+        /// <param name="paths">The paths.</param>
+        private void Uninstall(params string[] paths)
+        {
+            if (paths == null || paths.All(o => o == null)) return;
+
+            Log.Info(this, "Uninstalling {0} package(s).", paths.Length);
+
+            foreach (var pkg in paths)
+            {
+                this.WaitForExit(string.Format("/c start /MIN /wait msiexec.exe /x \"{0}\" /quiet {1}", pkg, this.Configuration.UninstallPropertyReferences));
+            }
+        }
+
+        /// <summary>
+        ///     Shells the command prompt and waits for it to exit.
         /// </summary>
         /// <param name="arguments">The arguments.</param>
-        private void RunMsi(string arguments)
+        private void WaitForExit(string arguments)
         {
             ProcessStartInfo startInfo = new ProcessStartInfo("cmd.exe", arguments);
             startInfo.WindowStyle = ProcessWindowStyle.Hidden;
@@ -354,18 +416,8 @@ namespace Chauffeur.Jenkins.Services
 
             using (Process process = Process.Start(startInfo))
             {
-                process.WaitForExit();
+                if (process != null) process.WaitForExit();
             }
-        }
-
-        /// <summary>
-        ///     Saves the packages to the packages data file.
-        /// </summary>
-        /// <param name="packages">The packages.</param>
-        private void Serialize(IEnumerable<Package> packages)
-        {
-            var json = JsonConvert.SerializeObject(packages, Formatting.Indented);
-            File.WriteAllText(base.Configuration.PackagesDataFile, json);
         }
 
         #endregion

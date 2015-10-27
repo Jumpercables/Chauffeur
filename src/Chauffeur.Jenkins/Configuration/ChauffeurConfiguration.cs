@@ -2,15 +2,13 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Configuration;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Web.UI.WebControls;
 
 namespace Chauffeur.Jenkins.Configuration
 {
     /// <summary>
-    ///     Provides access to the configurations provided in the configuration file.
+    /// Provides access to the configurations provided in the configuration file.
     /// </summary>
     public class ChauffeurConfiguration
     {
@@ -22,6 +20,7 @@ namespace Chauffeur.Jenkins.Configuration
         private Setting<string> _From;
         private Setting<string> _Host;
         private Setting<string> _InstallPropertyReferences;
+        private Setting<string> _PackageCacheName;
         private Setting<string> _PackagesDataFile;
         private Setting<string> _Server;
         private Setting<string> _SubjectTemplateFile;
@@ -111,6 +110,17 @@ namespace Chauffeur.Jenkins.Configuration
         public string InstallPropertyReferences
         {
             get { return _InstallPropertyReferences.Value; }
+        }
+
+        /// <summary>
+        /// Gets the name of the package cache.
+        /// </summary>
+        /// <value>
+        /// The name of the package cache.
+        /// </value>
+        public string PackageCacheName
+        {
+            get { return _PackageCacheName.Value; }
         }
 
         /// <summary>
@@ -209,14 +219,18 @@ namespace Chauffeur.Jenkins.Configuration
 
         #endregion
 
+        #region Public Methods
+
         /// <summary>
-        /// Returns the configurations as-a dictionary.
+        ///     Returns the configurations as-a dictionary.
         /// </summary>
-        /// <returns>Returns a <see cref="Dictionary{String, String}"/> representing the configurations.</returns>
+        /// <returns>Returns a <see cref="Dictionary{String, String}" /> representing the configurations.</returns>
         public Dictionary<string, string> ToDictionary()
         {
             return this.Settings.AllKeys.ToDictionary(key => key, key => this.Settings[key]);
         }
+
+        #endregion
 
         #region Private Methods
 
@@ -266,6 +280,7 @@ namespace Chauffeur.Jenkins.Configuration
             _ArtifactsDirectory = new Setting<string>(this.Settings, "Chauffeur/Packages/Artifacts", value => this.GetDirectory(value, Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Jenkins")));
             _InstallPropertyReferences = new StringSetting(this.Settings, "Chauffeur/Packages/InstallPropertyReferences", "");
             _UninstallPropertyReferences = new StringSetting(this.Settings, "Chauffeur/Packages/UninstallPropertyReferences", "");
+            _PackageCacheName = new StringSetting(this.Settings, "Chauffeur/Packages/PackageCacheName", "");
         }
 
         /// <summary>
@@ -336,7 +351,6 @@ namespace Chauffeur.Jenkins.Configuration
             public Setting(NameValueCollection settings, string name, Func<string, TValue> func)
                 : this(settings, name, func, (collection, value) => collection[name] = value.ToString())
             {
-                
             }
 
             #endregion
@@ -359,7 +373,7 @@ namespace Chauffeur.Jenkins.Configuration
 
             public StringSetting(NameValueCollection settings, string name, string value)
                 : base(settings, name, s => string.IsNullOrEmpty(s) ? value : s)
-            {                
+            {
             }
 
             #endregion
