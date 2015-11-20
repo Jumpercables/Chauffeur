@@ -81,7 +81,7 @@
     <GetAssemblyIdentity AssemblyFiles="..\..\src\bin\$(Configuration)\Chauffeur.Jenkins.dll">
       <Output TaskParameter="Assemblies" ItemName="AssemblyVersion" />
     </GetAssemblyIdentity>
-    <Copy SourceFiles=".\bin\$(Configuration)\$(OutputName).msi" DestinationFiles=".\bin\$(Configuration)\Jenkins Chauffeur Service v.%(AssemblyVersion.Version).msi" />
+    <Copy SourceFiles=".\bin\$(Configuration)\$(OutputName).msi" DestinationFiles=".\bin\$(Configuration)\Jenkins Chauffeur Service v%(AssemblyVersion.Version).msi" />
     <Delete Files=".\bin\$(Configuration)\$(OutputName).msi" />
   </Target>
 </Project>
