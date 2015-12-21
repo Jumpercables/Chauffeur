@@ -8,9 +8,9 @@
   <!--
       ====================================================================================
       Defines & Variables
-   -->
+   --> 
   <?ifndef $(var.BuildArtifactDir)?>
-  <?define BuildArtifactDir = ..\..\src\bin\Debug?>
+  <?define BuildArtifactDir = ..\..\src\bin\$(var.Chauffeur.Jenkins.Configuration)?>
   <?endif?>
 
   <?ifndef $(var.Version)?>
