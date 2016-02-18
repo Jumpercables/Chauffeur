@@ -283,7 +283,7 @@ namespace Chauffeur.Jenkins.Services
 
             return package;
         }
-
+        
         /// <summary>
         ///     Downloads the packages of the build.
         /// </summary>
@@ -354,12 +354,14 @@ namespace Chauffeur.Jenkins.Services
         {
             if (paths == null || paths.All(o => o == null)) return;
 
-            Log.Info(this, "Installing {0} package(s).", paths.Length);
+            Log.Info(this, "Installing {0} package(s).", paths.Length);            
 
             foreach (var pkg in paths)
             {
                 this.WaitForExit(string.Format("/c start /MIN /wait msiexec.exe /i \"{0}\" /quiet {1}", pkg, this.Configuration.InstallPropertyReferences));
             }
+
+            this.WaitForExit(this.Configuration.AfterInstall, this.Configuration.AfterInstallParameters);
         }
 
         /// <summary>
@@ -400,6 +402,8 @@ namespace Chauffeur.Jenkins.Services
 
             Log.Info(this, "Uninstalling {0} package(s).", paths.Length);
 
+            this.WaitForExit(this.Configuration.BeforeUninstall, this.Configuration.BeforeUninstallParameters);
+
             foreach (var pkg in paths)
             {
                 this.WaitForExit(string.Format("/c start /MIN /wait msiexec.exe /x \"{0}\" /quiet {1}", pkg, this.Configuration.UninstallPropertyReferences));
@@ -412,7 +416,19 @@ namespace Chauffeur.Jenkins.Services
         /// <param name="arguments">The arguments.</param>
         private void WaitForExit(string arguments)
         {
-            ProcessStartInfo startInfo = new ProcessStartInfo("cmd.exe", arguments);
+            this.WaitForExit("cmd.exe", arguments);
+        }
+
+        /// <summary>
+        ///     Shells the command prompt and waits for it to exit.
+        /// </summary>
+        /// <param name="fileName">Name of the file.</param>
+        /// <param name="arguments">The arguments.</param>
+        private void WaitForExit(string fileName, string arguments)
+        {
+            if (string.IsNullOrEmpty(fileName)) return;
+
+            ProcessStartInfo startInfo = new ProcessStartInfo(fileName, arguments);
             startInfo.WindowStyle = ProcessWindowStyle.Hidden;
 
             Log.Info(this, string.Format("\t{0} {1}", startInfo.FileName, startInfo.Arguments));

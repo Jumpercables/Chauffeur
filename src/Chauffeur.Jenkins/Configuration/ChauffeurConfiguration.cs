@@ -8,13 +8,17 @@ using System.Linq;
 namespace Chauffeur.Jenkins.Configuration
 {
     /// <summary>
-    /// Provides access to the configurations provided in the configuration file.
+    ///     Provides access to the configurations provided in the configuration file.
     /// </summary>
     public class ChauffeurConfiguration
     {
         #region Fields
 
+        private Setting<string> _AfterInstall;
+        private Setting<string> _AfterInstallParameters;
         private Setting<string> _ArtifactsDirectory;
+        private Setting<string> _BeforeUninstall;
+        private Setting<string> _BeforeUninstallParameters;
         private Setting<string> _BodyTemplateFile;
         private Setting<string> _DataDirectory;
         private Setting<string> _From;
@@ -47,6 +51,28 @@ namespace Chauffeur.Jenkins.Configuration
         #region Public Properties
 
         /// <summary>
+        ///     Gets the after install.
+        /// </summary>
+        /// <value>
+        ///     The after install.
+        /// </value>
+        public string AfterInstall
+        {
+            get { return _AfterInstall.Value; }
+        }
+
+        /// <summary>
+        ///     Gets the after install parameters.
+        /// </summary>
+        /// <value>
+        ///     The after install parameters.
+        /// </value>
+        public string AfterInstallParameters
+        {
+            get { return _AfterInstallParameters.Value; }
+        }
+
+        /// <summary>
         ///     Gets the artifacts directory.
         /// </summary>
         /// <value>
@@ -55,6 +81,28 @@ namespace Chauffeur.Jenkins.Configuration
         public string ArtifactsDirectory
         {
             get { return _ArtifactsDirectory.Value; }
+        }
+
+        /// <summary>
+        ///     Gets the before uninstall.
+        /// </summary>
+        /// <value>
+        ///     The before uninstall.
+        /// </value>
+        public string BeforeUninstall
+        {
+            get { return _BeforeUninstall.Value; }
+        }
+
+        /// <summary>
+        ///     Gets the before uninstall parameters.
+        /// </summary>
+        /// <value>
+        ///     The before uninstall parameters.
+        /// </value>
+        public string BeforeUninstallParameters
+        {
+            get { return _BeforeUninstallParameters.Value; }
         }
 
         /// <summary>
@@ -113,10 +161,10 @@ namespace Chauffeur.Jenkins.Configuration
         }
 
         /// <summary>
-        /// Gets the name of the package cache.
+        ///     Gets the name of the package cache.
         /// </summary>
         /// <value>
-        /// The name of the package cache.
+        ///     The name of the package cache.
         /// </value>
         public string PackageCacheName
         {
@@ -281,6 +329,10 @@ namespace Chauffeur.Jenkins.Configuration
             _InstallPropertyReferences = new StringSetting(this.Settings, "Chauffeur/Packages/InstallPropertyReferences", "");
             _UninstallPropertyReferences = new StringSetting(this.Settings, "Chauffeur/Packages/UninstallPropertyReferences", "");
             _PackageCacheName = new StringSetting(this.Settings, "Chauffeur/Packages/PackageCacheName", "");
+            _BeforeUninstall = new StringSetting(this.Settings, "Chauffeur/Packages/BeforeInstall", "");
+            _AfterInstall = new StringSetting(this.Settings, "Chauffeur/Packages/AfterInstall", "");
+            _BeforeUninstallParameters = new StringSetting(this.Settings, "Chauffeur/Packages/BeforeUninstallParameters", "");
+            _AfterInstallParameters = new StringSetting(this.Settings, "Chauffeur/Packages/AfterInstallParameters", "");
         }
 
         /// <summary>
