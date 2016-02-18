@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Net;
 
@@ -9,7 +10,7 @@ namespace Chauffeur.Tests.Jenkins.Client
     {
         #region Fields
 
-        private readonly IDictionary<Uri, MockWebResponse> _Responses = new Dictionary<Uri, MockWebResponse>();
+        private readonly ConcurrentDictionary<Uri, MockWebResponse> _Responses = new ConcurrentDictionary<Uri, MockWebResponse>();
 
         #endregion
 
