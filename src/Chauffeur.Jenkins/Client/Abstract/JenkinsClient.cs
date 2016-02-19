@@ -87,7 +87,7 @@ namespace Chauffeur.Jenkins.Client
         /// <returns>Returns a <see cref="T" /> representing the resource converted to the type.</returns>
         public T GetResource<T>(Uri resourceUri, Func<WebResponse, T> func)
         {
-            var request = this.Create(resourceUri, WebRequestMethods.Http.Get);
+            var request = Create(resourceUri, WebRequestMethods.Http.Get);
             return func(request.GetResponse());
         }
 
