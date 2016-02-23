@@ -25,8 +25,8 @@ if (result != "SUCCESS") {
     return;
 }
 
-def jobName = 'Sempra_Development_10.2.1b_Desktop_Gas'
-def buildNumber = '36'
+def jobName = 'The_Name-Of-The-Build'
+def buildNumber = 'The-Build-Number'
 
 def passes = new ArrayList<String>()
 def errors = new ArrayList<String>()
