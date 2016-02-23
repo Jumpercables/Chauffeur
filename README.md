@@ -1,5 +1,3 @@
-[![Stories in Ready](https://badge.waffle.io/Jumpercables/Chauffeur.svg?label=ready&title=Ready)](http://waffle.io/Jumpercables/Chauffeur)
-
 # Chauffeur #
 A service that communicates with the Jenkins Continious Integration Service to download and install artifacts on the host servers. 
 
@@ -30,8 +28,8 @@ A groovy script that can be configured in a "post-build" event that will notify 
     - `Chauffeur/Jenkins/User` - The name of the user that has access to the Jenkins CI.
     - `Chauffeur/Jenkins/Token` - The API token for the user.
     - `Chauffeur/Packages/Artifacts` - The path to the directory that will contain the downloaded artifacts for the builds.    
-    - `Chauffeur/Packages/PreInstall` - The path to an bat file that will be run before the uninstall of the MSI.
-    - `Chauffeur/Packages/PostInstall` - The path to an bat file that will be run after the install of the MSI.
+    - `Chauffeur/Packages/PreInstall` - The path to an powershell script file that will be run before the uninstall of the MSI.
+    - `Chauffeur/Packages/PostInstall` - The path to an powershell script file that will be run after the install of the MSI.
     - `Chauffeur/Notifications/Host` - The STMP server.
     - `Chauffeur/Notifications/To` - The group alias or individual e-mail addresses separated by commas.
     - `Chauffeur/Notifications/From` - The group alias or e-mail address.    
@@ -40,23 +38,25 @@ A groovy script that can be configured in a "post-build" event that will notify 
 
 3. Start and stop the service to allow the latest configuration changes to take affect.
 4. Download and install the `Groovy Postbuild` plugin on the Jenkins server.
-5. Copy and past the contents of the `Chauffeur.groovy` script into the contents window of the `Groovy Postbuild` plugin on the build configuration (that is the highest in build chain that generates an MSI).    
+5. Copy and past the contents of the `Jenkins.groovy` script into the contents window of the `Groovy Postbuild` plugin on the build configuration (that is the highest in build chain that generates an MSI).    
 
     ```groovy
     /*
-    .SYNOPSIS
-        The script is designed to act as a client proxy that will notify the
-        machines (that are hosting the Jenkins Chauffeur Service) that a new
-        build should be installed.
-    .NOTES
-        File Name       : Chauffeur.groovy        
-        Prerequisite    : Groovy 1.8.9
-                        : Groovy Postbuild Plugin (https://wiki.jenkins-ci.org/display/JENKINS/Groovy+Postbuild+Plugin)
-    */
+        .SYNOPSIS
+            The script is designed to act as a client proxy that will notify the
+            machines (that are hosting the Jenkins Chauffeur Service) that a new
+            build should be installed.
+        .NOTES
+            File Name      : Chauffeur.groovy
+            Author         : Kyle Baesler
+            Prerequisite   : Groovy 1.8.9
+                           : Groovy Postbuild Plugin (https://wiki.jenkins-ci.org/display/JENKINS/Groovy+Postbuild+Plugin)
+     */
+
     import groovy.json.JsonSlurper
 
     // The name of the computers that host the Chauffeur service.
-    def MACHINE_NAMES = []
+    def MACHINE_NAMES = ["localhost"]
 
     // The port that the WCF service is hosted on.
     def PORT = 8080
@@ -85,20 +85,22 @@ A groovy script that can be configured in a "post-build" event that will notify 
 
             def jsonSlurper = new JsonSlurper()
             def build = jsonSlurper.parseText(text);
-            if(build != null && build.number.toString() == buildNumber) {
+            if (build != null && build.number.toString() == buildNumber) {
                 passes.add(s)
                 manager.listener.logger.println("Chauffeur.groovy: Successfully installed on " + s);
-            }
-            else {
+            } else {
                 errors.add(s)
                 manager.listener.logger.println("Chauffeur.groovy: Failed to install on " + s);
             }
         } catch (Exception e) {
+            errors.add(s)
             manager.listener.logger.println("Chauffeur.groovy: " + e.message)
         }
     }
 
-    if(errors.size() > 0)
+    if (errors.size() > 0)
         throw new Exception()
+
+    manager.addInfoBadge(passes.join(", "))
     ```
     > The script assumes that the WCF configurations for the service in the `Chauffeur.exe.config` have not been modified. 
