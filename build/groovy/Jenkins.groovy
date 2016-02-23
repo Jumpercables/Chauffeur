@@ -50,6 +50,7 @@ MACHINE_NAMES.eachWithIndex { String s, int i ->
             manager.listener.logger.println("Chauffeur.groovy: Failed to install on " + s);
         }
     } catch (Exception e) {
+        errors.add(s)
         manager.listener.logger.println("Chauffeur.groovy: " + e.message)
     }
 }
