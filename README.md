@@ -29,9 +29,9 @@ A groovy script that can be configured in a "post-build" event that will notify 
     - `Chauffeur/Jenkins/Server` - The URL to the Jenkins CI.
     - `Chauffeur/Jenkins/User` - The name of the user that has access to the Jenkins CI.
     - `Chauffeur/Jenkins/Token` - The API token for the user.
-    - `Chauffeur/Packages/Artifacts` - The path to the directory that will contain the downloaded artifacts for the builds.
-    - `Chauffeur/Packages/InstallPropertyReferences` - The property references that are passed to the MSI during install.
-    - `Chauffeur/Packages/UninstallPropertyReferences` - The property references that are passed to the MSI during uninstall.
+    - `Chauffeur/Packages/Artifacts` - The path to the directory that will contain the downloaded artifacts for the builds.    
+    - `Chauffeur/Packages/PreInstall` - The path to an bat file that will be run before the uninstall of the MSI.
+    - `Chauffeur/Packages/PostInstall` - The path to an bat file that will be run after the install of the MSI.
     - `Chauffeur/Notifications/Host` - The STMP server.
     - `Chauffeur/Notifications/To` - The group alias or individual e-mail addresses separated by commas.
     - `Chauffeur/Notifications/From` - The group alias or e-mail address.    

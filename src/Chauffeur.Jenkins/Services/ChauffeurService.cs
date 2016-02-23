@@ -5,6 +5,8 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Management;
+using System.Management.Automation;
+using System.Management.Automation.Runspaces;
 using System.ServiceModel;
 using System.ServiceModel.Web;
 using System.Threading.Tasks;
@@ -283,7 +285,7 @@ namespace Chauffeur.Jenkins.Services
 
             return package;
         }
-        
+
         /// <summary>
         ///     Downloads the packages of the build.
         /// </summary>
@@ -354,14 +356,14 @@ namespace Chauffeur.Jenkins.Services
         {
             if (paths == null || paths.All(o => o == null)) return;
 
-            Log.Info(this, "Installing {0} package(s).", paths.Length);            
+            Log.Info(this, "Installing {0} package(s).", paths.Length);
 
             foreach (var pkg in paths)
             {
                 this.WaitForExit(string.Format("/c start /MIN /wait msiexec.exe /i \"{0}\" /quiet {1}", pkg, this.Configuration.InstallPropertyReferences));
             }
 
-            this.WaitForExit(this.Configuration.AfterInstall, this.Configuration.AfterInstallParameters);
+            this.WaitForPowershell(this.Configuration.PowershellPostInstall);
         }
 
         /// <summary>
@@ -402,7 +404,7 @@ namespace Chauffeur.Jenkins.Services
 
             Log.Info(this, "Uninstalling {0} package(s).", paths.Length);
 
-            this.WaitForExit(this.Configuration.BeforeUninstall, this.Configuration.BeforeUninstallParameters);
+            this.WaitForPowershell(this.Configuration.PowershellPreUninstall);
 
             foreach (var pkg in paths)
             {
@@ -428,15 +430,84 @@ namespace Chauffeur.Jenkins.Services
         {
             if (string.IsNullOrEmpty(fileName)) return;
 
-            ProcessStartInfo startInfo = new ProcessStartInfo(fileName, arguments);
-            startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-
-            Log.Info(this, string.Format("\t{0} {1}", startInfo.FileName, startInfo.Arguments));
-
-            using (Process process = Process.Start(startInfo))
+            try
             {
-                if (process != null) process.WaitForExit();
+                ProcessStartInfo startInfo = new ProcessStartInfo(fileName, arguments);
+                startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                startInfo.RedirectStandardOutput = true;
+                startInfo.RedirectStandardError = true;
+                startInfo.UseShellExecute = false;
+
+                Log.Info(this, string.Format("\t{0} {1}", startInfo.FileName, startInfo.Arguments));
+
+                using (Process process = Process.Start(startInfo))
+                {
+                    if (process != null)
+                    {
+                        using (var sr = process.StandardOutput)
+                        {
+                            string msg = sr.ReadToEnd();
+                            if (!string.IsNullOrEmpty(msg))
+                                Log.Info(this, msg);
+                        }
+
+                        process.WaitForExit();
+
+                        using (var sr = process.StandardError)
+                        {
+                            string msg = sr.ReadToEnd();
+                            if(!string.IsNullOrEmpty(msg))
+                                Log.Error(this, msg);
+                        }
+                    }
+                }
             }
+            catch (Exception ex)
+            {
+                Log.Error(this, ex);
+            }
+        }
+
+        /// <summary>
+        ///     Waits for powershell script to complete execution under the process scope.
+        /// </summary>
+        /// <param name="scriptFile">The script file.</param>
+        private void WaitForPowershell(string scriptFile)
+        {
+            if (!File.Exists(scriptFile)) return;
+
+            var contents = File.ReadAllText(scriptFile);
+            if (string.IsNullOrEmpty(contents)) return;
+
+            try
+            {
+                Log.Info(this, string.Format("\t{0} {1}", Path.GetFileName(scriptFile), contents));
+
+                using (Runspace runspace = RunspaceFactory.CreateRunspace())
+                {
+                    runspace.Open();
+
+                    RunspaceInvoke runspaceInvoke = new RunspaceInvoke(runspace);
+                    runspaceInvoke.Invoke("Set-ExecutionPolicy Unrestricted -Scope Process");
+
+                    Pipeline pipeline = runspace.CreatePipeline();
+                    pipeline.Commands.AddScript(contents);
+                    pipeline.Commands.Add("Out-String");
+
+                    var results = pipeline.Invoke();
+                    foreach (var pso in results)
+                    {
+                        var msg = pso.ToString();
+                        if(!string.IsNullOrEmpty(msg))
+                            Log.Info(this, msg);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(this, ex);
+            }
+            
         }
 
         #endregion

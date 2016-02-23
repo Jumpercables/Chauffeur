@@ -123,7 +123,8 @@
 
       <Component Id="Data" Guid="79C3F26D-1BB0-4732-B69F-30D7359D2791" Directory="DATAFOLDER">
         <File Id="Packages.json" Source="$(var.DataDir)\Packages.json"/>
-
+        <File Id="Install.ps1" Source="$(var.DataDir)\Install.ps1"/>
+        <File Id="Uninstall.ps1" Source="$(var.DataDir)\Uninstall.ps1"/>
         <RemoveFile Id="DeleteData" Name="*.*" On="uninstall" />
       </Component>
     </ComponentGroup>
