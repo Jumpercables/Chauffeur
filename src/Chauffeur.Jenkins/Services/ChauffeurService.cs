@@ -127,7 +127,7 @@ namespace Chauffeur.Jenkins.Services
                 var package = await this.AddPackage(jobName, build, paths);
 
                 // Send the notifications.
-                this.Notify(package);
+                await this.Notify(package);
 
                 // Return the build.
                 return build;
@@ -370,10 +370,11 @@ namespace Chauffeur.Jenkins.Services
         ///     Sends the notification of the completion.
         /// </summary>
         /// <param name="package">The package.</param>
-        private async void Notify(Package package)
+        /// <returns></returns>
+        private async Task<bool> Notify(Package package)
         {
             NotificationService service = new NotificationService();
-            await service.SendAsync(package).ContinueWith((task) =>
+            return await service.SendAsync(package).ContinueWith((task) =>
             {
                 if (task.IsFaulted)
                 {
@@ -381,6 +382,8 @@ namespace Chauffeur.Jenkins.Services
                 }
 
                 Log.Info(this, "Notification: {0}", task.Result);
+
+                return task.Result;
             });
         }
 
@@ -456,7 +459,7 @@ namespace Chauffeur.Jenkins.Services
                         using (var sr = process.StandardError)
                         {
                             string msg = sr.ReadToEnd();
-                            if(!string.IsNullOrEmpty(msg))
+                            if (!string.IsNullOrEmpty(msg))
                                 Log.Error(this, msg);
                         }
                     }
@@ -498,7 +501,7 @@ namespace Chauffeur.Jenkins.Services
                     foreach (var pso in results)
                     {
                         var msg = pso.ToString();
-                        if(!string.IsNullOrEmpty(msg))
+                        if (!string.IsNullOrEmpty(msg))
                             Log.Info(this, msg);
                     }
                 }
@@ -507,7 +510,6 @@ namespace Chauffeur.Jenkins.Services
             {
                 Log.Error(this, ex);
             }
-            
         }
 
         #endregion

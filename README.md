@@ -47,7 +47,7 @@ A groovy script that can be configured in a "post-build" event that will notify 
             machines (that are hosting the Jenkins Chauffeur Service) that a new
             build should be installed.
         .NOTES
-            File Name      : Chauffeur.groovy
+            File Name      : Jenkins.groovy
             Author         : Kyle Baesler
             Prerequisite   : Groovy 1.8.9
                            : Groovy Postbuild Plugin (https://wiki.jenkins-ci.org/display/JENKINS/Groovy+Postbuild+Plugin)
