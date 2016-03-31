@@ -135,9 +135,8 @@ namespace Chauffeur.Jenkins.Services
             catch (Exception e)
             {
                 Log.Error(this, e);
+                throw;
             }
-
-            return null;
         }
 
         /// <summary>
@@ -166,20 +165,18 @@ namespace Chauffeur.Jenkins.Services
 
                     this.Serialize(packages.Where(pkg => pkg != package));
                     this.Uninstall(paths);
-
-                    return true;
                 }
 
                 string path = await this.GetPackageCacheAsync();
                 if (path != null)
                 {
-                    this.Uninstall(path);
-                    return true;
+                    return this.Uninstall(path);
                 }
             }
             catch (Exception e)
             {
                 Log.Error(this, e);
+                throw;
             }
 
             return false;
@@ -202,9 +199,8 @@ namespace Chauffeur.Jenkins.Services
             catch (Exception e)
             {
                 Log.Error(this, e);
+                throw;
             }
-
-            return null;
         }
 
         /// <summary>
@@ -401,27 +397,27 @@ namespace Chauffeur.Jenkins.Services
         ///     Uninstalls the specified paths.
         /// </summary>
         /// <param name="paths">The paths.</param>
-        private void Uninstall(params string[] paths)
+        /// <returns>Returns a <see cref="bool" /> representing <c>true</c> when there was a package uninstalled.</returns>
+        private bool Uninstall(params string[] paths)
         {
-            if (paths == null || paths.All(o => o == null)) return;
+            if (paths == null || paths.All(o => o == null)) return false;
 
             Log.Info(this, "Uninstalling {0} package(s).", paths.Length);
 
             this.WaitForPowershell(this.Configuration.PowershellPreUninstall);
 
-            foreach (var pkg in paths)
-            {
-                this.WaitForExit(string.Format("/c start /MIN /wait msiexec.exe /x \"{0}\" /quiet {1}", pkg, this.Configuration.UninstallPropertyReferences));
-            }
+            var flags = paths.Select(pkg => this.WaitForExit(string.Format("/c start /MIN /wait msiexec.exe /x \"{0}\" /quiet {1}", pkg, this.Configuration.UninstallPropertyReferences)));
+            return flags.Any(o => true);
         }
 
         /// <summary>
         ///     Shells the command prompt and waits for it to exit.
         /// </summary>
         /// <param name="arguments">The arguments.</param>
-        private void WaitForExit(string arguments)
+        /// <returns>Returns a <see cref="bool" /> representing <c>true</c> when shell command completed.</returns>
+        private bool WaitForExit(string arguments)
         {
-            this.WaitForExit("cmd.exe", arguments);
+            return this.WaitForExit("cmd.exe", arguments);
         }
 
         /// <summary>
@@ -429,9 +425,11 @@ namespace Chauffeur.Jenkins.Services
         /// </summary>
         /// <param name="fileName">Name of the file.</param>
         /// <param name="arguments">The arguments.</param>
-        private void WaitForExit(string fileName, string arguments)
+        /// <returns>Returns a <see cref="bool" /> representing <c>true</c> when shell command completed.</returns>
+        private bool WaitForExit(string fileName, string arguments)
         {
-            if (string.IsNullOrEmpty(fileName)) return;
+            if (string.IsNullOrEmpty(fileName)) return false;
+            if (!File.Exists(fileName)) return false;
 
             try
             {
@@ -469,6 +467,8 @@ namespace Chauffeur.Jenkins.Services
             {
                 Log.Error(this, ex);
             }
+
+            return true;
         }
 
         /// <summary>
@@ -477,38 +477,31 @@ namespace Chauffeur.Jenkins.Services
         /// <param name="scriptFile">The script file.</param>
         private void WaitForPowershell(string scriptFile)
         {
-            if (!File.Exists(scriptFile)) return;
+            if (string.IsNullOrEmpty(scriptFile) || !File.Exists(scriptFile)) return;
 
             var contents = File.ReadAllText(scriptFile);
             if (string.IsNullOrEmpty(contents)) return;
 
-            try
-            {
-                Log.Info(this, string.Format("\t{0} {1}", Path.GetFileName(scriptFile), contents));
+            Log.Info(this, string.Format("\t{0} {1}", Path.GetFileName(scriptFile), contents));
 
-                using (Runspace runspace = RunspaceFactory.CreateRunspace())
+            using (Runspace runspace = RunspaceFactory.CreateRunspace())
+            {
+                runspace.Open();
+
+                RunspaceInvoke runspaceInvoke = new RunspaceInvoke(runspace);
+                runspaceInvoke.Invoke("Set-ExecutionPolicy Unrestricted -Scope Process");
+
+                Pipeline pipeline = runspace.CreatePipeline();
+                pipeline.Commands.AddScript(contents);
+                pipeline.Commands.Add("Out-String");
+
+                var results = pipeline.Invoke();
+                foreach (var pso in results)
                 {
-                    runspace.Open();
-
-                    RunspaceInvoke runspaceInvoke = new RunspaceInvoke(runspace);
-                    runspaceInvoke.Invoke("Set-ExecutionPolicy Unrestricted -Scope Process");
-
-                    Pipeline pipeline = runspace.CreatePipeline();
-                    pipeline.Commands.AddScript(contents);
-                    pipeline.Commands.Add("Out-String");
-
-                    var results = pipeline.Invoke();
-                    foreach (var pso in results)
-                    {
-                        var msg = pso.ToString();
-                        if (!string.IsNullOrEmpty(msg))
-                            Log.Info(this, msg);
-                    }
+                    var msg = pso.ToString();
+                    if (!string.IsNullOrEmpty(msg))
+                        Log.Info(this, msg);
                 }
-            }
-            catch (Exception ex)
-            {
-                Log.Error(this, ex);
             }
         }
 
