@@ -73,6 +73,7 @@
     <Compile Include="Jenkins\Client\MockWebRequestFactory.cs" />
     <Compile Include="Jenkins\Client\MockWebResponse.cs" />
     <Compile Include="Jenkins\Configurations\ChauffeurConfigurationTest.cs" />
+    <Compile Include="Jenkins\Listeners\ChauffeurServiceListenerTest.cs" />
     <Compile Include="Jenkins\Model\BuildTest.cs" />
     <Compile Include="Jenkins\Model\PackageTest.cs" />
     <Compile Include="Jenkins\Client\JenkinsClientTest.cs" />

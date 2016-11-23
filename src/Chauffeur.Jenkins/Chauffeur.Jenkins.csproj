@@ -99,6 +99,7 @@
     <Compile Include="Client\Abstract\JenkinsClient.cs" />
     <Compile Include="Client\JsonJenkinsClient.cs" />
     <Compile Include="Configuration\ChauffeurConfiguration.cs" />
+    <Compile Include="Listeners\ChaufferServiceListener.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="Model\Build.cs" />
     <Compile Include="Model\Job.cs" />
