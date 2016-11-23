@@ -1,9 +1,15 @@
 # Chauffeur #
-A service that communicates with the Jenkins Continious Integration Service to download and install artifacts on the host servers. 
+A service that communicates with the Jenkins Continious Integration Service to download and install artifacts on the host servers.
 
 ## Windows Service ##
 A windows service (that hosts a WCF Service) that allows communication between the Jenkins build server and the machine that hosts the window service to automatically
 install the last successful build on the machine.
+
+  - If you run the service as user other than the Local System, you'll need to grant a namespace reservation to that user.
+
+   ```
+   netsh http add urlacl url=http://+:8080/Chauffeur.Jenkins.Services/ChauffeurService/ user=DOMAIN\user
+   ```
 
 ## Groovy Script ##
 A groovy script that can be configured in a "post-build" event that will notify the specified servers that a new build needs to be installed.
@@ -13,7 +19,7 @@ A groovy script that can be configured in a "post-build" event that will notify 
 - Visual Studio 2013
 
 ### Third Party Libraries ###
-- https://jenkins-ci.org/ 
+- https://jenkins-ci.org/
 
 
 ## Getting Started ##
@@ -27,18 +33,18 @@ A groovy script that can be configured in a "post-build" event that will notify 
     - `Chauffeur/Jenkins/Server` - The URL to the Jenkins CI.
     - `Chauffeur/Jenkins/User` - The name of the user that has access to the Jenkins CI.
     - `Chauffeur/Jenkins/Token` - The API token for the user.
-    - `Chauffeur/Packages/Artifacts` - The path to the directory that will contain the downloaded artifacts for the builds.    
+    - `Chauffeur/Packages/Artifacts` - The path to the directory that will contain the downloaded artifacts for the builds.
     - `Chauffeur/Packages/PreInstall` - The path to an powershell script file that will be run before the uninstall of the MSI.
     - `Chauffeur/Packages/PostInstall` - The path to an powershell script file that will be run after the install of the MSI.
     - `Chauffeur/Notifications/Host` - The STMP server.
     - `Chauffeur/Notifications/To` - The group alias or individual e-mail addresses separated by commas.
-    - `Chauffeur/Notifications/From` - The group alias or e-mail address.    
+    - `Chauffeur/Notifications/From` - The group alias or e-mail address.
     - `Chauffeur/Notifications/Subject` - The path to the XSLT used to transform the `package.xml` into readable format.
     - `Chauffeur/Notifications/Body` - The path to the XSLT used to transform the `package.xml` into readable format.
 
 3. Start and stop the service to allow the latest configuration changes to take affect.
 4. Download and install the `Groovy Postbuild` plugin on the Jenkins server.
-5. Copy and past the contents of the `Jenkins.groovy` script into the contents window of the `Groovy Postbuild` plugin on the build configuration (that is the highest in build chain that generates an MSI).    
+5. Copy and past the contents of the `Jenkins.groovy` script into the contents window of the `Groovy Postbuild` plugin on the build configuration (that is the highest in build chain that generates an MSI).
 
     ```groovy
     /*
@@ -103,4 +109,4 @@ A groovy script that can be configured in a "post-build" event that will notify 
 
     manager.addInfoBadge(passes.join(", "))
     ```
-    > The script assumes that the WCF configurations for the service in the `Chauffeur.exe.config` have not been modified. 
+    > The script assumes that the WCF configurations for the service in the `Chauffeur.exe.config` have not been modified.
