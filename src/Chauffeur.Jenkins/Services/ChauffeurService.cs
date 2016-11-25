@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 
 using Chauffeur.Jenkins.Configuration;
 using Chauffeur.Jenkins.Model;
+using Chauffeur.Jenkins.System;
 
 using Newtonsoft.Json;
 
@@ -354,9 +355,19 @@ namespace Chauffeur.Jenkins.Services
 
             Log.Info(this, "Installing {0} package(s).", paths.Length);
 
-            foreach (var pkg in paths)
+            NetworkDrive drive = null;
+
+            if (this.Configuration.Packages.IsMapDriveRequired)
             {
-                this.WaitForExit(string.Format("/c start /MIN /wait msiexec.exe /i \"{0}\" /quiet {1}", pkg, this.Configuration.Packages.InstallPropertyReferences));
+                drive = NetworkDrive.Map(this.Configuration.Packages.ArtifactsDirectory, this.Configuration.Packages.Credentials);
+            }
+
+            using (drive)
+            {
+                foreach (var pkg in paths)
+                {
+                    this.WaitForExit(string.Format("/c start /MIN /wait msiexec.exe /i \"{0}\" /quiet {1}", pkg, this.Configuration.Packages.InstallPropertyReferences));
+                }
             }
 
             this.WaitForPowershell(this.Configuration.Packages.PowershellPostInstall);
@@ -406,8 +417,25 @@ namespace Chauffeur.Jenkins.Services
 
             this.WaitForPowershell(this.Configuration.Packages.PowershellPreUninstall);
 
-            var flags = paths.Select(pkg => this.WaitForExit(string.Format("/c start /MIN /wait msiexec.exe /x \"{0}\" /quiet {1}", pkg, this.Configuration.Packages.UninstallPropertyReferences)));
-            return flags.Any(o => true);
+            List<bool> flags = new List<bool>();
+
+            NetworkDrive drive = null;
+
+            if (this.Configuration.Packages.IsMapDriveRequired)
+            {
+                drive = NetworkDrive.Map(this.Configuration.Packages.ArtifactsDirectory, this.Configuration.Packages.Credentials);
+            }
+
+            using (drive)
+            {
+                foreach (var pkg in paths)
+                {
+                    var flag = this.WaitForExit(string.Format("/c start /MIN /wait msiexec.exe /x \"{0}\" /quiet {1}", pkg, this.Configuration.Packages.UninstallPropertyReferences));
+                    flags.Add(flag);
+                }
+            }
+
+            return flags.All(o => o);
         }
 
         /// <summary>
