@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.ServiceModel;
 using System.Threading.Tasks;
 
 using Chauffeur.Jenkins.Client;
 using Chauffeur.Jenkins.Configuration;
 using Chauffeur.Jenkins.Model;
+using Chauffeur.Jenkins.System;
 
 namespace Chauffeur.Jenkins.Services
 {
@@ -74,12 +76,22 @@ namespace Chauffeur.Jenkins.Services
         /// </returns>
         public Task<string[]> DownloadArtifactsAsync(Build build)
         {
-            Log.Info(this, "Downloading {0} artifact(s) into the {1} directory.", build.Artifacts.Count, this.Configuration.ArtifactsDirectory);
+            Log.Info(this, "Downloading {0} artifact(s) into the {1} directory.", build.Artifacts.Count, this.Configuration.Packages.ArtifactsDirectory);
 
             return Task.Run(() =>
             {
-                var tasks = build.Artifacts.Select(artifact => this.DownloadArtifactAsync(build, artifact, this.Configuration.ArtifactsDirectory));
-                return tasks.Select(o => o.Result).ToArray();
+                NetworkDrive drive = null;
+
+                if (this.Configuration.Packages.IsMapDriveRequired)
+                {
+                    drive = NetworkDrive.Map(this.Configuration.Packages.ArtifactsDirectory, this.Configuration.Packages.Credentials);                    
+                }
+
+                using (drive)
+                {
+                    var tasks = build.Artifacts.Select(artifact => this.DownloadArtifactAsync(build, artifact, this.Configuration.Packages.ArtifactsDirectory));
+                    return tasks.Select(o => o.Result).ToArray();
+                }
             });
         }
 

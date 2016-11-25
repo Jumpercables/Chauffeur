@@ -213,9 +213,9 @@ namespace Chauffeur.Jenkins.Services
         {
             List<Package> packages = null;
 
-            if (File.Exists(base.Configuration.PackagesDataFile))
+            if (File.Exists(base.Configuration.Resources.PackagesDataFile))
             {
-                var json = File.ReadAllText(base.Configuration.PackagesDataFile);
+                var json = File.ReadAllText(base.Configuration.Resources.PackagesDataFile);
                 packages = JsonConvert.DeserializeObject<List<Package>>(json);
             }
 
@@ -263,7 +263,7 @@ namespace Chauffeur.Jenkins.Services
             {
                 package = new Package
                 {
-                    Url = new Uri(this.Configuration.PackagesDataFile),
+                    Url = new Uri(this.Configuration.Resources.PackagesDataFile),
                     Job = jobName,
                 };
 
@@ -312,10 +312,10 @@ namespace Chauffeur.Jenkins.Services
         /// <returns>Returns a <see cref="string" /> representing the file from the package cache.</returns>
         private string GetPackageCache()
         {
-            if (string.IsNullOrEmpty(this.Configuration.PackageCacheName))
+            if (string.IsNullOrEmpty(this.Configuration.Packages.PackageCacheName))
                 return null;
 
-            string queryString = string.Format("SELECT * FROM Win32_Product WHERE Name LIKE '{0}%'", this.Configuration.PackageCacheName);
+            string queryString = string.Format("SELECT * FROM Win32_Product WHERE Name LIKE '{0}%'", this.Configuration.Packages.PackageCacheName);
             Log.Info(this, "Loading the installed programs '{0}'", queryString);
 
             ManagementObjectSearcher mos = new ManagementObjectSearcher(queryString);
@@ -356,10 +356,10 @@ namespace Chauffeur.Jenkins.Services
 
             foreach (var pkg in paths)
             {
-                this.WaitForExit(string.Format("/c start /MIN /wait msiexec.exe /i \"{0}\" /quiet {1}", pkg, this.Configuration.InstallPropertyReferences));
+                this.WaitForExit(string.Format("/c start /MIN /wait msiexec.exe /i \"{0}\" /quiet {1}", pkg, this.Configuration.Packages.InstallPropertyReferences));
             }
 
-            this.WaitForPowershell(this.Configuration.PowershellPostInstall);
+            this.WaitForPowershell(this.Configuration.Packages.PowershellPostInstall);
         }
 
         /// <summary>
@@ -390,7 +390,7 @@ namespace Chauffeur.Jenkins.Services
         private void Serialize(IEnumerable<Package> packages)
         {
             var json = JsonConvert.SerializeObject(packages, Formatting.Indented);
-            File.WriteAllText(base.Configuration.PackagesDataFile, json);
+            File.WriteAllText(base.Configuration.Resources.PackagesDataFile, json);
         }
 
         /// <summary>
@@ -404,9 +404,9 @@ namespace Chauffeur.Jenkins.Services
 
             Log.Info(this, "Uninstalling {0} package(s).", paths.Length);
 
-            this.WaitForPowershell(this.Configuration.PowershellPreUninstall);
+            this.WaitForPowershell(this.Configuration.Packages.PowershellPreUninstall);
 
-            var flags = paths.Select(pkg => this.WaitForExit(string.Format("/c start /MIN /wait msiexec.exe /x \"{0}\" /quiet {1}", pkg, this.Configuration.UninstallPropertyReferences)));
+            var flags = paths.Select(pkg => this.WaitForExit(string.Format("/c start /MIN /wait msiexec.exe /x \"{0}\" /quiet {1}", pkg, this.Configuration.Packages.UninstallPropertyReferences)));
             return flags.Any(o => true);
         }
 

@@ -4,36 +4,15 @@ using System.Collections.Specialized;
 using System.Configuration;
 using System.IO;
 using System.Linq;
+using System.Net;
 
 namespace Chauffeur.Jenkins.Configuration
 {
     /// <summary>
     ///     Provides access to the configurations provided in the configuration file.
     /// </summary>
-    public class ChauffeurConfiguration
+    public sealed class ChauffeurConfiguration
     {
-        #region Fields
-
-        private Setting<string> _ArtifactsDirectory;
-        private Setting<string> _BodyTemplateFile;
-        private Setting<string> _DataDirectory;
-        private Setting<string> _From;
-        private Setting<string> _Host;
-        private Setting<string> _InstallPropertyReferences;
-        private Setting<string> _PackageCacheName;
-        private Setting<string> _PackagesDataFile;
-        private Setting<string> _PowershellPostInstall;
-        private Setting<string> _PowershellPreUninstall;
-        private Setting<string> _Server;
-        private Setting<string> _SubjectTemplateFile;
-        private Setting<string> _TemplateDirectory;
-        private Setting<string> _To;
-        private Setting<string> _Token;
-        private Setting<string> _UninstallPropertyReferences;
-        private Setting<string> _User;
-
-        #endregion
-
         #region Constructors
 
         /// <summary>
@@ -41,7 +20,7 @@ namespace Chauffeur.Jenkins.Configuration
         /// </summary>
         public ChauffeurConfiguration()
         {
-            this.LoadConfigurationAndInitialize(ConfigurationManager.AppSettings.AllKeys.Select(k => Tuple.Create(k, ConfigurationManager.AppSettings[k])));
+            this.LoadConfigurationAndInitialize(ConfigurationManager.AppSettings.AllKeys.Select(k => Tuple.Create(k, ConfigurationManager.AppSettings[k])).ToList());
         }
 
         #endregion
@@ -49,198 +28,491 @@ namespace Chauffeur.Jenkins.Configuration
         #region Public Properties
 
         /// <summary>
-        ///     Gets the artifacts directory.
+        ///     Gets the jenkins.
         /// </summary>
         /// <value>
-        ///     The artifacts directory.
+        ///     The jenkins.
         /// </value>
-        public string ArtifactsDirectory
-        {
-            get { return _ArtifactsDirectory.Value; }
-        }
-
+        public JenkinsConfiguration Jenkins { get; private set; }
 
         /// <summary>
-        ///     Gets the body.
+        ///     Gets the notification.
         /// </summary>
         /// <value>
-        ///     The body.
+        ///     The notification.
         /// </value>
-        public string BodyTemplateFile
-        {
-            get { return _BodyTemplateFile.Value; }
-        }
+        public NotificationsConfiguration Notifications { get; private set; }
 
         /// <summary>
-        ///     Gets the data directory.
+        ///     Gets the package.
         /// </summary>
         /// <value>
-        ///     The data directory.
+        ///     The package.
         /// </value>
-        public string DataDirectory
-        {
-            get { return _DataDirectory.Value; }
-        }
+        public PackagesConfiguration Packages { get; private set; }
 
         /// <summary>
-        ///     Gets from.
+        ///     Gets the resources.
         /// </summary>
         /// <value>
-        ///     From.
+        ///     The resources.
         /// </value>
-        public string From
-        {
-            get { return _From.Value; }
-        }
+        public ResourcesConfiguration Resources { get; private set; }
+
+        #endregion
+
+        #region Public Methods
 
         /// <summary>
-        ///     Gets the host.
+        ///     Returns the configurations as-a dictionary.
         /// </summary>
-        /// <value>
-        ///     The host.
-        /// </value>
-        public string Host
+        /// <returns>Returns a <see cref="Dictionary{String, String}" /> representing the configurations.</returns>
+        public Dictionary<string, string> ToDictionary()
         {
-            get { return _Host.Value; }
-        }
+            Dictionary<string, string>[] dictionaries =
+            {
+                this.Jenkins.ToDictionary(),
+                this.Notifications.ToDictionary(),
+                this.Resources.ToDictionary(),
+                this.Packages.ToDictionary()
+            };
 
-        /// <summary>
-        ///     Gets the install property references.
-        /// </summary>
-        /// <value>
-        ///     The install property references.
-        /// </value>
-        public string InstallPropertyReferences
-        {
-            get { return _InstallPropertyReferences.Value; }
-        }
-
-        /// <summary>
-        ///     Gets the name of the package cache.
-        /// </summary>
-        /// <value>
-        ///     The name of the package cache.
-        /// </value>
-        public string PackageCacheName
-        {
-            get { return _PackageCacheName.Value; }
-        }
-
-        /// <summary>
-        ///     Gets the packages json file.
-        /// </summary>
-        /// <value>
-        ///     The packages json file.
-        /// </value>
-        public string PackagesDataFile
-        {
-            get { return _PackagesDataFile.Value; }
-        }
-
-        /// <summary>
-        ///     Gets the after install.
-        /// </summary>
-        /// <value>
-        ///     The after install.
-        /// </value>
-        public string PowershellPostInstall
-        {
-            get { return _PowershellPostInstall.Value; }
-        }
-
-        /// <summary>
-        ///     Gets the before uninstall.
-        /// </summary>
-        /// <value>
-        ///     The before uninstall.
-        /// </value>
-        public string PowershellPreUninstall
-        {
-            get { return _PowershellPreUninstall.Value; }
-        }
-
-        /// <summary>
-        ///     Gets the server.
-        /// </summary>
-        /// <value>
-        ///     The server.
-        /// </value>
-        public string Server
-        {
-            get { return _Server.Value; }
-        }
-
-        /// <summary>
-        ///     Gets the subject.
-        /// </summary>
-        /// <value>
-        ///     The subject.
-        /// </value>
-        public string SubjectTemplateFile
-        {
-            get { return _SubjectTemplateFile.Value; }
-        }
-
-        /// <summary>
-        ///     Gets the template directory.
-        /// </summary>
-        /// <value>
-        ///     The template directory.
-        /// </value>
-        public string TemplateDirectory
-        {
-            get { return _TemplateDirectory.Value; }
-        }
-
-        /// <summary>
-        ///     Gets to.
-        /// </summary>
-        /// <value>
-        ///     To.
-        /// </value>
-        public string To
-        {
-            get { return _To.Value; }
-        }
-
-        /// <summary>
-        ///     Gets the token.
-        /// </summary>
-        /// <value>
-        ///     The token.
-        /// </value>
-        public string Token
-        {
-            get { return _Token.Value; }
-        }
-
-        /// <summary>
-        ///     Gets the uninstall property references.
-        /// </summary>
-        /// <value>
-        ///     The uninstall property references.
-        /// </value>
-        public string UninstallPropertyReferences
-        {
-            get { return _UninstallPropertyReferences.Value; }
-        }
-
-        /// <summary>
-        ///     Gets the user.
-        /// </summary>
-        /// <value>
-        ///     The user.
-        /// </value>
-        public string User
-        {
-            get { return _User.Value; }
+            return dictionaries.SelectMany(dictionary => dictionary).ToDictionary(dict => dict.Key, dict => dict.Value);
         }
 
         #endregion
 
-        #region Private Properties
+        #region Private Methods
 
-        private NameValueCollection Settings { get; set; }
+        /// <summary>
+        ///     Loads the configuration and initialize the settings.
+        /// </summary>
+        /// <param name="values">The values.</param>
+        private void LoadConfigurationAndInitialize(List<Tuple<string, string>> values)
+        {
+            this.Resources = new ResourcesConfiguration(values);
+            this.Jenkins = new JenkinsConfiguration(values);
+            this.Notifications = new NotificationsConfiguration(values, this.Resources);
+            this.Packages = new PackagesConfiguration(values, this.Resources);
+        }
+
+        #endregion
+
+        #region Nested Type: JenkinsConfiguration
+
+        public sealed class JenkinsConfiguration : ApplicationConfiguration
+        {
+            #region Fields
+
+            private readonly Setting<string> _Server;
+            private readonly Setting<string> _Token;
+            private readonly Setting<string> _User;
+
+            #endregion
+
+            #region Constructors
+
+            /// <summary>
+            ///     Initializes a new instance of the <see cref="JenkinsConfiguration" /> class.
+            /// </summary>
+            /// <param name="values">The values.</param>
+            public JenkinsConfiguration(IEnumerable<Tuple<string, string>> values)
+                : base(values, "Chauffeur/Jenkins/")
+            {
+                _Server = new StringSetting(this.Settings, "Chauffeur/Jenkins/Server", "http://localhost:8080/");
+                _User = new StringSetting(this.Settings, "Chauffeur/Jenkins/User", "");
+                _Token = new StringSetting(this.Settings, "Chauffeur/Jenkins/Token", "");
+            }
+
+            #endregion
+
+            #region Public Properties
+
+            /// <summary>
+            ///     Gets the server.
+            /// </summary>
+            /// <value>
+            ///     The server.
+            /// </value>
+            public string Server
+            {
+                get { return _Server.Value; }
+            }
+
+            /// <summary>
+            ///     Gets the token.
+            /// </summary>
+            /// <value>
+            ///     The token.
+            /// </value>
+            public string Token
+            {
+                get { return _Token.Value; }
+            }
+
+
+            /// <summary>
+            ///     Gets the user.
+            /// </summary>
+            /// <value>
+            ///     The user.
+            /// </value>
+            public string User
+            {
+                get { return _User.Value; }
+            }
+
+            #endregion
+        }
+
+        #endregion
+
+        #region Nested Type: NotificationsConfiguration
+
+        public sealed class NotificationsConfiguration : ApplicationConfiguration
+        {
+            #region Fields
+
+            private readonly Setting<string> _BodyTemplateFile;
+            private readonly Setting<string> _From;
+            private readonly Setting<string> _Host;
+            private readonly Setting<string> _SubjectTemplateFile;
+            private readonly Setting<string> _To;
+
+            #endregion
+
+            #region Constructors
+
+            /// <summary>
+            ///     Initializes a new instance of the <see cref="NotificationsConfiguration" /> class.
+            /// </summary>
+            /// <param name="values">The values.</param>
+            /// <param name="resources">The resources.</param>
+            public NotificationsConfiguration(IEnumerable<Tuple<string, string>> values, ResourcesConfiguration resources)
+                : base(values, "Chauffeur/Notifications/")
+            {
+                _Host = new StringSetting(this.Settings, "Chauffeur/Notifications/Host", "");
+                _To = new StringSetting(this.Settings, "Chauffeur/Notifications/To", "");
+                _From = new StringSetting(this.Settings, "Chauffeur/Notifications/From", "");
+                _SubjectTemplateFile = new StringSetting(this.Settings, "Chauffeur/Notifications/Subject", Path.Combine(resources.TemplateDirectory, "_Notification-Subject.xslt"));
+                _BodyTemplateFile = new StringSetting(this.Settings, "Chauffeur/Notifications/Body", Path.Combine(resources.TemplateDirectory, "_Notification-Body.xslt"));
+            }
+
+            #endregion
+
+            #region Public Properties
+
+            /// <summary>
+            ///     Gets the body.
+            /// </summary>
+            /// <value>
+            ///     The body.
+            /// </value>
+            public string BodyTemplateFile
+            {
+                get { return _BodyTemplateFile.Value; }
+            }
+
+
+            /// <summary>
+            ///     Gets from.
+            /// </summary>
+            /// <value>
+            ///     From.
+            /// </value>
+            public string From
+            {
+                get { return _From.Value; }
+            }
+
+            /// <summary>
+            ///     Gets the host.
+            /// </summary>
+            /// <value>
+            ///     The host.
+            /// </value>
+            public string Host
+            {
+                get { return _Host.Value; }
+            }
+
+
+            /// <summary>
+            ///     Gets the subject.
+            /// </summary>
+            /// <value>
+            ///     The subject.
+            /// </value>
+            public string SubjectTemplateFile
+            {
+                get { return _SubjectTemplateFile.Value; }
+            }
+
+
+            /// <summary>
+            ///     Gets to.
+            /// </summary>
+            /// <value>
+            ///     To.
+            /// </value>
+            public string To
+            {
+                get { return _To.Value; }
+            }
+
+            #endregion
+        }
+
+        #endregion
+
+        #region Nested Type: PackagesConfiguration
+
+        public sealed class PackagesConfiguration : ApplicationConfiguration
+        {
+            #region Fields
+
+            private readonly Setting<string> _ArtifactsDirectory;
+            private readonly Setting<string> _InstallPropertyReferences;
+            private readonly Setting<string> _PackageCacheName;
+            private readonly Setting<string> _Password;
+            private readonly Setting<string> _PowershellPostInstall;
+            private readonly Setting<string> _PowershellPreUninstall;
+            private readonly Setting<string> _UninstallPropertyReferences;
+            private readonly Setting<string> _UserName;
+            private readonly Setting<string> _Domain;
+ 
+            #endregion
+
+            #region Constructors
+
+            /// <summary>
+            ///     Initializes a new instance of the <see cref="PackagesConfiguration" /> class.
+            /// </summary>
+            /// <param name="values">The values.</param>
+            /// <param name="resources">The resources.</param>
+            public PackagesConfiguration(IEnumerable<Tuple<string, string>> values, ResourcesConfiguration resources)
+                : base(values, "Chauffeur/Packages/")
+            {
+                _ArtifactsDirectory = new Setting<string>(this.Settings, "Chauffeur/Packages/Artifacts", value => this.GetDirectory(value, Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Jenkins")));
+                _InstallPropertyReferences = new StringSetting(this.Settings, "Chauffeur/Packages/InstallPropertyReferences", "");
+                _UninstallPropertyReferences = new StringSetting(this.Settings, "Chauffeur/Packages/UninstallPropertyReferences", "");
+                _PackageCacheName = new StringSetting(this.Settings, "Chauffeur/Packages/PackageCacheName", "");
+
+                _PowershellPreUninstall = new Setting<string>(this.Settings, "Chauffeur/Packages/PreUninstall", value => !File.Exists(value) ? Path.Combine(resources.DataDirectory, "Uninstall.ps1") : value);
+                _PowershellPostInstall = new Setting<string>(this.Settings, "Chauffeur/Packages/PostInstall", value => !File.Exists(value) ? Path.Combine(resources.DataDirectory, "Install.ps1") : value);
+
+               _UserName = new StringSetting(this.Settings, "Chauffeur/Packages/User", "");
+               _Password = new StringSetting(this.Settings, "Chauffeur/Packages/Password", "");
+               _Domain = new StringSetting(this.Settings, "Chauffeur/Packages/Domain", "");               
+            }
+
+            #endregion
+
+            #region Public Properties
+
+            /// <summary>
+            ///     Gets the artifacts directory.
+            /// </summary>
+            /// <value>
+            ///     The artifacts directory.
+            /// </value>
+            public string ArtifactsDirectory
+            {
+                get { return _ArtifactsDirectory.Value; }
+            }
+
+
+            /// <summary>
+            ///     Gets the install property references.
+            /// </summary>
+            /// <value>
+            ///     The install property references.
+            /// </value>
+            public string InstallPropertyReferences
+            {
+                get { return _InstallPropertyReferences.Value; }
+            }
+
+            /// <summary>
+            ///     Gets the name of the package cache.
+            /// </summary>
+            /// <value>
+            ///     The name of the package cache.
+            /// </value>
+            public string PackageCacheName
+            {
+                get { return _PackageCacheName.Value; }
+            }
+
+          
+            /// <summary>
+            ///     Gets the after install.
+            /// </summary>
+            /// <value>
+            ///     The after install.
+            /// </value>
+            public string PowershellPostInstall
+            {
+                get { return _PowershellPostInstall.Value; }
+            }
+
+            /// <summary>
+            ///     Gets the before uninstall.
+            /// </summary>
+            /// <value>
+            ///     The before uninstall.
+            /// </value>
+            public string PowershellPreUninstall
+            {
+                get { return _PowershellPreUninstall.Value; }
+            }
+
+
+            /// <summary>
+            ///     Gets the uninstall property references.
+            /// </summary>
+            /// <value>
+            ///     The uninstall property references.
+            /// </value>
+            public string UninstallPropertyReferences
+            {
+                get { return _UninstallPropertyReferences.Value; }
+            }
+
+            /// <summary>
+            /// Gets a value indicating whether this instance is map drive required.
+            /// </summary>
+            /// <value>
+            /// <c>true</c> if this instance is map drive required; otherwise, <c>false</c>.
+            /// </value>
+            public bool IsMapDriveRequired
+            {
+                get
+                {
+                    return !string.IsNullOrEmpty(_UserName.Value) && !string.IsNullOrEmpty(_Password.Value);
+                }
+            }
+
+            /// <summary>
+            /// Gets the credentials.
+            /// </summary>
+            /// <value>
+            /// The credentials.
+            /// </value>
+            public NetworkCredential Credentials
+            {
+                get
+                {                    
+                    return new NetworkCredential(_UserName.Value, _Password.Value, _Domain.Value);
+                }
+            }
+
+            #endregion
+        }
+
+        #endregion
+
+        #region Nested Type: ResourcesConfiguration
+
+        public class ResourcesConfiguration : ApplicationConfiguration
+        {
+            #region Fields
+
+            private readonly Setting<string> _DataDirectory;
+            private readonly Setting<string> _PackagesDataFile;
+            private readonly Setting<string> _TemplateDirectory;
+
+            #endregion
+
+            #region Constructors
+
+            /// <summary>
+            ///     Initializes a new instance of the <see cref="ResourcesConfiguration" /> class.
+            /// </summary>
+            /// <param name="values">The values.</param>
+            public ResourcesConfiguration(IEnumerable<Tuple<string, string>> values)
+                : base(values, "Chauffeur/Resources/")
+            {
+                _TemplateDirectory = new Setting<string>(this.Settings, "Chauffeur/Resources/Templates", value => this.GetDirectory(value, "~\\Templates"));
+                _DataDirectory = new Setting<string>(this.Settings, "Chauffeur/Resources/Data", value => this.GetDirectory(value, "~\\Data"));
+                _PackagesDataFile = new StringSetting(this.Settings, "Chauffeur/Resources/Packages", Path.Combine(this.DataDirectory, "Packages.json"));
+            }
+
+            #endregion
+
+            #region Public Properties
+
+            /// <summary>
+            ///     Gets the data directory.
+            /// </summary>
+            /// <value>
+            ///     The data directory.
+            /// </value>
+            public string DataDirectory
+            {
+                get { return _DataDirectory.Value; }
+            }
+
+
+            /// <summary>
+            ///     Gets the package directory.
+            /// </summary>
+            /// <value>
+            ///     The package directory.
+            /// </value>
+            public string PackagesDataFile
+            {
+                get { return _PackagesDataFile.Value; }
+            }
+
+            /// <summary>
+            ///     Gets the template directory.
+            /// </summary>
+            /// <value>
+            ///     The template directory.
+            /// </value>
+            public string TemplateDirectory
+            {
+                get { return _TemplateDirectory.Value; }
+            }
+
+            #endregion
+        }
+
+        #endregion
+    }
+
+    public abstract class ApplicationConfiguration
+    {
+        #region Constructors
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="ApplicationConfiguration" /> class.
+        /// </summary>
+        /// <param name="values">The values.</param>
+        /// <param name="configurationPrefix">The configuration prefix.</param>
+        protected ApplicationConfiguration(IEnumerable<Tuple<string, string>> values, string configurationPrefix)
+        {
+            this.Settings = new NameValueCollection();
+
+            foreach (Tuple<string, string> tuple in values)
+            {
+                if (tuple.Item1.StartsWith(configurationPrefix, StringComparison.OrdinalIgnoreCase))
+                    this.Settings[tuple.Item1] = tuple.Item2;
+            }
+        }
+
+        #endregion
+
+        #region Protected Properties
+
+        /// <summary>
+        ///     Gets or sets the settings.
+        /// </summary>
+        /// <value>
+        ///     The settings.
+        /// </value>
+        protected NameValueCollection Settings { get; set; }
 
         #endregion
 
@@ -257,7 +529,7 @@ namespace Chauffeur.Jenkins.Configuration
 
         #endregion
 
-        #region Private Methods
+        #region Protected Methods
 
         /// <summary>
         ///     Gets the complete path to the directory.
@@ -267,7 +539,7 @@ namespace Chauffeur.Jenkins.Configuration
         /// <returns>
         ///     Returns a <see cref="string" /> representing the path to the directory.
         /// </returns>
-        private string GetDirectory(string configurationValue, string fallbackValue)
+        protected string GetDirectory(string configurationValue, string fallbackValue)
         {
             configurationValue = configurationValue ?? string.Empty;
             fallbackValue = fallbackValue ?? string.Empty;
@@ -281,51 +553,6 @@ namespace Chauffeur.Jenkins.Configuration
             string dir = Path.GetDirectoryName(AppDomain.CurrentDomain.SetupInformation.ConfigurationFile);
             string path = Path.GetFullPath(Path.Combine(dir, configurationValue));
             return path;
-        }
-
-        /// <summary>
-        ///     Initializes the strongly typed settings.
-        /// </summary>
-        private void Initialize()
-        {
-            _TemplateDirectory = new Setting<string>(this.Settings, "Chauffeur/Resources/Templates", value => this.GetDirectory(value, "~\\Templates"));
-            _DataDirectory = new Setting<string>(this.Settings, "Chauffeur/Resources/Data", value => this.GetDirectory(value, "~\\Data"));
-            _PackagesDataFile = new StringSetting(this.Settings, "Chauffeur/Resources/Packages", Path.Combine(this.DataDirectory, "Packages.json"));
-
-            _Server = new StringSetting(this.Settings, "Chauffeur/Jenkins/Server", "http://localhost:8080/");
-            _User = new StringSetting(this.Settings, "Chauffeur/Jenkins/User", "");
-            _Token = new StringSetting(this.Settings, "Chauffeur/Jenkins/Token", "");
-
-            _Host = new StringSetting(this.Settings, "Chauffeur/Notifications/Host", "");
-            _To = new StringSetting(this.Settings, "Chauffeur/Notifications/To", "");
-            _From = new StringSetting(this.Settings, "Chauffeur/Notifications/From", "");
-            _SubjectTemplateFile = new StringSetting(this.Settings, "Chauffeur/Notifications/Subject", Path.Combine(this.TemplateDirectory, "_Notification-Subject.xslt"));
-            _BodyTemplateFile = new StringSetting(this.Settings, "Chauffeur/Notifications/Body", Path.Combine(this.TemplateDirectory, "_Notification-Body.xslt"));
-
-            _ArtifactsDirectory = new Setting<string>(this.Settings, "Chauffeur/Packages/Artifacts", value => this.GetDirectory(value, Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Jenkins")));
-            _InstallPropertyReferences = new StringSetting(this.Settings, "Chauffeur/Packages/InstallPropertyReferences", "");
-            _UninstallPropertyReferences = new StringSetting(this.Settings, "Chauffeur/Packages/UninstallPropertyReferences", "");
-            _PackageCacheName = new StringSetting(this.Settings, "Chauffeur/Packages/PackageCacheName", "");
-
-            _PowershellPreUninstall = new Setting<string>(this.Settings, "Chauffeur/Packages/PreUninstall", value => !File.Exists(value) ? Path.Combine(this.DataDirectory, "Uninstall.ps1") : value);
-            _PowershellPostInstall = new Setting<string>(this.Settings, "Chauffeur/Packages/PostInstall", value => !File.Exists(value) ? Path.Combine(this.DataDirectory, "Install.ps1") : value);
-        }
-
-        /// <summary>
-        ///     Loads the configuration and initialize the settings.
-        /// </summary>
-        /// <param name="values">The values.</param>
-        private void LoadConfigurationAndInitialize(IEnumerable<Tuple<string, string>> values)
-        {
-            this.Settings = new NameValueCollection();
-
-            foreach (Tuple<string, string> tuple in values)
-            {
-                if (tuple.Item1.StartsWith("Chauffeur/", StringComparison.OrdinalIgnoreCase))
-                    this.Settings[tuple.Item1] = tuple.Item2;
-            }
-
-            this.Initialize();
         }
 
         #endregion

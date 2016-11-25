@@ -2,13 +2,13 @@
 using System.Net;
 using System.Threading;
 
-namespace Chauffeur.Jenkins.Listeners
+namespace Chauffeur.Jenkins.System
 {
     /// <summary>
     ///     A simple HTTP request listener that redirects the requests that the caller can perform an action when a request is
     ///     received.
     /// </summary>
-    /// <seealso cref="System.IDisposable" />
+    /// <seealso cref="IDisposable" />
     public class ChaufferServiceListener : IDisposable
     {
         #region Fields

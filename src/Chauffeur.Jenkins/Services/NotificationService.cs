@@ -74,27 +74,27 @@ namespace Chauffeur.Jenkins.Services
         {
             return Task.Run(() =>
             {
-                if (string.IsNullOrEmpty(this.Configuration.To))
+                if (string.IsNullOrEmpty(this.Configuration.Notifications.To))
                     return false;
 
-                if (string.IsNullOrEmpty(this.Configuration.Host))
+                if (string.IsNullOrEmpty(this.Configuration.Notifications.Host))
                     throw new WebFaultException<ErrorData>(new ErrorData("The 'host' must be provided.", "The configuration must be provided in the configuration file."), HttpStatusCode.NotFound);
 
-                if (string.IsNullOrEmpty(this.Configuration.From))
+                if (string.IsNullOrEmpty(this.Configuration.Notifications.From))
                     throw new WebFaultException<ErrorData>(new ErrorData("The 'from' must be provided.", "The configuration must be provided in the configuration file."), HttpStatusCode.NotFound);
 
                 using (MailMessage message = new MailMessage())
                 {
-                    var addresses = this.Configuration.To.Split(new[] { ",", ";" }, StringSplitOptions.RemoveEmptyEntries);
+                    var addresses = this.Configuration.Notifications.To.Split(new[] { ",", ";" }, StringSplitOptions.RemoveEmptyEntries);
                     foreach (var address in addresses)
                         message.To.Add(new MailAddress(address.Trim()));
 
-                    message.From = new MailAddress(this.Configuration.From);
-                    message.Subject = StyleSheetTemplate.ApplyTemplate(this.Configuration.SubjectTemplateFile, package);
-                    message.Body = StyleSheetTemplate.ApplyTemplate(this.Configuration.BodyTemplateFile, package);
+                    message.From = new MailAddress(this.Configuration.Notifications.From);
+                    message.Subject = StyleSheetTemplate.ApplyTemplate(this.Configuration.Notifications.SubjectTemplateFile, package);
+                    message.Body = StyleSheetTemplate.ApplyTemplate(this.Configuration.Notifications.BodyTemplateFile, package);
                     message.IsBodyHtml = true;
 
-                    using (SmtpClient client = new SmtpClient(this.Configuration.Host))
+                    using (SmtpClient client = new SmtpClient(this.Configuration.Notifications.Host))
                         client.Send(message);
                 }
 

@@ -32,7 +32,7 @@ namespace Chauffeur.Jenkins.Services
         /// </summary>
         /// <param name="configuration">The configuration.</param>
         protected JenkinsService(ChauffeurConfiguration configuration)
-            : this(new Uri(configuration.Server), new JsonJenkinsClient(configuration.User, configuration.Token), configuration)
+            : this(new Uri(configuration.Jenkins.Server), new JsonJenkinsClient(configuration.Jenkins.User, configuration.Jenkins.Token), configuration)
         {
         }
 
@@ -42,7 +42,7 @@ namespace Chauffeur.Jenkins.Services
         /// <param name="baseUri">The base URI.</param>
         /// <param name="client">The client.</param>
         /// <param name="configuration">The configuration.</param>
-        /// <exception cref="System.ArgumentNullException">
+        /// <exception cref="ArgumentNullException">
         ///     baseUri
         ///     or
         ///     client
@@ -89,7 +89,7 @@ namespace Chauffeur.Jenkins.Services
         protected ChauffeurConfiguration Configuration { get; set; }
 
         #endregion
-
+       
         #region Protected Methods
 
         /// <summary>
